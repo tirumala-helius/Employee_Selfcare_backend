@@ -47,7 +47,6 @@ public class UserServiceImpl implements UserService, ApplicationListener {
 		SQLQuery query = session.createSQLQuery("select * from user u")
 				.addEntity(com.helius.entities.User.class);
 		List<User> list = query.list();
-
 		for (User user : list) {
 			user_inmemories.add(user);
 			System.out.println("loading DB users");
@@ -120,22 +119,16 @@ public class UserServiceImpl implements UserService, ApplicationListener {
 			  localSessionFactoryBean.setDataSource(datasource);
 			  Properties prop = new Properties();
 			  prop.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
-			  prop.put("hibernate.show_sql", false);
-				  
-			  localSessionFactoryBean.setHibernateProperties(prop);
-			  
+			  prop.put("hibernate.show_sql", false);			  
+			  localSessionFactoryBean.setHibernateProperties(prop);	  
 			  localSessionFactoryBean.setPackagesToScan("com.helius.entities");
 			  localSessionFactoryBean.setAnnotatedPackages("com.helius.entities");
-			 
-			 
-			 
 			  try {
 				localSessionFactoryBean.afterPropertiesSet();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			  
 			SessionFactory sessionFactory = localSessionFactoryBean.getObject();
 			Session session = sessionFactory.openSession();
 			SQLQuery query = session.createSQLQuery("select * from user u").addEntity(com.helius.entities.User.class);

@@ -21,6 +21,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import com.helius.entities.Employee;
+import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
 import com.helius.entities.Users;
 import com.helius.managers.EmployeeManager;
@@ -494,36 +495,26 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			try {
 				String encodedpassword = Base64.getEncoder().encodeToString(password.getBytes());
 				session = sessionFactory.openSession();
-				String querystr = "select * from user u where u.active='Yes' and u.userid='"
+				String querystr = "select * from Employee_Selfcare_Users u where u.employee_id='"
 						+ userid + "' and" + " u.password='" + encodedpassword + "'";
-				Query query = session.createSQLQuery(querystr).addEntity(com.helius.entities.User.class);
+				Query query = session.createSQLQuery(querystr).addEntity(com.helius.entities.Employee_Selfcare_Users.class);
 				Object userobj = query.uniqueResult();
 				if (userobj != null) {
-					com.helius.entities.User user_entity = (com.helius.entities.User) userobj;
-
-					com.helius.utils.User user_util = new com.helius.utils.User();
-					user_util.setActive(user_entity.getActive());
-					user_util.setId(user_entity.getId());
-					user_util.setUserid(user_entity.getUserid());
+					com.helius.entities.Employee_Selfcare_Users user_entity = (com.helius.entities.Employee_Selfcare_Users) userobj;
+				//	com.helius.utils.User user_util = new com.helius.utils.User();
+					if (user_entity != null && user_entity.getUser_login_attempts() > 0) {
+					Employee_Selfcare_Users user_util = new Employee_Selfcare_Users();
+					user_util.setEmployee_Selfcare_Users_Id(user_entity.getEmployee_Selfcare_Users_Id());
+					user_util.setEmployee_id(user_entity.getEmployee_id());
 					user_util.setPassword(user_entity.getPassword());
-					user_util.setUsername(user_entity.getUsername());
-					user_util.setEdit(user_entity.getEdit());
-					user_util.setView(user_entity.getView());
-					String[] rr = user_entity.getRole().split(",");
-					List<String> role = new ArrayList<String>();
-					for (int i = 0; i < rr.length; i++) {
-						role.add(rr[i]);
-					}
-					user_util.setRole(role);
-					List<String> country = new ArrayList<String>();
-					String[] countries = user_entity.getCountry().split(",");
-					for (int i = 0; i < countries.length; i++) {
-						country.add(countries[i]);
-					}
-					user_util.setCountry(country);
+					user_util.setUser_last_login(user_entity.getUser_last_login());
+					user_util.setUser_login_attempts(user_entity.getUser_login_attempts());
 					validauser.setResult("Login success");
 					validauser.setUser(user_util);
-
+					}else{
+						validauser.setResult("Account is not Activated. Please check your emails for activation link or contact HR");
+						validauser.setUser(null);
+					}
 				} else {
 					validauser.setResult("User not found in the system");
 					validauser.setUser(null);

@@ -3,6 +3,8 @@
  */
 package com.helius.utils;
 
+import com.helius.entities.Employee_Selfcare_Users;
+
 /**
  * @author Tirumala
  * 29-Dec-2018
@@ -11,7 +13,7 @@ public class Logindetails {
 
 	
 	String result;
-	User user = null;
+	Employee_Selfcare_Users user = null;
 	
 	/**
 	 * @return the result
@@ -30,22 +32,21 @@ public class Logindetails {
 	/**
 	 * @return the user
 	 */
-	public User getUser() {
-		return user;
-	}
-
-	/**
-	 * @param user the user to set
-	 */
-	public void setUser(User user) {
-		this.user = user;
-	}
+	
 
 	/**
 	 * 
 	 */
 	public Logindetails() {
 		// TODO Auto-generated constructor stub
+	}
+
+	public Employee_Selfcare_Users getUser() {
+		return user;
+	}
+
+	public void setUser(Employee_Selfcare_Users user) {
+		this.user = user;
 	}
 
 }

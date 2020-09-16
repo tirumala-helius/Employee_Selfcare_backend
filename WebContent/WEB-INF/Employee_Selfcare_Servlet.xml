@@ -51,6 +51,7 @@
 				<value>com.helius.entities.Employee_Salary_Details</value>
 				<value>com.helius.entities.Employee_Assignment_Details</value>
 				<value>com.helius.entities.Users</value>
+				<value>com.helius.entities.Employee_Selfcare_Users</value>
 				<value>com.helius.entities.Skill</value>
 				<value>com.helius.entities.Certification</value>
 				<value>com.helius.entities.Country_Master</value>

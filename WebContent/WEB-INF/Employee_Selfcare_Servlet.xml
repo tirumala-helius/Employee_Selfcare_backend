@@ -28,12 +28,12 @@
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-	<property name="url" value="jdbc:mysql://localhost:3306/leavemgmt?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
+	 <property name="url" value="jdbc:mysql://localhost:3306/leavemgmt?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
 		<property name="username" value="root" />
-		<property name="password" value="1234" />
-	<!-- <property name="url" value="jdbc:mysql://hap.heliusapp.com:3306/helius_app?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
+		<property name="password" value="1234" />	
+	<!--  <property name="url" value="jdbc:mysql://hap.heliusapp.com:3306/helius_app?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
 		<property name="username" value="vinay_app" />
-		<property name="password" value="123" />-->
+		<property name="password" value="123" /> -->
 	
 		<!-- testonborrow and validationquery prooperty is to hand database connection expire exception -->
 		<property name="testOnBorrow" value="true" />
@@ -45,6 +45,7 @@
 		<property name="annotatedClasses">
 			<list>
 				<value>com.helius.entities.Employee_Personal_Details</value>
+				<value>com.helius.entities.Employee_Professional_Details</value>
 				<value>com.helius.entities.Employee_Identification_Details</value>
 				<value>com.helius.entities.Employee_Work_Permit_Details</value>
 				<value>com.helius.entities.Employee_Salary_Details</value>
@@ -92,9 +93,7 @@
 			 	<value>com.helius.entities.Leave_Eligibility_Details</value>
 			 	<value>com.helius.entities.Leave_Usage_Details</value>
 			 	<value>com.helius.entities.Leave_Record_Details</value>
-			 	<value>com.helius.entities.Client_Leave_Policy_New</value>
-			 	<value>com.helius.entities.Employee_Beeline_Timesheet</value>
-			 	<value>com.helius.entities.Employee_Beeline_Details</value>
+			 	
 			</list>
 		</property>
 		<property name="hibernateProperties">
@@ -109,21 +108,7 @@
 	</bean>
 	<task:annotation-driven />
 	<bean id="workPermitMaster" class="com.helius.entities.Work_Permit_Master" />
-	<bean id="timesheetService" class="com.helius.dao.TimeSheetAndLeaveServiceImpl">
-		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
-	</bean>
-	<bean id="timesheetManager" class="com.helius.managers.TimesheetManager">
-		<property name="timesheetService" ref="timesheetService" />
-	</bean>
-	<bean id="leaveService" class="com.helius.dao.LeaveServiceImpl">
-		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
-	</bean>
-	<bean id="leaveManager" class="com.helius.managers.LeaveManager">
-		<property name="leaveService" ref="leaveService" />
-	</bean>
-	<bean id="beelineService" class="com.helius.dao.BeelineTimesheetService">
-			<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
-	</bean>
+	
 	<bean id="employee" class="com.helius.entities.Employee" />
 	<bean id="status" class="com.helius.utils.Status" />
 	<bean id="users" class="com.helius.entities.Users" />
@@ -136,11 +121,26 @@
 	<bean id="employeeDAO" class="com.helius.dao.EmployeeDAOImpl">
 		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
 	</bean>
-	<bean id="clientDAO" class="com.helius.dao.ClientDAOImpl">
-		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
-	</bean>
 	<bean id="employeeManager" class="com.helius.managers.EmployeeManager">
 		<property name="employeeDAO" ref="employeeDAO" />
+	</bean>
+	
+	<bean id="Utils" class="com.helius.utils.Utils">
+	 </bean>
+	<!-- <bean id="clientDAO" class="com.helius.dao.ClientDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	<bean id="timesheetService" class="com.helius.dao.TimeSheetAndLeaveServiceImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	<bean id="timesheetManager" class="com.helius.managers.TimesheetManager">
+		<property name="timesheetService" ref="timesheetService" />
+	</bean>
+	<bean id="leaveService" class="com.helius.dao.LeaveServiceImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	<bean id="leaveManager" class="com.helius.managers.LeaveManager">
+		<property name="leaveService" ref="leaveService" />
 	</bean>
 	<bean id="sowDAO" class="com.helius.dao.SowDAOImpl">
 		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
@@ -163,11 +163,9 @@
 	<bean id="checklistManager" class="com.helius.managers.ChecklistManager">
 		<property name="checklistDAO" ref="checklistDAO" />
 	</bean>
-	<bean id="Utils" class="com.helius.utils.Utils">
-	</bean>
 	<bean id="alertService" class="com.helius.dao.EmailAlertsNotification">
 		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
-	</bean>
+	</bean> -->
 	<bean id="viewresolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<!-- <property name="prefix" value="/views/" /> -->

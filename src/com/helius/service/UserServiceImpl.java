@@ -494,7 +494,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			try {
 				String encodedpassword = Base64.getEncoder().encodeToString(password.getBytes());
 				session = sessionFactory.openSession();
-				String querystr = "select * from Employee_Selfcare_Users u where u.employee_id='"
+				String querystr = "select * from Employee_Selfcare_Users u where u.active='Yes' and u.employee_id='"
 						+ userid + "' and" + " u.password='" + encodedpassword + "'";
 				Query query = session.createSQLQuery(querystr).addEntity(com.helius.entities.Employee_Selfcare_Users.class);
 				Object userobj = query.uniqueResult();
@@ -506,6 +506,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					user_util.setEmployee_Selfcare_Users_Id(user_entity.getEmployee_Selfcare_Users_Id());
 					user_util.setEmployee_id(user_entity.getEmployee_id());
 					user_util.setPassword(user_entity.getPassword());
+					user_util.setActive(user_entity.getActive());
 					user_util.setUser_last_login(user_entity.getUser_last_login());
 					user_util.setUser_login_attempts(user_entity.getUser_login_attempts());
 					validauser.setResult("Login success");

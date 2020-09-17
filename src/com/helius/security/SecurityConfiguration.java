@@ -26,6 +26,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
 
 
@@ -78,21 +79,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 */        userService = webconfig.getuserService();
         DataSource datasource = webconfig.getDataSource();
         userService.populateDummyUsers(datasource);
-        List<com.helius.entities.User> allusers = userService.findAllUsers();
+        List<com.helius.entities.Employee_Selfcare_Users> allusers = userService.findAllUsers();
         List<UserDetails> springusers = new ArrayList<UserDetails>();
         if(allusers != null) {
-        	for(User user : allusers){
+        	for(Employee_Selfcare_Users user : allusers){
         		
         		String decodedpassword = new String(Base64.getDecoder().decode(user.getPassword()));
-        		String userid = user.getUserid();
-        		String[] rr = user.getRole().split(",");
+        		String userid = user.getEmployee_id();
 				List<GrantedAuthority> role = new ArrayList<GrantedAuthority>();
+        		/*String[] rr = user.getRole().split(",");
 				for (int i = 0; i < rr.length; i++) {
 					GrantedAuthority ga = new SimpleGrantedAuthority("ROLE_"+rr[i]);
 					role.add(ga);
-				}			
+				}		*/	
 				org.springframework.security.core.userdetails.User user_sec =
-        				new org.springframework.security.core.userdetails.User(user.getUserid(),decodedpassword,true,true,true,true,role);
+        				new org.springframework.security.core.userdetails.User(user.getEmployee_id(),decodedpassword,true,true,true,true,role);
 				springusers.add(user_sec);
         		//this.auth.inMemoryAuthentication().withUser(user.getUserid()).password(decodedpassword).roles(user.getRole());
         	

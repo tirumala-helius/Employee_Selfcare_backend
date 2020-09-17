@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.Session;
 
 import com.helius.utils.User;
+import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.Users;
 import com.helius.service.UserService;
 
@@ -109,31 +110,9 @@ public class UserManager {
 		return new Status(true, status);
 	}
 	
-	public Status createUser(User user) {
-		com.helius.entities.User user_entity = new com.helius.entities.User();
-		
-		user_entity.setActive("Yes");
-		user_entity.setId(user.getId());
-		user_entity.setUserid(user.getUserid()); 
-		user_entity.setPassword(user.getPassword());
-		user_entity.setUsername(user.getUsername());
-		user_entity.setEdit(user.getEdit());
-		user_entity.setView(user.getView());
-		String roles = "";
-		for(String role : user.getRole()){
-			roles = role + "," + roles;
-		}
-		roles = roles.substring(0, roles.lastIndexOf(","));
-		user_entity.setRole(roles);
-		
-		String countries = "";
-		for(String country : user.getCountry()){
-			countries = country + "," + countries;
-		}
-		countries = countries.substring(0, countries.lastIndexOf(","));
-		user_entity.setCountry(countries);
+	public Status createUser(Employee_Selfcare_Users user) {
 		try {
-			userService.createUser(user_entity);
+			userService.createUser(user);
 		} catch (Throwable e) {
 			
 			return new Status(false, e.getMessage());
@@ -141,31 +120,9 @@ public class UserManager {
 		return new Status(true, "created user successfully");
 	}
 	
-	public Status updateUser(User user) {
-		com.helius.entities.User user_entity = new com.helius.entities.User();
-		
-		user_entity.setId(user.getId());
-		user_entity.setUserid(user.getUserid()); 
-		user_entity.setPassword(user.getPassword());
-		user_entity.setUsername(user.getUsername());
-		user_entity.setEdit(user.getEdit());
-		user_entity.setView(user.getView());
-		user_entity.setActive(user.getActive());
-		String roles = "";
-		for(String role : user.getRole()){
-			roles = role + "," + roles;
-		}
-		roles = roles.substring(0, roles.lastIndexOf(","));
-		user_entity.setRole(roles);
-		
-		String countries = "";
-		for(String country : user.getCountry()){
-			countries = country + "," + countries;
-		}
-		countries = countries.substring(0, countries.lastIndexOf(","));
-		user_entity.setCountry(countries);
+	public Status updateUser(Employee_Selfcare_Users user) {
 		try {
-			userService.updateUser(user_entity);
+			userService.updateUser(user);
 		} catch (Throwable e) {
 			
 			return new Status(false, e.getMessage());

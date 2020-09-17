@@ -15,19 +15,19 @@ public interface UserService {
 	
 	User findById(long id);
 	
-	User findByName(String name);
+	Employee_Selfcare_Users findByName(String name);
 	
-	void saveUser(User user_inmemory);
+	void saveUser(Employee_Selfcare_Users user_inmemory);
 	
-	void updateUser(User user_inmemory);
+	void updateUser(Employee_Selfcare_Users user_inmemory);
 	
 	void deleteUserById(long id);
 
-	List<User> findAllUsers(); 
+	List<Employee_Selfcare_Users> findAllUsers(); 
 	
 	void deleteAllUsers();
 	
-	public boolean isUserExist(User user_inmemory);
+	public boolean isUserExist(Employee_Selfcare_Users user_inmemory);
 	public void populateDummyUsers(DataSource datasource);
 	
 

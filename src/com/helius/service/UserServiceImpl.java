@@ -366,7 +366,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * @see com.helius.service.UserService#createUser(com.helius.entities.User)
 	 */
 	@Override
-	public String createUser(User user) throws Throwable {
+	public String createUser(Employee_Selfcare_Users user) throws Throwable {
 		Session session  = null;
 		try {
 			session = sessionFactory.openSession();
@@ -375,7 +375,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session.save(user);
 			transaction.commit();
 			adduser_to_memory(user);
-			
 		} catch (HibernateException e) {
 			// transaction.rollback();
 			e.printStackTrace();
@@ -397,7 +396,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * @see com.helius.service.UserService#updateUser(com.helius.entities.User)
 	 */
 	@Override
-	public String updateUser(User user) throws Throwable {
+	public String updateUser(Employee_Selfcare_Users user) throws Throwable {
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
@@ -533,30 +532,30 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		return validauser;
 	}
 
-	private void adduser_to_memory(User user) {
+	private void adduser_to_memory(Employee_Selfcare_Users user) {
 		String decodedpassword = new String(Base64.getDecoder().decode(user.getPassword()));
-		String userid = user.getUserid();
-		String[] rr = user.getRole().split(",");
+		String userid = user.getEmployee_id();
 		List<GrantedAuthority> role = new ArrayList<GrantedAuthority>();
+		/*String[] rr = user.getRole().split(",");
 		for (int i = 0; i < rr.length; i++) {
 			GrantedAuthority ga = new SimpleGrantedAuthority("ROLE_"+rr[i]);
 			role.add(ga);
-		}			
+		}	*/		
 		org.springframework.security.core.userdetails.User user_sec =
-				new org.springframework.security.core.userdetails.User(user.getUserid(),decodedpassword,true,true,true,true,role);
+				new org.springframework.security.core.userdetails.User(user.getEmployee_id(),decodedpassword,true,true,true,true,role);
 		inMemoryUserDetailsManager.createUser(user_sec);
 	}
-	private void updateuser_to_memory(User user) {
+	private void updateuser_to_memory(Employee_Selfcare_Users user) {
 		String decodedpassword = new String(Base64.getDecoder().decode(user.getPassword()));
-		String userid = user.getUserid();
-		String[] rr = user.getRole().split(",");
+		String userid = user.getEmployee_id();
 		List<GrantedAuthority> role = new ArrayList<GrantedAuthority>();
+		/*String[] rr = user.getRole().split(",");
 		for (int i = 0; i < rr.length; i++) {
 			GrantedAuthority ga = new SimpleGrantedAuthority("ROLE_"+rr[i]);
 			role.add(ga);
-		}			
+		}	*/		
 		org.springframework.security.core.userdetails.User user_sec =
-				new org.springframework.security.core.userdetails.User(user.getUserid(),decodedpassword,true,true,true,true,role);
+				new org.springframework.security.core.userdetails.User(user.getEmployee_id(),decodedpassword,true,true,true,true,role);
 		inMemoryUserDetailsManager.updateUser(user_sec);
 	}
 

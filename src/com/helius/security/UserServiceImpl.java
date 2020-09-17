@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 
+import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
 
 
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService, ApplicationListener {
 
 	private static final AtomicLong counter = new AtomicLong();
 	
-	private static List<User> user_inmemories = new ArrayList<User>();
+	private static List<Employee_Selfcare_Users> user_inmemories = new ArrayList<Employee_Selfcare_Users>();
 	private static boolean usersLoaded = false;
 	
 	private SessionFactory sessionFactory = null;
@@ -44,10 +45,10 @@ public class UserServiceImpl implements UserService, ApplicationListener {
 		this.sessionFactory = sessionFactory;
 		//SessionFactory sessionFactory = localSessionFactoryBean.getObject();
 		Session session = sessionFactory.openSession();
-		SQLQuery query = session.createSQLQuery("select * from user u")
-				.addEntity(com.helius.entities.User.class);
-		List<User> list = query.list();
-		for (User user : list) {
+		SQLQuery query = session.createSQLQuery("select * from Employee_Selfcare_Users u")
+				.addEntity(Employee_Selfcare_Users.class);
+		List<Employee_Selfcare_Users> list = query.list();
+		for (Employee_Selfcare_Users user : list) {
 			user_inmemories.add(user);
 			System.out.println("loading DB users");
 		}
@@ -55,50 +56,50 @@ public class UserServiceImpl implements UserService, ApplicationListener {
 		session.close();
 	}
 	
-	public List<User> findAllUsers() {
+	public List<Employee_Selfcare_Users> findAllUsers() {
 		return user_inmemories;
 	}
 	
-	public User findById(int id) {
-		for(User user_inmemory : user_inmemories){
-			if(user_inmemory.getId() == id){
+	public Employee_Selfcare_Users findById(int id) {
+		for(Employee_Selfcare_Users user_inmemory : user_inmemories){
+			if(user_inmemory.getEmployee_Selfcare_Users_Id() == id){
 				return user_inmemory;
 			}
 		}
 		return null;
 	}
 	
-	public User findByName(String name) {
-		for(User user_inmemory : user_inmemories){
-			if(user_inmemory.getUsername().equalsIgnoreCase(name)){
+	public Employee_Selfcare_Users findByName(String name) {
+		for(Employee_Selfcare_Users user_inmemory : user_inmemories){
+			if(user_inmemory.getEmployee_id().equalsIgnoreCase(name)){
 				return user_inmemory;
 			}
 		}
 		return null;
 	}
 	
-	public void saveUser(User user_inmemory) {
+	public void saveUser(Employee_Selfcare_Users user_inmemory) {
 		//user_inmemory.setUserid(userid);(counter.incrementAndGet());
 		user_inmemories.add(user_inmemory);
 	}
 
-	public void updateUser(User user_inmemory) {
+	public void updateUser(Employee_Selfcare_Users user_inmemory) {
 		int index = user_inmemories.indexOf(user_inmemory);
 		user_inmemories.set(index, user_inmemory);
 	}
 
 	public void deleteUserById(int id) {
 		
-		for (Iterator<User> iterator = user_inmemories.iterator(); iterator.hasNext(); ) {
-		    User user_inmemory = iterator.next();
-		    if (user_inmemory.getId() == id) {
+		for (Iterator<Employee_Selfcare_Users> iterator = user_inmemories.iterator(); iterator.hasNext(); ) {
+			Employee_Selfcare_Users user_inmemory = iterator.next();
+		    if (user_inmemory.getEmployee_Selfcare_Users_Id() == id) {
 		        iterator.remove();
 		    }
 		}
 	}
 
-	public boolean isUserExist(User user_inmemory) {
-		return findByName(user_inmemory.getUsername())!=null;
+	public boolean isUserExist(Employee_Selfcare_Users user_inmemory) {
+		return findByName(user_inmemory.getEmployee_id())!=null;
 	}
 	
 	public void deleteAllUsers(){
@@ -131,10 +132,10 @@ public class UserServiceImpl implements UserService, ApplicationListener {
 			}
 			SessionFactory sessionFactory = localSessionFactoryBean.getObject();
 			Session session = sessionFactory.openSession();
-			SQLQuery query = session.createSQLQuery("select * from user u").addEntity(com.helius.entities.User.class);
-			List<User> list = query.list();
+			SQLQuery query = session.createSQLQuery("select * from Employee_Selfcare_Users u").addEntity(Employee_Selfcare_Users.class);
+			List<Employee_Selfcare_Users> list = query.list();
 
-			for (User user : list) {
+			for (Employee_Selfcare_Users user : list) {
 				user_inmemories.add(user);
 				System.out.println("loading DB users");
 			}

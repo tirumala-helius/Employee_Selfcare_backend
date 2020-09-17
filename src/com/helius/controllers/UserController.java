@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee;
+import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
 import com.helius.entities.Users;
 import com.helius.managers.EmployeeManager;
@@ -186,9 +187,9 @@ public class UserController {
 		System.out.println("userjson : " + userjson);
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
-		com.helius.utils.User user;
+		Employee_Selfcare_Users user;
 		try {
-			user = obm.readValue(userjson, com.helius.utils.User.class);
+			user = obm.readValue(userjson, Employee_Selfcare_Users.class);
 			UserManager userManager = (UserManager) context.getBean("userManager");
 
 			status = userManager.createUser(user);
@@ -205,18 +206,11 @@ public class UserController {
 		System.out.println("updateuser userjson : " + userjson);
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
-		com.helius.utils.User user;
+		Employee_Selfcare_Users user;
 		try {
-			user = obm.readValue(userjson, com.helius.utils.User.class);
+			user = obm.readValue(userjson, Employee_Selfcare_Users.class);
 			UserManager userManager = (UserManager) context.getBean("userManager");
 			status = userManager.updateUser(user);
-			/*com.helius.utils.User existing_user = userManager.getUser(user.getUserid());
-			if(existing_user.getUserid() == user.getUserid()) {
-				status = userManager.updateUser(user);
-			} else {
-				status = userManager.createUser(user);
-			}*/
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -230,9 +224,9 @@ public class UserController {
 		System.out.println("delete user userjson : " + userjson);
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
-		com.helius.utils.User user;
+		Employee_Selfcare_Users user;
 		try {
-			user = obm.readValue(userjson, com.helius.utils.User.class);
+			user = obm.readValue(userjson, Employee_Selfcare_Users.class);
 			UserManager userManager = (UserManager) context.getBean("userManager");
 
 			status = userManager.updateUser(user);
@@ -292,9 +286,9 @@ public class UserController {
 		System.out.println("change password userjson : " + userjson);
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
-		com.helius.utils.User user;
+		Employee_Selfcare_Users user;
 		try {
-			user = obm.readValue(userjson, com.helius.utils.User.class);
+			user = obm.readValue(userjson, Employee_Selfcare_Users.class);
 			UserManager userManager = (UserManager) context.getBean("userManager");
 
 			status = userManager.updateUser(user);

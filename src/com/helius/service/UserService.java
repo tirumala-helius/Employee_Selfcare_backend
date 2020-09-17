@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 
+import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
 import com.helius.entities.Users;
 
@@ -26,8 +27,8 @@ public interface UserService {
 
 	public void save(Users user, String createLoginFlag, Session session) throws Throwable;
 	
-	public String createUser(User user) throws Throwable;
-	public String updateUser(User user) throws Throwable;
+	public String createUser(Employee_Selfcare_Users user) throws Throwable;
+	public String updateUser(Employee_Selfcare_Users user) throws Throwable;
 	public String deleteUser(User user) throws Throwable;
 	public List<com.helius.utils.User> getAllUsers() throws Throwable;
 

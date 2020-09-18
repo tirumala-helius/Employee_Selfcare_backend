@@ -35,7 +35,7 @@ public class UserManager {
 		this.users = users;
 	}
 
-	public Users getUsers(String employeeid) {
+	/*public Users getUsers(String employeeid) {
 		Users usr = null;
 		try {
 			usr = userService.get(employeeid);
@@ -43,44 +43,44 @@ public class UserManager {
 			return usr;
 		}
 		return usr;
-	}
+	}*/
 
-	public Status createUserLogin(Users user,String createLoginFlag) {
+	/*public Status createUserLogin(Users user,String createLoginFlag) {
 		try {
 			userService.save(user,createLoginFlag);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, "Employee Details saved successfully");
-	}
+	}*/
 	
-	public Status createUserLogin(Users user,String createLoginFlag,Session session) {
+	/*public Status createUserLogin(Users user,String createLoginFlag,Session session) {
 		try {
 			userService.save(user,createLoginFlag,session);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, "Employee Details saved successfully");
-	}
+	}*/
 
-	public Status activateAccount(String base64Credentials) {
+	public Status activateAccount(String base64Credentials,String token) {
 		try {
-			userService.activateUserAccount(base64Credentials);
+			userService.activateUserAccount(base64Credentials,token);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
-		return new Status(true, "success");
+		return new Status(true, "Account Successfully Activated Please Login !");
 	}
 
-	public Status activateAccount12(String base64Credentials,String forgot) {
+	/*public Status activateAccount12(String base64Credentials,String forgot) {
 		try {
 			userService.activateUserAccount12(base64Credentials,forgot);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, "success");
-	}
-	public Status verifyLogin(String usrId,String password) {
+	}*/
+	/*public Status verifyLogin(String usrId,String password) {
 		String status = "";
 		try {
 			status = userService.verifyUserLogin( usrId, password);
@@ -88,22 +88,22 @@ public class UserManager {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, status);
-	}
+	}*/
 
-	public Status verifyEmailadress(String employeeid,String email) {
+	public Status verifyEmailadress(String employeeid) {
 		String status = "";
 		try {
-			status = userService.verifyForgotEmailAddress(employeeid,email);
+			status = userService.verifyForgotEmailAddress(employeeid);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, status);
 	}
 
-	public Status forgotPassword(String base64Credentials) {
+	public Status forgotPassword(String base64Credentials,String token) {
 		String status = "";
 		try {
-			status = userService.forgotpswd(base64Credentials);
+			status = userService.forgotpswd(base64Credentials,token);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
@@ -130,17 +130,17 @@ public class UserManager {
 		return new Status(true, "updated user successfully");
 	}
 	
-	public List<com.helius.utils.User> getAllUsers() throws Throwable {
+	/*public List<com.helius.utils.User> getAllUsers() throws Throwable {
 		return userService.getAllUsers();
 		
 		
-	}
+	}*/
 
 	
 	public Logindetails validateUser(String username, String password) throws Throwable {
 		return userService.validateUser(username, password);
 	}
-	public com.helius.utils.User getUser(String userid) throws Throwable{
+	/*public com.helius.utils.User getUser(String userid) throws Throwable{
 		return userService.getUser(userid);
-	}
+	}*/
 }

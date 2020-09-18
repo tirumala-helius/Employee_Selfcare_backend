@@ -33,6 +33,8 @@ import org.hibernate.envers.NotAudited;
 		@Column
 		private String user_last_login;
 		@Column
+		private String token;
+		@Column
 		//@UpdateTimestamp
 		//@NotAudited
 		private Timestamp last_modified_date;
@@ -48,6 +50,13 @@ import org.hibernate.envers.NotAudited;
 		}
 		public void setEmployee_Selfcare_Users_Id(int employee_Selfcare_Users_Id) {
 			Employee_Selfcare_Users_Id = employee_Selfcare_Users_Id;
+		}
+		
+		public String getToken() {
+			return token;
+		}
+		public void setToken(String token) {
+			this.token = token;
 		}
 		public String getEmployee_id() {
 			return employee_id;

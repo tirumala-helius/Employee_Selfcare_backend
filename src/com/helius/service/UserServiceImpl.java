@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -20,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
+import com.helius.dao.EmployeeDAOImpl;
 import com.helius.entities.Employee;
 import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
@@ -27,13 +30,14 @@ import com.helius.entities.Users;
 import com.helius.managers.EmployeeManager;
 import com.helius.managers.UserManager;
 import com.helius.utils.Logindetails;
+import com.helius.utils.Utils;
 
 @Service
 public class UserServiceImpl implements com.helius.service.UserService {
 	@Autowired
 	private EmailService emailService;
 	@Autowired
-	private EmployeeManager employeemanager;
+	EmployeeDAOImpl employeeDAO;
 	@Autowired
 	ApplicationContext context;
 	@Autowired 
@@ -54,7 +58,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	}
 
 	/** create userlogin id & password **/
-	@Override
+	/*@Override
 	public void save(Users user, String createLoginFlag) throws Throwable {
 		Employee employee = employeemanager.getEmployee(user.getEmployee_id());
 		Session session = null;
@@ -140,28 +144,28 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			throw new Throwable("Failed to Save UserLogin");
 		}
 	}
-
-	/** fetch userlogin role loginattempts details **/
+*/
 	@Override
-	public Users get(String employeeid) {
-		System.out.println("\n===emp id" + employeeid);
-		Users Users = new Users();
+	public Employee_Selfcare_Users getUser(String userid) throws Throwable {
+		System.out.println("\n===emp id" + userid);
+		Employee_Selfcare_Users User = null;
 		String status = "";
-
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
-			String user_query = "select * from Users where employee_id = :employee_id ";
-			java.util.List userlist = session.createSQLQuery(user_query).addEntity(Users.class)
-					.setParameter("employee_id", employeeid).list();
-			if (!userlist.isEmpty()) {
-				Users = (Users) userlist.iterator().next();
+			String user_query = "select * from Employee_Selfcare_Users u where u.active='Yes' and u.employee_id='"
+					+ userid + "' ";
+			java.util.List userlist = session.createSQLQuery(user_query).addEntity(Employee_Selfcare_Users.class).list();
+			if (userlist != null && !userlist.isEmpty()) {
+				User = (Employee_Selfcare_Users) userlist.iterator().next();
 			}
-			session.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new Throwable("Unable to fetch User Details !");
+		}finally{
+			session.close();
 		}
-		return Users;
+		return User;
 	}
 
 	/**
@@ -169,33 +173,44 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * to set new password
 	 **/
 	@Override
-	public String verifyForgotEmailAddress(String employeeid, String email) {
+	public String verifyForgotEmailAddress(String employeeid) throws Throwable{
 		String status = "";
 		Session session = null;
+		Transaction transaction = null;
 		String To = "";
+		Employee employee = null;
+		Employee_Selfcare_Users user = null;
 		try {
 			session = sessionFactory.openSession();
-			Employee employee = employeemanager.getEmployee(employeeid);
-			if (employee != null && email.equals(employee.getEmployeeOfferDetails().getPersonal_email_id())) {
+			transaction = session.beginTransaction();
+			employee = employeeDAO.get(employeeid);
+			user = getUser(employeeid);
+			if (employee != null && user !=null) {
+				String token = UUID.randomUUID().toString();
+				user.setToken(token);
+				session.update(user);
 				To = employee.getEmployeeOfferDetails().getPersonal_email_id();
-				String appUrl = "http://localhost:63342/helius/changepassword.html#!/";
-				SimpleMailMessage passwordResetEmail = new SimpleMailMessage();
-				passwordResetEmail.setFrom("vinay.er@helius-tech.com");
-				passwordResetEmail.setTo("vinay.er@helius-tech.com");
-				passwordResetEmail.setSubject("Forgot Password");
-				passwordResetEmail.setText("Hello " + employee.getEmployeePersonalDetails().getEmployee_id() + ","
-						+ "\n\n" + "Welcome to Helius Family." + "\n\n" + "Please click below and change your password "
-						+ "\n\n" + appUrl + "?token=" + employeeid + "\n\n" + "With Regards," + "\n"
-						+ "Helius Technologies.");
-				emailService.sendEmail(passwordResetEmail);
-				status = "success";
+				String[] cc = null;
+				String getCC = Utils.getHapProperty("heliusHR");
+				if (getCC != null && !getCC.isEmpty()) {
+					cc = getCC.split(",");
+				}
+				String appUrl = "http://localhost:8080/helius/changepassword.html#!/";
+				String subject= "Forgot Password";
+				String text = "Hello " + employee.getEmployeePersonalDetails().getEmployee_name() + ","
+						+ "\n\n" + "Please click below and change your password "
+						+ "\n\n" + appUrl + "?token=" + token +"&id="+employeeid+ "\n\n" + "With Regards," + "\n"
+						+ "Helius Technologies.";
+				transaction.commit();
+				emailService.sendBulkEmail(To, cc, null, subject, text);
+				status = "Forgot Password link has been send to your registered Email Address";
 			} else {
-				status = "Please check Employee ID and Email ID does not match!";
+				throw new Throwable("Please check your User-Id or contact HR !");
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			status = e.getMessage();
+			throw new Throwable("Please check your User-Id or contact HR !");
 		} finally {
 			session.close();
 		}
@@ -203,25 +218,25 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	}
 
 	@Override
-	public void activateUserAccount(String base64Credentials) throws Throwable {
+	public void activateUserAccount(String base64Credentials,String token) throws Throwable {
 		Session session = null;
 		Transaction transaction = null;
 		String password = null;
-		String username = null;
+		String userid = null;
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			String credentials = new String(Base64.getDecoder().decode(base64Credentials));
 			final String[] values = credentials.split(":", 2);
 			password = values[1];
-			username = values[0];
-			String pwd = (BCrypt.hashpw(password, BCrypt.gensalt()));
-			Users user = get(username);
+			userid = values[0];
+		//	String pwd = (BCrypt.hashpw(password, BCrypt.gensalt()));
+			Employee_Selfcare_Users user = getUser(userid);
 			if (user.getEmployee_id() != null) {
 				int User_login_attempts = user.getUser_login_attempts();
-				if (User_login_attempts == 0) {
+				if (User_login_attempts == 0 && token.equals(user.getToken())) {
 					user.setUser_login_attempts(User_login_attempts + 1);
-					user.setPassword(pwd);
+					user.setPassword(password);
 					session.update(user);
 				} else {
 					throw new Throwable("Account is already activated please Login");
@@ -230,8 +245,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				throw new Throwable("Account not found ");
 			}
 			transaction.commit();
-		} catch (HibernateException e) {
-			transaction.rollback();
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new Throwable("Failed to activate account");
 		} finally {
@@ -243,7 +257,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * Used to activate account and change password for the first time login and
 	 * also to set new password incase of forgot
 	 **/
-	@Override
+	/*@Override
 	public void activateUserAccount12(String base64Credentials, String forgot) throws Throwable {
 		Session session = null;
 		Transaction transaction = null;
@@ -258,7 +272,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			password = values[1];
 			username = values[0];
 			String pwd = (BCrypt.hashpw(password, BCrypt.gensalt()));
-			Users user = get(username);
+			Employee_Selfcare_Users user = getUser(username);
 			if (forgot.equals("N")) {
 				if (user.getEmployee_id() != null) {
 					int User_login_attempts = user.getUser_login_attempts();
@@ -293,14 +307,14 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		} finally {
 			session.close();
 		}
-	}
+	}*/
 
 	@Override
-	public String forgotpswd(String base64Credentials) {
+	public String forgotpswd(String base64Credentials,String token) throws Throwable{
 		Session session = null;
 		Transaction transaction = null;
 		String password = null;
-		String username = null;
+		String userid = null;
 		String status = "";
 		try {
 			session = sessionFactory.openSession();
@@ -308,25 +322,28 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			String credentials = new String(Base64.getDecoder().decode(base64Credentials));
 			final String[] values = credentials.split(":", 2);
 			password = values[1];
-			username = values[0];
-			String pwd = (BCrypt.hashpw(password, BCrypt.gensalt()));
-			Users user = get(username);
-			user.setPassword(pwd);
+			userid = values[0];
+			//String pwd = (BCrypt.hashpw(password, BCrypt.gensalt()));
+			Employee_Selfcare_Users user = getUser(userid);
+			if(token.equals(user.getToken())){
+			user.setPassword(password);
 			session.update(user);
-			status = "success";
 			transaction.commit();
+			status = "Password saved succesfully Please Login !";
+			}else{
+				throw new Throwable("Filed to change Password Please Contact HR !");
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			transaction.rollback();
-			status = "Unable to change Password Please Contact HR";
+			throw new Throwable("Failed to change Password Please Contact HR !");
 		} finally {
 			session.close();
 		}
 		return status;
 	}
 
-	/** employee login **/
+	/** employee login **//*
 	@Override
 	public String verifyUserLogin(String username, String password) {
 		String status = "";
@@ -358,7 +375,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		else
 			status = false;
 		return status;
-	}
+	}*/
 
 	/*
 	 * (non-Javadoc)
@@ -366,15 +383,32 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * @see com.helius.service.UserService#createUser(com.helius.entities.User)
 	 */
 	@Override
-	public String createUser(Employee_Selfcare_Users user) throws Throwable {
+	public void createUser(Employee_Selfcare_Users user) throws Throwable {
 		Session session  = null;
+		Employee employee = null;
 		try {
 			session = sessionFactory.openSession();
 			Transaction transaction = session.beginTransaction();
 			// user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+			String token = UUID.randomUUID().toString();
+			//user.setToken(token);
 			session.save(user);
 			transaction.commit();
 			adduser_to_memory(user);
+			employee = employeeDAO.get(user.getEmployee_id());
+			String To = employee.getEmployeeOfferDetails().getPersonal_email_id();
+			String[] cc = null;
+			String getCC = Utils.getHapProperty("heliusHR");
+			if (getCC != null && !getCC.isEmpty()) {
+				cc = getCC.split(",");
+			}
+			String appUrl = "http://localhost:8080/helius/changepassword.html#!/";
+			String subject= "Account Activation";
+			String text = "Hello " + employee.getEmployeePersonalDetails().getEmployee_name() + ","
+					+ "\n\n" + "Please click below to activate and create your password "
+					+ "\n\n" + appUrl + "?token=" + token +"&id="+user.getEmployee_id()+ "\n\n" + "With Regards," + "\n"
+					+ "Helius Technologies.";
+			emailService.sendBulkEmail(To, cc, null, subject, text);
 		} catch (HibernateException e) {
 			// transaction.rollback();
 			e.printStackTrace();
@@ -387,7 +421,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		finally{
 			session.close();
 		}
-		return null;
 	}
 
 	/*
@@ -426,13 +459,13 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * 
 	 * @see com.helius.service.UserService#deleteUser(com.helius.entities.User)
 	 */
-	@Override
+	/*@Override
 	public String deleteUser(User user) throws Throwable {
 		// TODO Auto-generated method stub
 		return null;
-	}
+	}*/
 
-	public List<com.helius.utils.User> getAllUsers() throws Throwable {
+	/*public List<com.helius.utils.User> getAllUsers() throws Throwable {
 		List<com.helius.utils.User> allusers = new ArrayList<com.helius.utils.User>();
 		
 		Session session = null;
@@ -480,7 +513,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session.close();
 		}
 		return allusers;
-	}
+	}*/
 
 	/* (non-Javadoc)
 	 * @see com.helius.service.UserService#validateUser()
@@ -563,8 +596,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	/* (non-Javadoc)
 	 * @see com.helius.service.UserService#getUser(java.lang.String)
 	 */
-	@Override
-	public com.helius.utils.User getUser(String userid) throws Exception{
+	/*public com.helius.utils.User getUserold(String userid) throws Exception{
 		com.helius.utils.User user = null;
 		
 		Session session = null;
@@ -612,5 +644,5 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session.close();
 		}
 		return user;
-	}
+	}*/
 }

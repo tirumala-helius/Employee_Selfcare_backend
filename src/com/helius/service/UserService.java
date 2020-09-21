@@ -19,9 +19,9 @@ public interface UserService {
 
 	//public String verifyUserLogin(String username,String password);
 
-	public String forgotpswd(String base64Credentials,String token) throws Throwable;
+	public String resetpswd(String base64Credentials,String token,String fg) throws Throwable;
 
-	public String verifyForgotEmailAddress(String employeeid) throws Throwable;
+	public String verifyForgotEmailAddress(String employeeid,String appUrl) throws Throwable;
 	
 	//void activateUserAccount12(String base64Credentials, String forgot) throws Throwable;
 

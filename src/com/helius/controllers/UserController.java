@@ -139,8 +139,8 @@ public class UserController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "/verifyEmailAddress", method = RequestMethod.GET)
-	public @ResponseBody String verifyEmailAdress(@RequestParam String employeeid) {
-		Status status = userManager.verifyEmailadress(employeeid);
+	public @ResponseBody String verifyEmailAdress(@RequestParam String employeeid,String appUrl) {
+		Status status = userManager.verifyEmailadress(employeeid,appUrl);
 		String result = "";
 		if (status.isOk()) {
 			result = status.getMessage(); 
@@ -151,13 +151,13 @@ public class UserController {
 	}
 	
 	@CrossOrigin
-	@RequestMapping(value = "/forgotPwd", method = RequestMethod.POST)
-	public @ResponseBody String forgotPwd(@RequestHeader("Authorization") String Authorization, String token) {
+	@RequestMapping(value = "/resetPwd", method = RequestMethod.POST)
+	public @ResponseBody String resetPwd(@RequestHeader("Authorization") String Authorization, String token,String fg) {
 		Status status = null;
 		try {
 			final String authorization = Authorization;
 			String base64Credentials = authorization.substring("Basic".length()).trim();
-			status = userManager.forgotPassword(base64Credentials, token);
+			status = userManager.resetPassword(base64Credentials, token,fg);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -186,7 +186,7 @@ public class UserController {
 		}
 	}*/
 	@CrossOrigin
-    @RequestMapping(value = "user/createuser", method = RequestMethod.POST, consumes = { "multipart/form-data" })
+    @RequestMapping(value = "user/createuser", method = RequestMethod.POST, consumes = { "application/json" })
 	public @ResponseBody String createUser(@RequestParam("user") String userjson) {
 		System.out.println("userjson : " + userjson);
 		ObjectMapper obm = new ObjectMapper();

@@ -1,6 +1,8 @@
 package com.helius.service;
 
 
+import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -56,6 +60,8 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	public void setSessionFactory(org.hibernate.internal.SessionFactoryImpl sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
+	
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class.getName());
 
 	/** create userlogin id & password **/
 	/*@Override
@@ -173,7 +179,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * to set new password
 	 **/
 	@Override
-	public String verifyForgotEmailAddress(String employeeid) throws Throwable{
+	public String verifyForgotEmailAddress(String employeeid,String appUrl) throws Throwable{
 		String status = "";
 		Session session = null;
 		Transaction transaction = null;
@@ -186,7 +192,13 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			employee = employeeDAO.get(employeeid);
 			user = getUser(employeeid);
 			if (employee != null && user !=null) {
-				String token = UUID.randomUUID().toString();
+				//String token = UUID.randomUUID().toString();
+			    SecureRandom random = new SecureRandom();
+			    Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+				byte[] buffer = new byte[20];
+		        random.nextBytes(buffer);
+		        String token = encoder.encodeToString(buffer)+Instant.EPOCH.toEpochMilli();
+		        logger.info("----token ----"+token);
 				user.setToken(token);
 				session.update(user);
 				To = employee.getEmployeeOfferDetails().getPersonal_email_id();
@@ -195,11 +207,11 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				if (getCC != null && !getCC.isEmpty()) {
 					cc = getCC.split(",");
 				}
-				String appUrl = "http://localhost:8080/helius/changepassword.html#!/";
+			//	String appUrl = "http://localhost:8080/helius/changepassword.html#!/";
 				String subject= "Forgot Password";
 				String text = "Hello " + employee.getEmployeePersonalDetails().getEmployee_name() + ","
 						+ "\n\n" + "Please click below and change your password "
-						+ "\n\n" + appUrl + "?token=" + token +"&id="+employeeid+ "\n\n" + "With Regards," + "\n"
+						+ "\n\n" + appUrl + "?token="+employeeid+"Y"+ token+"\n\n" + "With Regards," + "\n"
 						+ "Helius Technologies.";
 				transaction.commit();
 				emailService.sendBulkEmail(To, cc, null, subject, text);
@@ -257,7 +269,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * Used to activate account and change password for the first time login and
 	 * also to set new password incase of forgot
 	 **/
-	/*@Override
+	//Override
 	public void activateUserAccount12(String base64Credentials, String forgot) throws Throwable {
 		Session session = null;
 		Transaction transaction = null;
@@ -278,7 +290,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					int User_login_attempts = user.getUser_login_attempts();
 					if (User_login_attempts == 0) {
 						user.setUser_login_attempts(User_login_attempts + 1);
-						user.setPassword(pwd);
+						user.setPassword(password);
 						session.update(user);
 					} else {
 						throw new Throwable("Account is already activated please Login");
@@ -291,7 +303,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					user.setPassword(pwd);
 					session.update(user);
 					status = "success";
-
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -307,10 +318,10 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		} finally {
 			session.close();
 		}
-	}*/
+	}
 
 	@Override
-	public String forgotpswd(String base64Credentials,String token) throws Throwable{
+	public String resetpswd(String base64Credentials,String token,String fg) throws Throwable{
 		Session session = null;
 		Transaction transaction = null;
 		String password = null;
@@ -325,13 +336,24 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			userid = values[0];
 			//String pwd = (BCrypt.hashpw(password, BCrypt.gensalt()));
 			Employee_Selfcare_Users user = getUser(userid);
-			if(token.equals(user.getToken())){
+			if("Y".equalsIgnoreCase(fg) && token.equals(user.getToken())){
 			user.setPassword(password);
 			session.update(user);
 			transaction.commit();
 			status = "Password saved succesfully Please Login !";
 			}else{
 				throw new Throwable("Filed to change Password Please Contact HR !");
+			}
+			if("N".equalsIgnoreCase(fg) && token.equals(user.getToken())){				
+				int User_login_attempts = user.getUser_login_attempts();
+				if (User_login_attempts == 0) {
+					user.setUser_login_attempts(User_login_attempts + 1);
+					user.setPassword(password);
+					session.update(user);
+					status = "Password saved succesfully Please Login !";
+				} else {
+					throw new Throwable("Account is already activated please Login");
+				}
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -391,7 +413,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			Transaction transaction = session.beginTransaction();
 			// user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 			String token = UUID.randomUUID().toString();
-			//user.setToken(token);
+			user.setToken(token);
 			session.save(user);
 			transaction.commit();
 			adduser_to_memory(user);
@@ -544,9 +566,13 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					user_util.setUser_login_attempts(user_entity.getUser_login_attempts());
 					validauser.setResult("Login success");
 					validauser.setUser(user_util);
+					logger.info("-------info---");
+					logger.debug("----debug-----");
+					System.out.println("--------sysss");
 					}else{
 						validauser.setResult("Account is not Activated. Please check your emails for activation link or contact HR");
 						validauser.setUser(null);
+						logger.error("----error----");
 					}
 				} else {
 					validauser.setResult("User not found in the system");

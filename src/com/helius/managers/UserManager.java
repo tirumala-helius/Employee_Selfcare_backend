@@ -90,20 +90,20 @@ public class UserManager {
 		return new Status(true, status);
 	}*/
 
-	public Status verifyEmailadress(String employeeid) {
+	public Status verifyEmailadress(String employeeid,String appUrl) {
 		String status = "";
 		try {
-			status = userService.verifyForgotEmailAddress(employeeid);
+			status = userService.verifyForgotEmailAddress(employeeid,appUrl);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, status);
 	}
 
-	public Status forgotPassword(String base64Credentials,String token) {
+	public Status resetPassword(String base64Credentials,String token,String fg) {
 		String status = "";
 		try {
-			status = userService.forgotpswd(base64Credentials,token);
+			status = userService.resetpswd(base64Credentials,token,fg);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}

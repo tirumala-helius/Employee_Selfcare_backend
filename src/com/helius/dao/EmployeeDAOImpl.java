@@ -29,6 +29,8 @@ import java.util.Set;
 import javax.mail.MessagingException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -78,6 +80,7 @@ import com.helius.entities.Sow_Employee_Association;
 import com.helius.entities.Timesheet_Email;
 import com.helius.entities.Work_Permit_Master;
 import com.helius.service.EmailService;
+import com.helius.service.UserServiceImpl;
 import com.helius.utils.FilecopyStatus;
 import com.helius.utils.Utils;
 /**
@@ -119,6 +122,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	@Autowired
 	private EmailService emailService;
 	private List<String> copied_with_success = new ArrayList<String>();
+    private static final Logger logger = LogManager.getLogger(EmployeeDAOImpl.class.getName());
 
 	/** returns employee details **/
 	@SuppressWarnings("unchecked")
@@ -128,6 +132,11 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
+			logger.debug("----===dbug====");
+			logger.info("----===info====");
+			logger.error("----===error====");
+			logger.fatal("----===fatal====");
+
 			// Employee personal Details
 			Employee_Personal_Details employee_Personal_Details = (Employee_Personal_Details) session
 					.get(Employee_Personal_Details.class, employeeid);

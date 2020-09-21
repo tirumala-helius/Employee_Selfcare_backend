@@ -61,7 +61,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
       //http.csrf().disable()
  
     	http.csrf().disable().authorizeRequests()
-        .antMatchers("/user/createuser").hasAnyRole("HR-superuser")
+        //.antMatchers("/user/createuser").hasAnyRole("HR-superuser")
         .antMatchers("/user/updateuser").hasAnyRole("HR-superuser")
         .antMatchers("/client/save").hasAnyRole("HR-superuser,Accountmanager")
         .antMatchers("/client/update").hasAnyRole("HR-superuser,Accountmanager")

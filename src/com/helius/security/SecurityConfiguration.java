@@ -114,6 +114,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
+        web.ignoring().antMatchers("/verifyEmailAddress/");
+        web.ignoring().antMatchers("/resetPwd/");
     }
     
     @Bean

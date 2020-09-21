@@ -3,6 +3,7 @@ package com.helius.managers;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.springframework.http.ResponseEntity;
 
 import com.helius.utils.User;
 import com.helius.entities.Employee_Selfcare_Users;
@@ -108,6 +109,16 @@ public class UserManager {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, status);
+	}
+	
+	public ResponseEntity<byte[]> getPayslipFile(String userId,String month) {
+		ResponseEntity<byte[]> res = null;
+		try {
+			 res =	userService.getPayslipFIle(userId,month);
+		} catch (Throwable e) {
+				return res;
+		}
+		return res;
 	}
 	
 	public Status createUser(Employee_Selfcare_Users user) {

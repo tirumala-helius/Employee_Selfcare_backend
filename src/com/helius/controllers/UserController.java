@@ -152,12 +152,12 @@ public class UserController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "/resetPwd", method = RequestMethod.POST)
-	public @ResponseBody String resetPwd(@RequestHeader("Authorization") String Authorization, String token,String fg) {
+	public @ResponseBody String resetPwd(@RequestHeader("Authorization") String Authorization, String token,String fgt) {
 		Status status = null;
 		try {
 			final String authorization = Authorization;
 			String base64Credentials = authorization.substring("Basic".length()).trim();
-			status = userManager.resetPassword(base64Credentials, token,fg);
+			status = userManager.resetPassword(base64Credentials, token,fgt);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -301,5 +301,12 @@ public class UserController {
 		}
 		return "{\"response\":\"" + status.getMessage() + "\"}";
 	}  
+	
+	@CrossOrigin
+	@RequestMapping(value = "getPayslipFile", method = RequestMethod.GET, produces = "multipart/form-data")
+	public ResponseEntity<byte[]> getPayslipFile(@RequestParam String userId,String month) {
+		ResponseEntity<byte[]> responseEntity = userManager.getPayslipFile(userId,month);
+		return responseEntity;
+	}
 
 }

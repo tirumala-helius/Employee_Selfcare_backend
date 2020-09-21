@@ -1,13 +1,19 @@
 package com.helius.service;
 
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.security.SecureRandom;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -16,6 +22,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -23,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import com.helius.dao.EmployeeDAOImpl;
 import com.helius.entities.Employee;
+import com.helius.entities.Employee_Beeline_Details;
 import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.utils.Logindetails;
 import com.helius.utils.Utils;
@@ -332,7 +341,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			transaction.commit();
 			status = "Password saved succesfully Please Login !";
 			}else{
-				throw new Throwable("Filed to change Password Please Contact HR !");
+				throw new Throwable("Failed to change Password Please Contact HR !");
 			}
 			if("N".equalsIgnoreCase(fg) && token.equals(user.getToken())){				
 				int User_login_attempts = user.getUser_login_attempts();
@@ -345,6 +354,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					throw new Throwable("Account is already activated please Login");
 				}
 			}
+			updateuser_to_memory(user);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -661,4 +671,68 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		}
 		return user;
 	}*/
+	
+	public HashMap<String,String> getOldANDNewEmpIdAssosc() throws Throwable {
+		Session session = null;
+		HashMap<String,String> map = new HashMap<String,String>();
+		try {
+			session = sessionFactory.openSession();
+			String query = "SELECT employee_id,old_employee_id from Employee_Old_Id_VS_New_Id";
+			List<Object[]> EmpAssoc = session.createSQLQuery(query).list();
+			for(Object[] obj : EmpAssoc){
+					map.put(obj[0].toString(), obj[1].toString());
+				}
+		} catch (Exception e) {
+			e.printStackTrace(); 
+			throw new Throwable("Failed to fetch beeline employee Association details " + e.getMessage());
+		}finally{
+			session.close();
+		}
+		return map;
+	}
+	
+	@Override
+	public ResponseEntity<byte[]> getPayslipFIle(String userId,String date) throws Throwable {
+		Session session = null;
+		byte[] files = null;
+		try{
+		session = sessionFactory.openSession();
+		HashMap<String,String> assosc = getOldANDNewEmpIdAssosc();
+		String employeeId = null;
+		if(assosc.containsKey(userId)){
+			if(assosc.get(userId) != null && !assosc.get(userId).isEmpty()){
+				employeeId = assosc.get(userId);
+			}
+		}else{
+			employeeId = userId;
+		}
+		SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
+		java.util.Date selectedMonth = sdfMonth.parse(date);
+		Timestamp playslipMonth = new Timestamp(selectedMonth.getTime());
+		String query = "SELECT payslip_path from Employee_Pay_Slips where month = :month AND employee_id = :employee_id";
+		List<String> payslipUrl = session.createSQLQuery(query).setParameter("month", playslipMonth).setParameter("employee_id", employeeId).list();
+		if(payslipUrl.size() > 1){
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		String url = null;
+		for(String urls : payslipUrl){
+			url = urls;
+		}
+		FileInputStream fi = null;
+			File file = new File(url);
+			if (file.exists()) {
+				fi = new FileInputStream(url);
+				files = IOUtils.toByteArray(fi);
+				fi.close();
+			} else {
+				return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(files, HttpStatus.OK);
+		return responseEntity;
+	}
+	
 }

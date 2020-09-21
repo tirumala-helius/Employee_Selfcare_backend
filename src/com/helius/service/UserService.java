@@ -3,6 +3,7 @@ package com.helius.service;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.springframework.http.ResponseEntity;
 
 import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
@@ -33,5 +34,7 @@ public interface UserService {
 	//public List<com.helius.utils.User> getAllUsers() throws Throwable;
 
 	public com.helius.utils.Logindetails validateUser(String username, String password) throws Throwable;
+
+	ResponseEntity<byte[]> getPayslipFIle(String userId, String date) throws Throwable;
 
 }

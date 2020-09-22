@@ -21,6 +21,8 @@ import java.util.Map.Entry;
 
 import org.apache.taglibs.standard.extra.spath.AbsolutePath;
 import org.hibernate.Session;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Utf8;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -110,7 +112,22 @@ public class Utils {
 	*/
 	public final static String fileLocation = "C:" + File.separator + "Users" + File.separator + "HELIUS" + File.separator
 			+ "Documents";
-
+	
+	public static boolean authenticateUrl(String userId){
+		    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			if (auth != null) {
+				if (auth.getName() != null) {
+					if(userId.equalsIgnoreCase(auth.getName())){
+						return true;
+					}
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+			return false;
+		    }
 
 	public static String jsonPicklist(Set<String> data) {
 		StringBuffer Sb = new StringBuffer();

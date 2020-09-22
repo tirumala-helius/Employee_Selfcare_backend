@@ -25,6 +25,8 @@ import org.hibernate.envers.NotAudited;
 		@Column
 		private String employee_id;
 		@Column
+		private String employee_name;
+		@Column
 		private String password;
 		@Column
 		private String active;
@@ -75,6 +77,13 @@ import org.hibernate.envers.NotAudited;
 		}
 		public void setActive(String active) {
 			this.active = active;
+		}
+		
+		public String getEmployee_name() {
+			return employee_name;
+		}
+		public void setEmployee_name(String employee_name) {
+			this.employee_name = employee_name;
 		}
 		public int getUser_login_attempts() {
 			return user_login_attempts;

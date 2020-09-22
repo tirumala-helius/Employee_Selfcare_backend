@@ -438,7 +438,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			throw new Throwable("Failed to Save User");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Throwable("Failed to Save User" + e.getMessage());
+			throw new Throwable("Failed to Save User");
 		}
 		
 		finally{
@@ -469,7 +469,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			throw new Throwable("Failed to update User");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Throwable("Failed to Save User" + e.getMessage());
+			throw new Throwable("Failed to update User");
 		}
 		finally{
 			session.close();
@@ -565,6 +565,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					user_util.setActive(user_entity.getActive());
 					user_util.setUser_last_login(user_entity.getUser_last_login());
 					user_util.setUser_login_attempts(user_entity.getUser_login_attempts());
+					user_util.setEmployee_name(user_entity.getEmployee_name());
 					validauser.setResult("Login success");
 					validauser.setUser(user_util);
 					logger.info("-------info---");

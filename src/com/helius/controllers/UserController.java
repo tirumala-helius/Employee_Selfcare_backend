@@ -29,6 +29,7 @@ import com.helius.service.UserService;
 import com.helius.service.UserServiceImpl;
 import com.helius.utils.Logindetails;
 import com.helius.utils.Status;
+import com.helius.utils.Utils;
 
 
 @RestController
@@ -139,29 +140,32 @@ public class UserController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "/verifyEmailAddress", method = RequestMethod.GET)
-	public @ResponseBody String verifyEmailAdress(@RequestParam String employeeid,String appUrl) {
-		Status status = userManager.verifyEmailadress(employeeid,appUrl);
-		String result = "";
-		if (status.isOk()) {
-			result = status.getMessage(); 
-		} else {
-			result =  status.getMessage();
-		}
-		return "{\"response\":{" + result + "}}";
+	public ResponseEntity<String> verifyEmailAdress(@RequestParam String employeeid,String appUrl) {
+		Status status = null;
+		try{
+		status = userManager.verifyEmailadress(employeeid,appUrl);
+	} catch (Exception e) {
+		return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+	} catch (Throwable e) {
+		return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
 	}
 	
 	@CrossOrigin
 	@RequestMapping(value = "/resetPwd", method = RequestMethod.POST)
-	public @ResponseBody String resetPwd(@RequestHeader("Authorization") String Authorization, String token,String fgt) {
+	public ResponseEntity<String> resetPwd(@RequestHeader("Authorization") String Authorization, String token,String fgt) {
 		Status status = null;
 		try {
 			final String authorization = Authorization;
 			String base64Credentials = authorization.substring("Basic".length()).trim();
 			status = userManager.resetPassword(base64Credentials, token,fgt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return "{\"response\":\"" + status.getMessage() + "\"}";
+		return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
 	}
 	
 	/*@CrossOrigin
@@ -187,38 +191,40 @@ public class UserController {
 	}*/
 	@CrossOrigin
     @RequestMapping(value = "user/createuser", method = RequestMethod.POST, consumes = { "application/json" })
-	public @ResponseBody String createUser(@RequestParam("user") String userjson) {
-		System.out.println("userjson : " + userjson);
+	public ResponseEntity<String> createUser(@RequestParam("user") String userjson) {
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
 		Employee_Selfcare_Users user;
 		try {
 			user = obm.readValue(userjson,Employee_Selfcare_Users.class);
-			UserManager userManager = (UserManager) context.getBean("userManager");
 			status = userManager.createUser(user);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		return "{\"response\":\"" + status.getMessage() + "\"}";
+		return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
 	}
 	@CrossOrigin
     @RequestMapping(value = "user/updateuser", method = RequestMethod.POST, consumes = { "multipart/form-data" })
-	public @ResponseBody String updateUser(@RequestParam("user") String userjson) {
+	public ResponseEntity<String> updateUser(@RequestParam("user") String userjson) {
 		System.out.println("updateuser userjson : " + userjson);
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
 		Employee_Selfcare_Users user;
 		try {
 			user = obm.readValue(userjson, Employee_Selfcare_Users.class);
-			UserManager userManager = (UserManager) context.getBean("userManager");
+			boolean auth = Utils.authenticateUrl(user.getEmployee_id());
+			if(!auth){
+				return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 			status = userManager.updateUser(user);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		return "{\"response\":\"" + status.getMessage() + "\"}";
+		return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
 	}  
 	
 	@CrossOrigin
@@ -230,14 +236,11 @@ public class UserController {
 		Employee_Selfcare_Users user;
 		try {
 			user = obm.readValue(userjson, Employee_Selfcare_Users.class);
-			UserManager userManager = (UserManager) context.getBean("userManager");
-
-			status = userManager.updateUser(user);
+			//status = userManager.updateUser(user);
 		} catch (IOException e) {
 			
 			e.printStackTrace();
 		}
-
 		return "{\"response\":\"" + status.getMessage() + "\"}";
 	}  
 	/*@CrossOrigin
@@ -282,29 +285,32 @@ public class UserController {
 	
 	@CrossOrigin
     @RequestMapping(value = "user/changepassword", method = RequestMethod.POST, consumes = { "multipart/form-data" })
-	public @ResponseBody String changePassword(@RequestParam("user") String userjson) {
-		System.out.println("change password userjson : " + userjson);
+	public ResponseEntity<String> changePassword(@RequestParam("user") String userjson) {
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
 		Employee_Selfcare_Users user;
 		try {
 			user = obm.readValue(userjson, Employee_Selfcare_Users.class);
-			UserManager userManager = (UserManager) context.getBean("userManager");
-
+			boolean result = Utils.authenticateUrl(user.getEmployee_id());
+			if(!result){
+				return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}	
 			status = userManager.updateUser(user);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		if(status.isOk()) {
-			return "{\"response\":\"" + "change password is successful" + "\"}";
-		}
-		return "{\"response\":\"" + status.getMessage() + "\"}";
+		return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
 	}  
 	
 	@CrossOrigin
 	@RequestMapping(value = "getPayslipFile", method = RequestMethod.GET, produces = "multipart/form-data")
 	public ResponseEntity<byte[]> getPayslipFile(@RequestParam String userId,String month) {
+		boolean result = Utils.authenticateUrl(userId);
+		if(!result){
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		ResponseEntity<byte[]> responseEntity = userManager.getPayslipFile(userId,month);
 		return responseEntity;
 	}

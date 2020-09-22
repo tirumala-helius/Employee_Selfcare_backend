@@ -43,6 +43,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -123,11 +125,21 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	private EmailService emailService;
 	private List<String> copied_with_success = new ArrayList<String>();
     private static final Logger logger = LogManager.getLogger(EmployeeDAOImpl.class.getName());
-
+    
 	/** returns employee details **/
 	@SuppressWarnings("unchecked")
 	@Override
 	public Employee get(String employeeid) {
+	try {
+		boolean result = Utils.authenticateUrl(employeeid);
+		if(!result){
+			return null;
+		}
+	} catch (Throwable e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+		return null;
+	}
 		Employee emp = new Employee();
 		Session session = null;
 		try {

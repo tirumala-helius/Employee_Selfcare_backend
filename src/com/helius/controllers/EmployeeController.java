@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -93,10 +94,14 @@ public class EmployeeController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "employee/", method = RequestMethod.GET,produces = "application/json;charset=utf-8")
-	public @ResponseBody String getEmployee(@RequestParam String employeeid) {
+	public ResponseEntity<String> getEmployee(@RequestParam String employeeid) {
 		// TODO call EmployeeManager to get the employee details for the
 		// employee id and create json and send it back
 		// EmployeeManager employeemanager = new EmployeeManager();
+		boolean result = Utils.authenticateUrl(employeeid);
+		if(!result){
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		EmployeeManager employeemanager = (EmployeeManager) context.getBean("employeeManager");
 		Employee employee = employeemanager.getEmployee(employeeid);
 		ObjectMapper om = new ObjectMapper();
@@ -104,7 +109,7 @@ public class EmployeeController {
 		String employeejson1 = "";
 		if (employee == null) {			
 		status.setMessage("Unable to fetch employee details");
-		return "{\"response\":\"" + status.getMessage() + "\"}";
+		return new ResponseEntity<String>(status.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	//	om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 		//SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
@@ -144,7 +149,7 @@ public class EmployeeController {
 		} else {
 			totaljson = "{\"image\": " + "\"" + base64String + "\", \"employee\":" + employeejson + "}";
 		}
-		return totaljson;
+		return new ResponseEntity<String>(totaljson,HttpStatus.OK);
 	}
 	
 	@CrossOrigin

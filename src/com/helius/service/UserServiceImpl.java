@@ -732,9 +732,10 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}finally{
+			session.close();
 		}
-		ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(files, HttpStatus.OK);
-		return responseEntity;
+		return 	new ResponseEntity<byte[]>(files, HttpStatus.OK);		
 	}
 	
 }

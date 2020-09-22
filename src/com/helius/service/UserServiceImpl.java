@@ -321,6 +321,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 
 	@Override
 	public String resetpswd(String base64Credentials,String token,String fg) throws Throwable{
+		System.out.println("---fg---"+fg+"----token-----"+token);
 		Session session = null;
 		Transaction transaction = null;
 		String password = null;

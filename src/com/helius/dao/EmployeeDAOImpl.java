@@ -130,16 +130,6 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Employee get(String employeeid) {
-	try {
-		boolean result = Utils.authenticateUrl(employeeid);
-		if(!result){
-			return null;
-		}
-	} catch (Throwable e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-		return null;
-	}
 		Employee emp = new Employee();
 		Session session = null;
 		try {

@@ -154,7 +154,7 @@ public class UserController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "/resetPwd", method = RequestMethod.POST)
-	public ResponseEntity<String> resetPwd(@RequestHeader("Authorization") String Authorization, String token,String fgt) {
+	public @ResponseBody ResponseEntity<String> resetPwd(@RequestHeader("Authorization") String Authorization, String token,String fgt) {
 		Status status = null;
 		try {
 			final String authorization = Authorization;
@@ -190,7 +190,7 @@ public class UserController {
 		}
 	}*/
 	@CrossOrigin
-    @RequestMapping(value = "user/createuser", method = RequestMethod.POST, consumes = { "application/json" })
+    @RequestMapping(value = "user/createuser", method = RequestMethod.POST, consumes = { "multipart/form-data" })
 	public ResponseEntity<String> createUser(@RequestParam("user") String userjson) {
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;

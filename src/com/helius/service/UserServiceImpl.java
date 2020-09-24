@@ -210,7 +210,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				String subject= "Forgot Password";
 				String text = "Hello " + employee.getEmployeePersonalDetails().getEmployee_name() + ","
 						+ "\n\n" + "Please click below and change your password "
-						+ "\n\n" + appUrl + "?token="+employeeid+"Y"+ token+"\n\n" + "With Regards," + "\n"
+						+ "\n\n" + appUrl + "?token="+employeeid+"-fgtY"+ token+"\n\n" + "With Regards," + "\n"
 						+ "Helius Technologies.";
 				transaction.commit();
 				emailService.sendBulkEmail(To, cc, null, subject, text);
@@ -336,7 +336,8 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			userid = values[0];
 			//String pwd = (BCrypt.hashpw(password, BCrypt.gensalt()));
 			Employee_Selfcare_Users user = getUser(userid);
-			if("Y".equalsIgnoreCase(fg) && token.equals(user.getToken())){
+			if("Y".equalsIgnoreCase(fg)){
+			if(token.equals(user.getToken())){
 			user.setPassword(password);
 			session.update(user);
 			transaction.commit();
@@ -344,12 +345,14 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			}else{
 				throw new Throwable("Failed to change Password Please Contact HR !");
 			}
+		}
 			if("N".equalsIgnoreCase(fg) && token.equals(user.getToken())){				
 				int User_login_attempts = user.getUser_login_attempts();
 				if (User_login_attempts == 0) {
 					user.setUser_login_attempts(User_login_attempts + 1);
 					user.setPassword(password);
 					session.update(user);
+					transaction.commit();
 					status = "Password saved succesfully Please Login !";
 				} else {
 					throw new Throwable("Account is already activated please Login");
@@ -440,7 +443,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			e.printStackTrace();
 			throw new Throwable("Failed to Save User");
 		}
-		
 		finally{
 			session.close();
 		}

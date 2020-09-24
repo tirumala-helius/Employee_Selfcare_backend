@@ -92,12 +92,10 @@ public class UserController {
 	
     
     
-	@CrossOrigin
+	/*@CrossOrigin
 	@RequestMapping(value = "/activation", method = RequestMethod.POST)
 	public @ResponseBody String activation(@RequestHeader("Authorization") String Authorization,String token) {
 		final String authorization = Authorization;
-		String password = null;
-		String username = null;
 			String base64Credentials = authorization.substring("Basic".length()).trim();		
 			Status status = userManager.activateAccount(base64Credentials,token);
 			String result = "";
@@ -108,7 +106,7 @@ public class UserController {
 			}
 			return "{\"response\":{" + result + "}}";
 		
-	}
+	}*/
 
 /*	@CrossOrigin
 	@RequestMapping(value = "/activation12", method = RequestMethod.POST)
@@ -145,11 +143,12 @@ public class UserController {
 		try{
 		status = userManager.verifyEmailadress(employeeid,appUrl);
 	} catch (Exception e) {
-		return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 	} catch (Throwable e) {
-		return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
+	String res ="{\"response\":\"" + status.getMessage() + "\"}";
+	return new ResponseEntity<String>(res,HttpStatus.OK);
 	}
 	
 	@CrossOrigin
@@ -161,11 +160,11 @@ public class UserController {
 			String base64Credentials = authorization.substring("Basic".length()).trim();
 			status = userManager.resetPassword(base64Credentials, token,fgt);
 		} catch (Exception e) {
-			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Throwable e) {
-			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
 	}
 	
 	/*@CrossOrigin
@@ -220,11 +219,11 @@ public class UserController {
 			}
 			status = userManager.updateUser(user);
 		} catch (Exception e) {
-			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Throwable e) {
-			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
 	}  
 	
 	@CrossOrigin
@@ -297,11 +296,11 @@ public class UserController {
 			}	
 			status = userManager.updateUser(user);
 		} catch (Exception e) {
-			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Throwable e) {
-			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<String>(status.getMessage(),HttpStatus.OK);
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
 	}  
 	
 	@CrossOrigin

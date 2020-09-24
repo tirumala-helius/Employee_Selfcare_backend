@@ -29,7 +29,7 @@ public interface UserService {
 	//public void save(Users user, String createLoginFlag, Session session) throws Throwable;
 	
 	public void createUser(Employee_Selfcare_Users user) throws Throwable;
-	public String updateUser(Employee_Selfcare_Users user) throws Throwable;
+	public void updateUser(Employee_Selfcare_Users user) throws Throwable;
 	//public String deleteUser(User user) throws Throwable;
 	//public List<com.helius.utils.User> getAllUsers() throws Throwable;
 

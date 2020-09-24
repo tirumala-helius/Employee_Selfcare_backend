@@ -213,7 +213,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 						+ "\n\n" + appUrl + "?token="+employeeid+"-fgtY"+ token+"\n\n" + "With Regards," + "\n"
 						+ "Helius Technologies.";
 				transaction.commit();
-				emailService.sendBulkEmail(To, cc, null, subject, text);
+				emailService.sendEmail(To, cc, null, subject, text);
 				status = "Forgot Password link has been send to your registered Email Address";
 			} else {
 				throw new Throwable("Please check your User-Id or contact HR !");
@@ -269,7 +269,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * also to set new password incase of forgot
 	 **/
 	//Override
-	public void activateUserAccount12(String base64Credentials, String forgot) throws Throwable {
+	/*public void activateUserAccount12(String base64Credentials, String forgot) throws Throwable {
 		Session session = null;
 		Transaction transaction = null;
 		String password = null;
@@ -318,7 +318,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session.close();
 		}
 	}
-
+*/
 	@Override
 	public String resetpswd(String base64Credentials,String token,String fg) throws Throwable{
 		System.out.println("---fg---"+fg+"----token-----"+token);
@@ -346,8 +346,9 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				throw new Throwable("Failed to change Password Please Contact HR !");
 			}
 		}
-			if("N".equalsIgnoreCase(fg) && token.equals(user.getToken())){				
+			if("N".equalsIgnoreCase(fg)){				
 				int User_login_attempts = user.getUser_login_attempts();
+				if(token.equals(user.getToken())){
 				if (User_login_attempts == 0) {
 					user.setUser_login_attempts(User_login_attempts + 1);
 					user.setPassword(password);
@@ -355,8 +356,11 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					transaction.commit();
 					status = "Password saved succesfully Please Login !";
 				} else {
-					throw new Throwable("Account is already activated please Login");
+					status = "Account is already activated please Login";
 				}
+			}else{
+				throw new Throwable("Failed to change Password Please Contact HR !");
+			}
 			}
 			updateuser_to_memory(user);
 		} catch (Exception e) {
@@ -432,7 +436,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			String subject= "Account Activation";
 			String text = "Hello " + employee.getEmployeePersonalDetails().getEmployee_name() + ","
 					+ "\n\n" + "Please click below to activate and create your password "
-					+ "\n\n" + appUrl + "?token=" + token +"&id="+user.getEmployee_id()+ "\n\n" + "With Regards," + "\n"
+					+ "\n\n" + appUrl + "?token=" +user.getEmployee_id()+"-fgtN"+ token + "\n\n" + "With Regards," + "\n"
 					+ "Helius Technologies.";
 			emailService.sendBulkEmail(To, cc, null, subject, text);
 		} catch (HibernateException e) {
@@ -454,7 +458,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * @see com.helius.service.UserService#updateUser(com.helius.entities.User)
 	 */
 	@Override
-	public String updateUser(Employee_Selfcare_Users user) throws Throwable {
+	public void updateUser(Employee_Selfcare_Users user) throws Throwable {
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
@@ -468,15 +472,14 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		} catch (HibernateException e) {
 			// transaction.rollback();
 			e.printStackTrace();
-			throw new Throwable("Failed to update User");
+			throw new Throwable("Failed to update details");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Throwable("Failed to update User");
+			throw new Throwable("Failed to update details");
 		}
 		finally{
 			session.close();
 		}
-		return null;
 	}
 
 	/*
@@ -558,18 +561,17 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				Object userobj = query.uniqueResult();
 				if (userobj != null) {
 					com.helius.entities.Employee_Selfcare_Users user_entity = (com.helius.entities.Employee_Selfcare_Users) userobj;
-				//	com.helius.utils.User user_util = new com.helius.utils.User();
 					if (user_entity != null && user_entity.getUser_login_attempts() > 0) {
-					Employee_Selfcare_Users user_util = new Employee_Selfcare_Users();
+				/*	Employee_Selfcare_Users user_util = new Employee_Selfcare_Users();
 					user_util.setEmployee_Selfcare_Users_Id(user_entity.getEmployee_Selfcare_Users_Id());
 					user_util.setEmployee_id(user_entity.getEmployee_id());
 					user_util.setPassword(user_entity.getPassword());
 					user_util.setActive(user_entity.getActive());
 					user_util.setUser_last_login(user_entity.getUser_last_login());
 					user_util.setUser_login_attempts(user_entity.getUser_login_attempts());
-					user_util.setEmployee_name(user_entity.getEmployee_name());
+					user_util.setEmployee_name(user_entity.getEmployee_name());*/
 					validauser.setResult("Login success");
-					validauser.setUser(user_util);
+					validauser.setUser(user_entity);
 					logger.info("-------info---");
 					logger.debug("----debug-----");
 					System.out.println("--------sysss");

@@ -138,7 +138,6 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			logger.info("----===info====");
 			logger.error("----===error====");
 			logger.fatal("----===fatal====");
-
 			// Employee personal Details
 			Employee_Personal_Details employee_Personal_Details = (Employee_Personal_Details) session
 					.get(Employee_Personal_Details.class, employeeid);
@@ -148,7 +147,6 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			} else {
 				emp.setEmployeePersonalDetails(employee_Personal_Details);
 			}
-			
 			// Salary details
 			String employee_salary_query = "select salary.* from Employee_Salary_Details salary where employee_id = :employee_id ";
 			java.util.List salaryList = session.createSQLQuery(employee_salary_query)

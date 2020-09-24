@@ -100,6 +100,7 @@ public class EmployeeController {
 		// EmployeeManager employeemanager = new EmployeeManager();
 		boolean result = Utils.authenticateUrl(employeeid);
 		if(!result){
+			status.setMessage("Internal Server Error. Please contact HR !");
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		EmployeeManager employeemanager = (EmployeeManager) context.getBean("employeeManager");
@@ -108,7 +109,7 @@ public class EmployeeController {
 		String employeejson = "";
 		String employeejson1 = "";
 		if (employee == null) {			
-		status.setMessage("Unable to fetch employee details");
+		status.setMessage("Unable to process your Request. Please contact HR !");
 		return new ResponseEntity<String>(status.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	//	om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);

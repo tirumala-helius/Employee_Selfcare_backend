@@ -284,7 +284,7 @@ public class UserController {
 	
 	@CrossOrigin
     @RequestMapping(value = "user/changepassword", method = RequestMethod.POST, consumes = { "multipart/form-data" })
-	public ResponseEntity<String> changePassword(@RequestParam("user") String userjson) {
+	public ResponseEntity<String> changepassword(@RequestParam("user") String userjson) {
 		ObjectMapper obm = new ObjectMapper();
 		Status status = null;
 		Employee_Selfcare_Users user;

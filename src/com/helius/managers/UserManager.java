@@ -136,7 +136,7 @@ public class UserManager {
 		} catch (Throwable e) {
 			throw new Throwable(e.getMessage());
 		}
-		return new Status(true, "updated user successfully");
+		return new Status(true, "Updated Successfully");
 	}
 	
 	/*public List<com.helius.utils.User> getAllUsers() throws Throwable {

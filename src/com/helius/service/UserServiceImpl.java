@@ -342,6 +342,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session.update(user);
 			transaction.commit();
 			status = "Password saved succesfully Please Login !";
+			updateuser_to_memory(user);
 			}else{
 				throw new Throwable("Failed to change Password Please Contact HR !");
 			}
@@ -355,6 +356,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					session.update(user);
 					transaction.commit();
 					status = "Password saved succesfully Please Login !";
+					adduser_to_memory(user);
 				} else {
 					status = "Account is already activated please Login";
 				}
@@ -362,7 +364,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				throw new Throwable("Failed to change Password Please Contact HR !");
 			}
 			}
-			updateuser_to_memory(user);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

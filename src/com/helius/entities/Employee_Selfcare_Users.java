@@ -33,7 +33,7 @@ import org.hibernate.envers.NotAudited;
 		@Column
 		private int user_login_attempts;
 		@Column
-		private String user_last_login;
+		private Timestamp user_last_login;
 		@Column
 		private String token;
 		@Column
@@ -91,10 +91,11 @@ import org.hibernate.envers.NotAudited;
 		public void setUser_login_attempts(int user_login_attempts) {
 			this.user_login_attempts = user_login_attempts;
 		}
-		public String getUser_last_login() {
+		
+		public Timestamp getUser_last_login() {
 			return user_last_login;
 		}
-		public void setUser_last_login(String user_last_login) {
+		public void setUser_last_login(Timestamp user_last_login) {
 			this.user_last_login = user_last_login;
 		}
 		public Timestamp getLast_modified_date() {

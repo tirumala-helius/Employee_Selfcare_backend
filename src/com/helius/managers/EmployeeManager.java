@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.helius.dao.IEmployeeDAO;
 import com.helius.entities.Employee;
+import com.helius.entities.Employee_Leave_Data;
 import com.helius.entities.Employee_Offer_Details;
 import com.helius.entities.Employee_Timesheet_Status;
 import com.helius.entities.Help_Videos;
@@ -48,7 +49,17 @@ public class EmployeeManager {
 		}
 		return emp;
 	}
-
+	
+	public Employee_Leave_Data getEmployeeLeaveData(String employee_id) throws Throwable {
+		Employee_Leave_Data employeeLeaveData = null;
+		try {
+			employeeLeaveData = employeeDAO.getEmployeeLeaveData(employee_id);
+		} catch (Throwable e) {
+			throw new Throwable("Failed to fetch Employee Leave Details");
+		}
+		return employeeLeaveData;
+	}
+	
 	public ResponseEntity<byte[]> getEmployeeFiles(String employee_Id, String filetype) {
 		ResponseEntity<byte[]> res = null;
 		try {

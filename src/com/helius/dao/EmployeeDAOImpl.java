@@ -73,6 +73,7 @@ import com.helius.entities.Help_Videos;
 import com.helius.entities.Indian_Employee_Family_Member;
 import com.helius.entities.Indian_Employees_Insurance_Details;
 import com.helius.entities.Leave_Eligibility_Details;
+import com.helius.entities.Leave_Record_Details;
 import com.helius.entities.Leave_Usage_Details;
 import com.helius.entities.Leaves_Eligibility_defined_By_Client_Policy;
 import com.helius.entities.Singapore_Employee_Family_Member;
@@ -512,6 +513,67 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 		return employee_Offer_Details;
 	}
+	@Override
+	public Employee_Leave_Data getEmployeeLeaveData(String employee_id) throws Throwable {
+		Employee_Leave_Data employeeLeaveData = new Employee_Leave_Data();
+		Session session = null;
+		LocalDate date = LocalDate.now();
+		int year = date.getYear();
+		try {
+			session = sessionFactory.openSession();	
+			// Leave Eligibility details
+			String leaveEligibility = "select * from  Leave_Eligibility_Details where employee_id = :employee_id AND year = :year";
+			List<Leave_Eligibility_Details> eligibilityList = session.createSQLQuery(leaveEligibility)
+					.addEntity(Leave_Eligibility_Details.class).setParameter("employee_id", employee_id).setParameter("year",year).list();
+			List<Leave_Eligibility_Details> leave_Eligibility_DetailsList = new ArrayList<Leave_Eligibility_Details>();
+			if (!eligibilityList.isEmpty()) {
+				for (Leave_Eligibility_Details leave_Eligibility : eligibilityList) {
+					leave_Eligibility_DetailsList.add(leave_Eligibility);
+				}
+			}
+			if (leave_Eligibility_DetailsList != null && !leave_Eligibility_DetailsList.isEmpty()) {
+				employeeLeaveData.setLeavesEligibility(leave_Eligibility_DetailsList);
+			}
+			
+			String leaveUsageDetails = "select * from  Leave_Usage_Details where employee_id = :employee_id AND YEAR(usageMonth)= :year ORDER BY usageMonth DESC";
+			java.util.List leaveUsageDetailsList = session.createSQLQuery(leaveUsageDetails)
+					.addEntity(Leave_Usage_Details.class).setParameter("employee_id", employee_id).setParameter("year",year).list();
+			ArrayList<Leave_Usage_Details> leave_Usage_DetailsList = new ArrayList<Leave_Usage_Details>();
+			Leave_Usage_Details leave_Usage_Details = null;
+			if(leaveUsageDetailsList != null){
+				for(Object obj : leaveUsageDetailsList){
+				leave_Usage_Details = (Leave_Usage_Details)obj;
+				leave_Usage_DetailsList.add(leave_Usage_Details);
+				}
+				if(leave_Usage_DetailsList != null && !leave_Usage_DetailsList.isEmpty()){
+				employeeLeaveData.setLeaveUsageDetails(leave_Usage_DetailsList);
+				}
+			}
+			
+			String recordQuery = "select * from  Leave_Record_Details where employee_id = :employee_id AND YEAR(leaveMonth) = :year ORDER BY leaveMonth DESC";
+			java.util.List recordQueryList = session.createSQLQuery(recordQuery)
+					.addEntity(Leave_Record_Details.class).setParameter("employee_id", employee_id).setParameter("year", year).list();
+			ArrayList<Leave_Record_Details> leave_Record_DetailsList = new ArrayList<Leave_Record_Details>();
+			Leave_Record_Details leaveRecordDetails = null;
+			if(leaveUsageDetailsList != null){
+				for(Object obj : recordQueryList){
+					leaveRecordDetails = (Leave_Record_Details)obj;
+					leave_Record_DetailsList.add(leaveRecordDetails);
+				}
+				if(leave_Record_DetailsList != null && !leave_Record_DetailsList.isEmpty()){
+				employeeLeaveData.setLeaveRecordDetails(leave_Record_DetailsList);
+				}
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			throw new Throwable("Failed to fetch Employee Leave Details");
+		}finally{
+			session.close();
+		}
+		return employeeLeaveData;		
+	}
+	
 	
 	@Override
 	public void offUpdate(Employee employee, MultipartHttpServletRequest request) throws Throwable {

@@ -46,6 +46,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee;
+import com.helius.entities.Employee_Leave_Data;
 import com.helius.entities.Employee_Offer_Details;
 import com.helius.entities.Employee_Timesheet_Status;
 import com.helius.entities.Help_Videos;
@@ -100,7 +101,6 @@ public class EmployeeController {
 		// EmployeeManager employeemanager = new EmployeeManager();
 		boolean result = Utils.authenticateUrl(employeeid);
 		if(!result){
-			status.setMessage("Internal Server Error. Please contact HR !");
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		EmployeeManager employeemanager = (EmployeeManager) context.getBean("employeeManager");
@@ -151,6 +151,26 @@ public class EmployeeController {
 			totaljson = "{\"image\": " + "\"" + base64String + "\", \"employee\":" + employeejson + "}";
 		}
 		return new ResponseEntity<String>(totaljson,HttpStatus.OK);
+	}
+	
+	@CrossOrigin
+	@RequestMapping(value = "getEmployeeLeaveData", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<String> getEmployeeLeaveData(@RequestParam String employee_id) {
+		ResponseEntity<String> response = null;
+		try{
+			Employee_Leave_Data employeeLeaveData = employeemanager.getEmployeeLeaveData(employee_id);
+		if (employeeLeaveData != null) {
+			ObjectMapper om = new ObjectMapper();
+			String result = om.writeValueAsString(employeeLeaveData);
+			response = new ResponseEntity<String>(result, HttpStatus.OK);
+		} else {
+			response = new ResponseEntity<String>(HttpStatus.NO_CONTENT);
+		}}catch (Exception e) {
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
 	}
 	
 	@CrossOrigin

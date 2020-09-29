@@ -553,9 +553,11 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		String error = "";
 		if (userid != null && !userid.isEmpty()) {
 			Session session = null;
+			Transaction transaction = null;
 			try {
 				String encodedpassword = Base64.getEncoder().encodeToString(password.getBytes());
 				session = sessionFactory.openSession();
+				transaction = session.beginTransaction();
 				String querystr = "select * from Employee_Selfcare_Users u where u.active='Yes' and u.employee_id='"
 						+ userid + "' and" + " u.password='" + encodedpassword + "'";
 				Query query = session.createSQLQuery(querystr).addEntity(com.helius.entities.Employee_Selfcare_Users.class);
@@ -576,6 +578,10 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					logger.info("-------info---");
 					logger.debug("----debug-----");
 					System.out.println("--------sysss");
+					Timestamp currentTimestamp = Timestamp.from(Instant.now());
+					user_entity.setUser_last_login(currentTimestamp);
+					session.update(user_entity);
+					transaction.commit();
 					}else{
 						validauser.setResult("Account is not Activated. Please check your emails for activation link or contact HR");
 						validauser.setUser(null);
@@ -594,7 +600,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			} finally {
 				session.close();
 			}
-
 		}
 		return validauser;
 	}

@@ -32,9 +32,10 @@ public interface UserService {
 	public void updateUser(Employee_Selfcare_Users user) throws Throwable;
 	//public String deleteUser(User user) throws Throwable;
 	//public List<com.helius.utils.User> getAllUsers() throws Throwable;
-
 	public com.helius.utils.Logindetails validateUser(String username, String password) throws Throwable;
-
 	ResponseEntity<byte[]> getPayslipFIle(String userId, String date) throws Throwable;
+	public void createBulkUserIdService() throws Throwable;
+	public void sendBulkNotifyForUserIdActivationLinkService() throws Throwable;
+
 
 }

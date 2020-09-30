@@ -748,4 +748,86 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		return 	new ResponseEntity<byte[]>(files, HttpStatus.OK);		
 	}
 	
+	public void createBulkUserIdService() throws Throwable {
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+			String query = "SELECT a.employee_id,a.employee_name from Employee_Personal_Details a LEFT JOIN Employee_Work_Permit_Details b ON a.employee_id=b.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
+			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
+			for(Object[] obj : EmpQuery){
+				try{
+				String employee_id = obj[0].toString();
+				String employee_name = obj[1].toString();
+				String password = employee_id+"hap@heliustech";
+				String encodedpassword = Base64.getEncoder().encodeToString(password.getBytes());
+				SecureRandom random = new SecureRandom();
+			    Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+				byte[] buffer = new byte[20];
+		        random.nextBytes(buffer);
+		        String token = encoder.encodeToString(buffer)+Instant.now().toEpochMilli();
+			    Employee_Selfcare_Users user = new Employee_Selfcare_Users();
+			    user.setEmployee_id(employee_id);
+			    user.setEmployee_name(employee_name);
+			    user.setPassword(encodedpassword);
+			    user.setToken(token);
+			    user.setActive("Yes");
+			    user.setUser_login_attempts(0);
+			    user.setCreated_by("HAP");
+			    session.save(user);			
+			    System.out.println("--user created---"+employee_id);
+				}catch(Exception e){
+					e.printStackTrace();
+				    System.out.println("--failed to create user---"+obj[0].toString());
+				}
+			}
+			transaction.commit();			
+		} catch (Exception e) {
+			e.printStackTrace(); 
+			throw new Throwable("Failed to run bulk user creation service " + e.getMessage());
+		}finally{
+			session.close();
+		}
+	}
+	
+	public void sendBulkNotifyForUserIdActivationLinkService() throws Throwable {
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
+			String query = "SELECT a.employee_id,a.employee_name,b.personal_email_id,d.token from Employee_Personal_Details a left join Employee_Offer_Details b ON a.employee_id = b.employee_id LEFT JOIN Employee_Work_Permit_Details c ON a.employee_id = c.employee_id LEFT JOIN Employee_Selfcare_Users d ON a.employee_id=d.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
+			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
+			String appUrl = "http://localhost:63342/helius/changepassword.html#!/";
+			for(Object[] obj : EmpQuery){
+				try{
+				String employee_id = obj[0].toString();
+				String employee_name = obj[1].toString();
+				String To = obj[2].toString();
+				String token = obj[3].toString();
+				String[] userCC = null;
+				String getCC = Utils.getHapProperty("heliusHR");
+				if (getCC != null && !getCC.isEmpty()) {
+					userCC = getCC.split(",");
+				}
+				String subject= "Account Activation";
+				String text = "Hello " + employee_name + ","
+						+ "\n\n" + "Please click below and change your password "
+						+ "\n\n" + appUrl + "?token="+employee_id+"-fgtN"+ token+"\n\n" + "With Regards," + "\n"
+						+ "Helius Technologies.";
+				if (token != null && !token.isEmpty()) {
+				emailService.sendBulkEmail(To, userCC, null, subject, text);
+				}
+			    System.out.println("--email sent to ---"+employee_id);
+				}catch(Exception e){
+					e.printStackTrace();
+				    System.out.println("--failed to send email to user---"+obj[0].toString());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace(); 
+			throw new Throwable("Failed to run bulk userid notification service--" + e.getMessage());
+		}finally{
+			session.close();
+		}
+	}
 }

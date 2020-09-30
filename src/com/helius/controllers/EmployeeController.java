@@ -45,6 +45,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helius.entities.Checklist;
 import com.helius.entities.Employee;
 import com.helius.entities.Employee_Leave_Data;
 import com.helius.entities.Employee_Offer_Details;
@@ -173,6 +174,18 @@ public class EmployeeController {
 		return response;
 	}
 	
+	@CrossOrigin
+	@RequestMapping(value = "sendEmail", method = RequestMethod.POST, consumes = {"multipart/form-data" })
+		public ResponseEntity<String> sendEmail(@RequestParam("model") String jsondata,MultipartHttpServletRequest request){
+		try {
+				status = employeemanager.sendEmailService(jsondata, request);
+		} catch (Exception e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		}		
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
+	}
 	@CrossOrigin
 	@RequestMapping(value = "getOfferByID", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
 	public @ResponseBody String getOfferbyID(@RequestParam String offerid) {

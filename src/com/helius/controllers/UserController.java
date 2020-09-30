@@ -313,5 +313,37 @@ public class UserController {
 		ResponseEntity<byte[]> responseEntity = userManager.getPayslipFile(userId,month);
 		return responseEntity;
 	}
+	
+	@CrossOrigin
+    @RequestMapping(value = "sendBulkNotifyForUserIdActivationLinkService", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<String> sendBulkNotifyForUserIdActivationLinkService() {
+		ObjectMapper obm = new ObjectMapper();
+		Status status = null;
+		Employee_Selfcare_Users user;
+		try {
+			status = userManager.sendBulkNotifyForUserIdActivationLinkService();
+		} catch (Exception e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
+	}  
+	
+	@CrossOrigin
+    @RequestMapping(value = "createBulkUserIdService", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<String> createBulkUserIdService() {
+		ObjectMapper obm = new ObjectMapper();
+		Status status = null;
+		Employee_Selfcare_Users user;
+		try {
+			status = userManager.createBulkUserIdService();
+		} catch (Exception e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
+	}  
 
 }

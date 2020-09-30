@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.helius.utils.User;
 import com.helius.entities.Employee_Selfcare_Users;
@@ -152,4 +153,22 @@ public class UserManager {
 	/*public com.helius.utils.User getUser(String userid) throws Throwable{
 		return userService.getUser(userid);
 	}*/
+	
+	public Status createBulkUserIdService() throws Throwable {
+		try {
+			userService.createBulkUserIdService();
+		} catch (Throwable e) {
+			throw new Throwable(e.getMessage());
+		}
+		return new Status(true, "Users created successfully");
+	}
+	
+	public Status sendBulkNotifyForUserIdActivationLinkService() throws Throwable {
+		try {
+			userService.sendBulkNotifyForUserIdActivationLinkService();;
+		} catch (Throwable e) {
+			throw new Throwable(e.getMessage());
+		}
+		return new Status(true, "email service successfully");
+	}
 }

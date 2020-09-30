@@ -33,10 +33,10 @@ public interface IEmployeeDAO {
 	public List<Employee_Offer_Details> getOfferDetailsByName(String offerName,String type);
 	public void empUpdate(Employee emp, MultipartHttpServletRequest request) throws Throwable;
 	public void offUpdate(Employee emp, MultipartHttpServletRequest request) throws Throwable;
-	public void sendEmailNotification(String jsonData) throws Throwable;
 	ResponseEntity<byte[]> getHelpVideoFIle(int help_videos_id);
 	List<Help_Videos> getAllHelpVideos() throws Throwable;
 	public void saveOrUpdateHelpVideo(String help, MultipartHttpServletRequest request) throws Throwable;
 	public void deleteHelpVideo(String help_videos_id)throws Throwable;
 	public Employee_Leave_Data getEmployeeLeaveData(String employee_id)throws Throwable;
+	public void sendEmail(String jsonData, MultipartHttpServletRequest request) throws Throwable;
 	}

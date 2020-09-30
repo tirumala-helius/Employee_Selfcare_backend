@@ -11,11 +11,8 @@ import org.springframework.mail.SimpleMailMessage;
 import com.helius.dao.Mail;
 
 public interface EmailService {
-	public void sendEmail(SimpleMailMessage email) throws  MailException;
 	public void sendEmail(String to,String[] cc,String[] bcc, String subject, String text )throws MessagingException;
 	public void sendBulkEmail(String to,String[] cc,String[] bcc, String subject, String text) throws MessagingException;
-	public void sendSimpleMessage(String to, String subject, String text) throws  MessagingException;
-	public void sendMessageWithAttachment(String to,String[] cc, String subject, String message, List<String> urlList) throws MessagingException;
-	public void sendMessageWithAttachmentUsingTimesheetEmail(String to, String[] cc, String subject, String text, List<File> al) throws MessagingException;
-	public void sendEmailAlert(Mail mail)throws Exception;
+	public void sendEmailWithAttachment(String to,String[] cc,String[] bc, String subject, String message, List<File> files) throws MessagingException;
+	public void sendBulkEmailWithAttachment(String to,String[] cc,String[] bc, String subject, String message, List<File> files) throws MessagingException;
 }

@@ -60,6 +60,16 @@ public class EmployeeManager {
 		return employeeLeaveData;
 	}
 	
+	public Status sendEmailService(String jsondata,MultipartHttpServletRequest request)
+			throws Throwable {
+		try {
+			employeeDAO.sendEmail(jsondata,request);
+		} catch (Throwable e) {
+			throw new Throwable(" Failed to send Email ");
+		}
+		return new Status(true, "Email Sent Successfully.!");
+	}
+	
 	public ResponseEntity<byte[]> getEmployeeFiles(String employee_Id, String filetype) {
 		ResponseEntity<byte[]> res = null;
 		try {

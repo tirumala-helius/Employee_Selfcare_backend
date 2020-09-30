@@ -7,6 +7,7 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -1047,7 +1048,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				message.append("Thanks," + "\n\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd");
 				
 				Email.setText(message.toString());
-				emailService.sendEmail(Email);
+			//	emailService.sendEmail(Email);
 				}
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -1068,7 +1069,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 	
 	
-	@Override
+	/*@Override
 	public void sendEmailNotification(String jsonData) throws Throwable {
 		ObjectMapper obm = new ObjectMapper();
 		try {
@@ -1089,6 +1090,45 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw new Throwable("Unable to Send Email notification " + e.getMessage());
+		}
+	}*/
+	
+	@Override
+	public void sendEmail(String jsonData, MultipartHttpServletRequest request) throws Throwable {
+		try {
+			Map<String, List<MultipartFile>> files = request.getMultiFileMap();
+			List<File> al = new ArrayList<File>();
+			if (files.size() > 0) {
+				for (String key : files.keySet()) {
+					List<MultipartFile> ff = files.get(key);
+					for (MultipartFile multifile : ff) {
+						File convFile = new File(multifile.getOriginalFilename());
+						FileOutputStream fos = new FileOutputStream(convFile);
+						fos.write(multifile.getBytes());
+						al.add(convFile);
+						fos.close();
+					}
+				}
+			}
+			ObjectMapper obm = new ObjectMapper();
+			EmailScreen emailJson = obm.readValue(jsonData, EmailScreen.class);
+			String st = emailJson.getCc();
+			String[] cc = null;
+			if (st != null && !st.isEmpty()) {
+				cc = st.split(";");
+			}
+			String bccs = emailJson.getBcc();
+			String[] bcc = null;
+			if (bccs != null && !bccs.isEmpty()) {
+				bcc = st.split(";");
+			}
+			String to = emailJson.getTo();
+			String subject = emailJson.getSubject();
+			String text = emailJson.getText();
+			emailService.sendEmailWithAttachment(to, cc,bcc, subject, text, al);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Throwable(e.getMessage());
 		}
 	}
 	

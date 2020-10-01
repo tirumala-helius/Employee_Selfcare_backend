@@ -722,7 +722,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		java.util.Date selectedMonth = sdfMonth.parse(date);
 		Timestamp playslipMonth = new Timestamp(selectedMonth.getTime());
 		String query = "SELECT payslip_path from Employee_Pay_Slips where month = :month AND employee_id = :employee_id";
-		List<String> payslipUrl = session.createSQLQuery(query).setParameter("month", playslipMonth).setParameter("employee_id", employeeId).list();
+		List<String> payslipUrl = session.createSQLQuery(query).setParameter("month", playslipMonth).setParameter("employee_id", userId).list();
 		if(payslipUrl.size() > 1){
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -730,6 +730,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		for(String urls : payslipUrl){
 			url = urls;
 		}
+		if(url.contains(File.separator+employeeId+".")){
 		FileInputStream fi = null;
 			File file = new File(url);
 			if (file.exists()) {
@@ -739,6 +740,9 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			} else {
 				return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
 			}
+		}else{
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);

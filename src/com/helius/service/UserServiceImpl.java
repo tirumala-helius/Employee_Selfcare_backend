@@ -200,11 +200,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				user.setToken(token);
 				session.update(user);
 				To = employee.getEmployeeOfferDetails().getPersonal_email_id();
-				String[] cc = null;
-				String getCC = Utils.getHapProperty("heliusHR");
-				if (getCC != null && !getCC.isEmpty()) {
-					cc = getCC.split(",");
-				}
 			//	String appUrl = "http://localhost:8080/helius/changepassword.html#!/";
 				String subject= "Forgot Password";
 				String text = "Hello " + employee.getEmployeePersonalDetails().getEmployee_name() + ","
@@ -213,7 +208,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 						+ "Helius Technologies.";
 				transaction.commit();
 				logger.info("new token for forgot password is updated for user -"+employeeid+"--token--"+token);
-				emailService.sendEmail(To, cc, null, subject, text);
+				emailService.sendEmail(To, null, null, subject, text);
 				logger.info("forgot password link is sent to user successfully "+To);
 				status = "Forgot Password link has been send to your registered Email Address";
 			} else {

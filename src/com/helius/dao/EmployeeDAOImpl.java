@@ -136,15 +136,11 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
-			logger.debug("----===dbug====");
-			logger.info("----===info====");
-			logger.error("----===error====");
-			logger.fatal("----===fatal====");
 			// Employee personal Details
 			Employee_Personal_Details employee_Personal_Details = (Employee_Personal_Details) session
 					.get(Employee_Personal_Details.class, employeeid);
 			if (employee_Personal_Details == null) {
-				session.close();
+				logger.error("employee id not found in database for employee "+employeeid);
 				return null;
 			} else {
 				emp.setEmployeePersonalDetails(employee_Personal_Details);
@@ -406,7 +402,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				emp.setEmployeeWorkPermitDetails(employee_Work_Permit_Details);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("issue in fetcing employee details for employee "+employeeid +" find stacktrace",e);
 			return null;
 		}finally{
 			session.close();
@@ -565,9 +561,9 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				employeeLeaveData.setLeaveRecordDetails(leave_Record_DetailsList);
 				}
 			}
-			
 		}catch(Exception e){
 			e.printStackTrace();
+			logger.error("failed to fetch leave details for employee "+employee_id,e);
 			throw new Throwable("Failed to fetch Employee Leave Details");
 		}finally{
 			session.close();
@@ -1127,7 +1123,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			String text = emailJson.getText();
 			emailService.sendEmailWithAttachment(to, cc,bcc, subject, text, al);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to send email to user "+jsonData,e);
 			throw new Throwable(e.getMessage());
 		}
 	}

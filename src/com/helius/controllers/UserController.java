@@ -219,7 +219,8 @@ public class UserController {
 			}
 			status = userManager.updateUser(user);
 		} catch (Exception e) {
-			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Throwable e) {
 			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -296,9 +297,10 @@ public class UserController {
 			}	
 			status = userManager.updateUser(user);
 		} catch (Exception e) {
-			return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Throwable e) {
-			return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
 	}  

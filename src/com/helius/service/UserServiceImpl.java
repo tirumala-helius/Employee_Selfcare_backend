@@ -153,7 +153,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 */
 	@Override
 	public Employee_Selfcare_Users getUser(String userid) throws Throwable {
-		System.out.println("\n===emp id" + userid);
 		Employee_Selfcare_Users User = null;
 		String status = "";
 		Session session = null;
@@ -166,7 +165,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				User = (Employee_Selfcare_Users) userlist.iterator().next();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("failed to get employee detail of empid - "+userid,e);
 			throw new Throwable("Unable to fetch User Details !");
 		}finally{
 			session.close();
@@ -213,14 +212,16 @@ public class UserServiceImpl implements com.helius.service.UserService {
 						+ "\n\n" + appUrl + "?token="+employeeid+"-fgtY"+ token+"\n\n" + "With Regards," + "\n"
 						+ "Helius Technologies.";
 				transaction.commit();
+				logger.info("new token for forgot password is updated for user -"+employeeid+"--token--"+token);
 				emailService.sendEmail(To, cc, null, subject, text);
+				logger.info("forgot password link is sent to user successfully "+To);
 				status = "Forgot Password link has been send to your registered Email Address";
 			} else {
 				throw new Throwable("Please check your User-Id or contact HR !");
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("issue in sending forgot password link to user "+employeeid,e);
 			throw new Throwable("Please check your User-Id or contact HR !");
 		} finally {
 			session.close();
@@ -228,7 +229,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		return status;
 	}
 
-	@Override
+	/*@Override
 	public void activateUserAccount(String base64Credentials,String token) throws Throwable {
 		Session session = null;
 		Transaction transaction = null;
@@ -262,7 +263,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		} finally {
 			session.close();
 		}
-	}
+	}*/
 
 	/**
 	 * Used to activate account and change password for the first time login and
@@ -319,9 +320,13 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		}
 	}
 */
+	
+	/**
+	 * Service used to activate account for the first time login and
+	 * also to change password incase of forgot
+	 **/
 	@Override
 	public String resetpswd(String base64Credentials,String token,String fg) throws Throwable{
-		System.out.println("---fg---"+fg+"----token-----"+token);
 		Session session = null;
 		Transaction transaction = null;
 		String password = null;
@@ -340,10 +345,11 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			if(token.equals(user.getToken())){
 			user.setPassword(password);
 			session.update(user);
+			updateuser_to_memory(user);
 			transaction.commit();
 			status = "Password saved succesfully Please Login !";
-			updateuser_to_memory(user);
 			}else{
+				logger.error("failed to authenticate user email link token is not matching with db token for user -"+userid+ "given email token is "+token+" db token is "+user.getToken());
 				throw new Throwable("Failed to change Password Please Contact HR !");
 			}
 		}
@@ -354,19 +360,20 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					user.setUser_login_attempts(User_login_attempts + 1);
 					user.setPassword(password);
 					session.update(user);
+					adduser_to_memory(user);
 					transaction.commit();
 					status = "Password saved succesfully Please Login !";
-					adduser_to_memory(user);
 				} else {
 					status = "Account is already activated please Login";
 				}
 			}else{
+				logger.error("failed to authenticate user email link token is not matching with db token given email token is "+token+"db token is "+user.getToken());
 				throw new Throwable("Failed to change Password Please Contact HR !");
 			}
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to update password for user - "+userid+" internal error check stacktrace",e);
 			throw new Throwable("Failed to change Password Please Contact HR !");
 		} finally {
 			session.close();
@@ -425,27 +432,23 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			user.setToken(token);
 			session.save(user);
 			transaction.commit();
+			logger.info("-----user loginId created in db successfully");
 			adduser_to_memory(user);
 			employee = employeeDAO.get(user.getEmployee_id());
 			String To = employee.getEmployeeOfferDetails().getPersonal_email_id();
-			String[] cc = null;
-			String getCC = Utils.getHapProperty("heliusHR");
-			if (getCC != null && !getCC.isEmpty()) {
-				cc = getCC.split(",");
-			}
 			String appUrl = "http://localhost:8080/helius/changepassword.html#!/";
 			String subject= "Account Activation";
 			String text = "Hello " + employee.getEmployeePersonalDetails().getEmployee_name() + ","
 					+ "\n\n" + "Please click below to activate and create your password "
 					+ "\n\n" + appUrl + "?token=" +user.getEmployee_id()+"-fgtN"+ token + "\n\n" + "With Regards," + "\n"
 					+ "Helius Technologies.";
-			emailService.sendBulkEmail(To, cc, null, subject, text);
-		} catch (HibernateException e) {
-			// transaction.rollback();
-			e.printStackTrace();
-			throw new Throwable("Failed to Save User");
+			emailService.sendBulkEmail(To, null, null, subject, text);
 		} catch (Exception e) {
-			e.printStackTrace();
+			// transaction.rollback();
+			logger.error("internal error failed to create loginid for user - "+user.getEmployee_id(),e);
+			throw new Throwable("Failed to Save User");
+		} catch (Throwable e) {
+			logger.error("internal error failed to create loginid for user - "+user.getEmployee_id(),e);
 			throw new Throwable("Failed to Save User");
 		}
 		finally{
@@ -472,10 +475,10 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			updateuser_to_memory(user);
 		} catch (HibernateException e) {
 			// transaction.rollback();
-			e.printStackTrace();
+			logger.error("internal error failed to update login details in db or else in memory for user - "+user.getEmployee_id(),e);
 			throw new Throwable("Failed to update details");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("internal error failed to update login details in db or else in memory for user - "+user.getEmployee_id(),e);
 			throw new Throwable("Failed to update details");
 		}
 		finally{
@@ -559,25 +562,15 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				session = sessionFactory.openSession();
 				transaction = session.beginTransaction();
 				String querystr = "select * from Employee_Selfcare_Users u where u.active='Yes' and u.employee_id='"
-						+ userid + "' and" + " u.password='" + encodedpassword + "'";
+						+ userid + "'";
 				Query query = session.createSQLQuery(querystr).addEntity(com.helius.entities.Employee_Selfcare_Users.class);
 				Object userobj = query.uniqueResult();
 				if (userobj != null) {
 					com.helius.entities.Employee_Selfcare_Users user_entity = (com.helius.entities.Employee_Selfcare_Users) userobj;
-					if (user_entity != null && user_entity.getUser_login_attempts() > 0) {
-				/*	Employee_Selfcare_Users user_util = new Employee_Selfcare_Users();
-					user_util.setEmployee_Selfcare_Users_Id(user_entity.getEmployee_Selfcare_Users_Id());
-					user_util.setEmployee_id(user_entity.getEmployee_id());
-					user_util.setPassword(user_entity.getPassword());
-					user_util.setActive(user_entity.getActive());
-					user_util.setUser_last_login(user_entity.getUser_last_login());
-					user_util.setUser_login_attempts(user_entity.getUser_login_attempts());
-					user_util.setEmployee_name(user_entity.getEmployee_name());*/
+					if (user_entity != null && encodedpassword.equals(user_entity.getPassword())) {
+					if (user_entity.getUser_login_attempts() > 0) {
 					validauser.setResult("Login success");
 					validauser.setUser(user_entity);
-					logger.info("-------info---");
-					logger.debug("----debug-----");
-					System.out.println("--------sysss");
 					Timestamp currentTimestamp = Timestamp.from(Instant.now());
 					user_entity.setUser_last_login(currentTimestamp);
 					session.update(user_entity);
@@ -585,7 +578,12 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					}else{
 						validauser.setResult("Account is not Activated. Please check your emails for activation link or contact HR");
 						validauser.setUser(null);
-						logger.error("----error----");
+						logger.info(" - Account is not Activated. Please check your emails for activation link or contact HR "+userid);
+					}
+					}else{
+						validauser.setResult("Invalid LoginId & Password");
+						validauser.setUser(null);
+						logger.info(" passsword does not match failed to login "+userid);
 					}
 				} else {
 					validauser.setResult("User not found in the system");
@@ -593,10 +591,9 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("unable to fetch "+userid+" details looks like internal error or unable to update lastlogin in db",e);
 				validauser.setResult("Login failure");
 				validauser.setUser(null);
-
 			} finally {
 				session.close();
 			}
@@ -616,6 +613,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		org.springframework.security.core.userdetails.User user_sec =
 				new org.springframework.security.core.userdetails.User(user.getEmployee_id(),decodedpassword,true,true,true,true,role);
 		inMemoryUserDetailsManager.createUser(user_sec);
+		logger.info(" - user created in memory "+user.getEmployee_id());
 	}
 	private void updateuser_to_memory(Employee_Selfcare_Users user) {
 		String decodedpassword = new String(Base64.getDecoder().decode(user.getPassword()));
@@ -629,6 +627,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		org.springframework.security.core.userdetails.User user_sec =
 				new org.springframework.security.core.userdetails.User(user.getEmployee_id(),decodedpassword,true,true,true,true,role);
 		inMemoryUserDetailsManager.updateUser(user_sec);
+		logger.info(" - user updated in memory "+user.getEmployee_id());
 	}
 
 	/* (non-Javadoc)
@@ -738,13 +737,15 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				files = IOUtils.toByteArray(fi);
 				fi.close();
 			} else {
+				logger.error("payslip file not found for user - "+userId);
 				return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
 			}
 		}else{
+			logger.error("unable to download payslip as the filename is not matching with the userId "+userId+" filename is "+url);
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.error("internal error failed to dowwnload payslip for user - "+userId,e);
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}finally{
 			session.close();
@@ -801,25 +802,20 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session = sessionFactory.openSession();
 			String query = "SELECT a.employee_id,a.employee_name,b.personal_email_id,d.token from Employee_Personal_Details a left join Employee_Offer_Details b ON a.employee_id = b.employee_id LEFT JOIN Employee_Work_Permit_Details c ON a.employee_id = c.employee_id LEFT JOIN Employee_Selfcare_Users d ON a.employee_id=d.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
 			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
-			String appUrl = "http://localhost:63342/helius/changepassword.html#!/";
+			String appUrl = "http://13.234.24.40:8080/Employee_selfcare/changepwd.html";
 			for(Object[] obj : EmpQuery){
 				try{
 				String employee_id = obj[0].toString();
 				String employee_name = obj[1].toString();
 				String To = obj[2].toString();
 				String token = obj[3].toString();
-				String[] userCC = null;
-				String getCC = Utils.getHapProperty("heliusHR");
-				if (getCC != null && !getCC.isEmpty()) {
-					userCC = getCC.split(",");
-				}
 				String subject= "Account Activation";
 				String text = "Hello " + employee_name + ","
 						+ "\n\n" + "Please click below and change your password "
 						+ "\n\n" + appUrl + "?token="+employee_id+"-fgtN"+ token+"\n\n" + "With Regards," + "\n"
 						+ "Helius Technologies.";
 				if (token != null && !token.isEmpty()) {
-				emailService.sendBulkEmail(To, userCC, null, subject, text);
+				emailService.sendBulkEmail(To, null, null, subject, text);
 				}
 			    System.out.println("--email sent to ---"+employee_id);
 				}catch(Exception e){

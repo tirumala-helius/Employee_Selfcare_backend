@@ -16,7 +16,7 @@ public interface UserService {
 	
 	public Employee_Selfcare_Users getUser(String userid)throws Throwable;
 
-	public void activateUserAccount(String base64Credentials,String token) throws Throwable;
+	//public void activateUserAccount(String base64Credentials,String token) throws Throwable;
 
 	//public String verifyUserLogin(String username,String password);
 

@@ -159,6 +159,10 @@ public class EmployeeController {
 	public ResponseEntity<String> getEmployeeLeaveData(@RequestParam String employee_id) {
 		ResponseEntity<String> response = null;
 		try{
+			boolean autenticate = Utils.authenticateUrl(employee_id);
+			if(!autenticate){
+				return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 			Employee_Leave_Data employeeLeaveData = employeemanager.getEmployeeLeaveData(employee_id);
 		if (employeeLeaveData != null) {
 			ObjectMapper om = new ObjectMapper();

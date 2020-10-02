@@ -65,14 +65,14 @@ public class UserManager {
 		return new Status(true, "Employee Details saved successfully");
 	}*/
 
-	public Status activateAccount(String base64Credentials,String token) {
+	/*public Status activateAccount(String base64Credentials,String token) {
 		try {
 			userService.activateUserAccount(base64Credentials,token);
 		} catch (Throwable e) {
 			return new Status(false, e.getMessage());
 		}
 		return new Status(true, "Account Successfully Activated Please Login !");
-	}
+	}*/
 
 	/*public Status activateAccount12(String base64Credentials,String forgot) {
 		try {

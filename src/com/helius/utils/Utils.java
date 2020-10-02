@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.taglibs.standard.extra.spath.AbsolutePath;
 import org.hibernate.Session;
 import org.springframework.security.core.Authentication;
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee;
 import com.helius.entities.Workpermit_Worklocation;
 import com.helius.entities.workpermit;
+import com.helius.service.UserServiceImpl;
 import com.microsoft.schemas.office.x2006.encryption.CTKeyEncryptor.Uri;
 
 public class Utils {
@@ -112,22 +115,22 @@ public class Utils {
 	*/
 	public final static String fileLocation = "C:" + File.separator + "Users" + File.separator + "HELIUS" + File.separator
 			+ "Documents";
-	
-	public static boolean authenticateUrl(String userId){
-		    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			if (auth != null) {
-				if (auth.getName() != null) {
-					if(userId.equalsIgnoreCase(auth.getName())){
-						return true;
-					}
-				} else {
-					return false;
-				}
+    private static final Logger logger = LogManager.getLogger(Utils.class.getName());
+
+	public static boolean authenticateUrl(String userId) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null && auth.getName() != null) {
+			if (userId.equalsIgnoreCase(auth.getName())) {
+				return true;
 			} else {
+				logger.warn("Failed to autenticate url as userid in url does not match with logged in user " + auth.getName()+ " userid passed in url is " + userId);
 				return false;
 			}
+		} else {
+			logger.error("Failed to authenticate url as unable to get loggedin user details from security context UserId passed in url is "+userId);
 			return false;
-		    }
+		}
+	}
 
 	public static String jsonPicklist(Set<String> data) {
 		StringBuffer Sb = new StringBuffer();

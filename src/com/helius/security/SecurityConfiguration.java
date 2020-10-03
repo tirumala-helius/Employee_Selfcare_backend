@@ -92,9 +92,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 					GrantedAuthority ga = new SimpleGrantedAuthority("ROLE_"+rr[i]);
 					role.add(ga);
 				}		*/	
+				if(user.getUser_login_attempts() !=0){
 				org.springframework.security.core.userdetails.User user_sec =
         				new org.springframework.security.core.userdetails.User(user.getEmployee_id(),decodedpassword,true,true,true,true,role);
 				springusers.add(user_sec);
+				}
         		//this.auth.inMemoryAuthentication().withUser(user.getUserid()).password(decodedpassword).roles(user.getRole());
         	
         	}

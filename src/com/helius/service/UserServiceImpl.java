@@ -755,7 +755,21 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			String query = "SELECT a.employee_id,a.employee_name from Employee_Personal_Details a LEFT JOIN Employee_Work_Permit_Details b ON a.employee_id=b.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
-			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
+			//List<Object[]> EmpQuery = session.createSQLQuery(query).list();
+			
+			Object[] obj5 = new Object[]{"7030","Shashikala Kalaga"};
+			Object[] obj1 = new Object[]{"7262","Ramakanth Vaddi"};
+			Object[] obj2 = new Object[]{"7263","Pavan Siddartha Kakarlamudi"};
+			Object[] obj3 = new Object[]{"7321","Ramu Mangani"};
+			Object[] obj4 = new Object[]{"7330","Sandeep Sirugudi"};
+			Object[] obj6 = new Object[]{"7187","Umesh Hattekar"};
+			ArrayList<Object[]> EmpQuery = new ArrayList<Object[]>();
+				EmpQuery.add(obj1);
+				EmpQuery.add(obj2);
+				EmpQuery.add(obj3);
+				EmpQuery.add(obj4);
+				EmpQuery.add(obj5);
+				EmpQuery.add(obj6);
 			for(Object[] obj : EmpQuery){
 				try{
 				String employee_id = obj[0].toString();

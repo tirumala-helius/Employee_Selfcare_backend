@@ -755,9 +755,9 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			String query = "SELECT a.employee_id,a.employee_name from Employee_Personal_Details a LEFT JOIN Employee_Work_Permit_Details b ON a.employee_id=b.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
-			//List<Object[]> EmpQuery = session.createSQLQuery(query).list();
+			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
 			
-			Object[] obj5 = new Object[]{"7030","Shashikala Kalaga"};
+			/*Object[] obj5 = new Object[]{"7030","Shashikala Kalaga"};
 			Object[] obj1 = new Object[]{"7262","Ramakanth Vaddi"};
 			Object[] obj2 = new Object[]{"7263","Pavan Siddartha Kakarlamudi"};
 			Object[] obj3 = new Object[]{"7321","Ramu Mangani"};
@@ -769,7 +769,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				EmpQuery.add(obj3);
 				EmpQuery.add(obj4);
 				EmpQuery.add(obj5);
-				EmpQuery.add(obj6);
+				EmpQuery.add(obj6);*/
 			for(Object[] obj : EmpQuery){
 				try{
 				String employee_id = obj[0].toString();
@@ -811,8 +811,8 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session = sessionFactory.openSession();
 			String query = "SELECT a.employee_id,a.employee_name,b.personal_email_id,d.token from Employee_Personal_Details a left join Employee_Offer_Details b ON a.employee_id = b.employee_id LEFT JOIN Employee_Work_Permit_Details c ON a.employee_id = c.employee_id LEFT JOIN Employee_Selfcare_Users d ON a.employee_id=d.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
 			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
-			String appUrl = "http://13.234.24.40:8080/Employee_selfcare/changepwd.html";
-			String loginLink = "";
+			String appUrl = "https://hap.heliusapp.com/Employee_selfcare/changepwd.html";
+			String loginLink = "https://hap.heliusapp.com/Employee_selfcare/login.html";
 			for(Object[] obj : EmpQuery){
 				try{
 				String employee_id = obj[0].toString();
@@ -830,7 +830,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 						+ "\n\n"+ "Your suggestions are welcome and please reach us at hap@helius-tech.com."
 						+ "\n\n" + "Please click below and change your password "
 						+ "\n\n" + appUrl + "?token="+employee_id+"-fgtN"+ token+"\n\n"
-						+ "\n\n" + "Below is the login link "
+						+ "Plese click below to login "
 						+"\n\n" + loginLink +"\n\n"
 						+"With Regards," + "\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd";
 				if (token != null && !token.isEmpty()) {

@@ -37,13 +37,13 @@ import org.hibernate.envers.NotAudited;
 		@Column
 		private String token;
 		@Column
-		//@UpdateTimestamp
-		//@NotAudited
+		@UpdateTimestamp
+		@NotAudited
 		private Timestamp last_modified_date;
 		@Column
 		private String last_modified_by;
 		@Column
-		//@CreationTimestamp
+		@CreationTimestamp
 		private Timestamp create_date;
 		@Column
 		private String created_by;

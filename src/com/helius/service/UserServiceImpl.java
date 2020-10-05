@@ -812,17 +812,27 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			String query = "SELECT a.employee_id,a.employee_name,b.personal_email_id,d.token from Employee_Personal_Details a left join Employee_Offer_Details b ON a.employee_id = b.employee_id LEFT JOIN Employee_Work_Permit_Details c ON a.employee_id = c.employee_id LEFT JOIN Employee_Selfcare_Users d ON a.employee_id=d.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
 			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
 			String appUrl = "http://13.234.24.40:8080/Employee_selfcare/changepwd.html";
+			String loginLink = "";
 			for(Object[] obj : EmpQuery){
 				try{
 				String employee_id = obj[0].toString();
 				String employee_name = obj[1].toString();
 				String To = obj[2].toString();
+			    System.out.println("--To address is null ---"+To);
 				String token = obj[3].toString();
 				String subject= "Account Activation";
-				String text = "Hello " + employee_name + ","
+				String text = "Dear " + employee_name + ","
+						+ "\n\n"+ "Welcome to Helius Self Service Portal!"
+						+ "\n\n"+ "We have developed this employee self-service portal to support remote HR needs of our employees who are working at remote customer locations for extended periods."
+						+ "\n\n"+ "As a first step, we are giving your personal details, assignment details, leave balance and last month’s payslip.  Please go through the details and in case you find any information that is not correct,"
+						+ "\n"+ "Please write to us by clicking the link for sending a request to HR."
+						+ "\n\n"+ "The upcoming features are also mentioned and please check the details that will be available in future in this portal."
+						+ "\n\n"+ "Your suggestions are welcome and please reach us at hap@helius-tech.com."
 						+ "\n\n" + "Please click below and change your password "
-						+ "\n\n" + appUrl + "?token="+employee_id+"-fgtN"+ token+"\n\n" + "With Regards," + "\n"
-						+ "Helius Technologies.";
+						+ "\n\n" + appUrl + "?token="+employee_id+"-fgtN"+ token+"\n\n"
+						+ "\n\n" + "Below is the login link "
+						+"\n\n" + loginLink +"\n\n"
+						+"With Regards," + "\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd";
 				if (token != null && !token.isEmpty()) {
 				emailService.sendBulkEmail(To, null, null, subject, text);
 				}

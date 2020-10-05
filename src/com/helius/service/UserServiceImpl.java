@@ -724,6 +724,8 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		for(String urls : payslipUrl){
 			url = urls;
 		}
+		System.out.println("-----url---"+url);
+		System.out.println("-----employ payslip---"+File.separator+employeeId+".");
 		if(url.contains(File.separator+employeeId+".")){
 		FileInputStream fi = null;
 			File file = new File(url);

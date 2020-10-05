@@ -7,6 +7,7 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 
@@ -15,6 +16,7 @@ import org.hibernate.envers.NotAudited;
 	 * 
 	 */
 	@Entity
+	@Audited
 	@Table(name="Employee_Selfcare_Users")
 	public class Employee_Selfcare_Users  implements Serializable {
 		private static final long serialVersionUID = 1L;

@@ -548,7 +548,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	@Override
 	public Logindetails validateUser(String userid, String password) throws Throwable {
 		Logindetails validauser = new Logindetails();
-		String error = "";
 		if (userid != null && !userid.isEmpty()) {
 			Session session = null;
 			Transaction transaction = null;
@@ -564,12 +563,14 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					com.helius.entities.Employee_Selfcare_Users user_entity = (com.helius.entities.Employee_Selfcare_Users) userobj;
 					if (user_entity != null && encodedpassword.equals(user_entity.getPassword())) {
 					if (user_entity.getUser_login_attempts() > 0) {
-					validauser.setResult("Login success");
-					validauser.setUser(user_entity);
+					Timestamp lastlogin = user_entity.getUser_last_login();
 					Timestamp currentTimestamp = Timestamp.from(Instant.now());
 					user_entity.setUser_last_login(currentTimestamp);
 					session.update(user_entity);
 					transaction.commit();
+					validauser.setResult("Login success");
+					user_entity.setUser_last_login(lastlogin);
+					validauser.setUser(user_entity);
 					}else{
 						validauser.setResult("Account is not Activated. Please check your emails for activation link or contact HR");
 						validauser.setUser(null);
@@ -724,8 +725,6 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		for(String urls : payslipUrl){
 			url = urls;
 		}
-		System.out.println("-----url---"+url);
-		System.out.println("-----employ payslip---"+File.separator+employeeId+".");
 		if(url.contains(File.separator+employeeId+".")){
 		FileInputStream fi = null;
 			File file = new File(url);

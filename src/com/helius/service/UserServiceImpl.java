@@ -192,6 +192,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			user = getUser(employeeid);
 			if (employee != null && user !=null) {
 				//String token = UUID.randomUUID().toString();
+				if(user.getUser_login_attempts()>0){
 			    SecureRandom random = new SecureRandom();
 			    Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 				byte[] buffer = new byte[20];
@@ -211,6 +212,9 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				emailService.sendEmail(To, null, null, subject, text);
 				logger.info("forgot password link is sent to user successfully "+To);
 				status = "Forgot Password link has been send to your registered Email Address";
+				}else{
+				status = "Your Account is not activated. Please activate your account using activation link shared earlier or Contact - HR ";
+				}
 			} else {
 				throw new Throwable("Please check your User-Id or contact HR !");
 			}
@@ -339,6 +343,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			if("Y".equalsIgnoreCase(fg)){
 			if(token.equals(user.getToken())){
 			user.setPassword(password);
+			user.setLast_modified_by(user.getEmployee_id());
 			session.update(user);
 			updateuser_to_memory(user);
 			transaction.commit();
@@ -354,6 +359,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				if (User_login_attempts == 0) {
 					user.setUser_login_attempts(User_login_attempts + 1);
 					user.setPassword(password);
+					user.setLast_modified_by(user.getEmployee_id());
 					session.update(user);
 					adduser_to_memory(user);
 					transaction.commit();
@@ -566,6 +572,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					Timestamp lastlogin = user_entity.getUser_last_login();
 					Timestamp currentTimestamp = Timestamp.from(Instant.now());
 					user_entity.setUser_last_login(currentTimestamp);
+					user_entity.setUser_login_attempts(user_entity.getUser_login_attempts() + 1);
 					session.update(user_entity);
 					transaction.commit();
 					validauser.setResult("Login success");
@@ -725,6 +732,9 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		for(String urls : payslipUrl){
 			url = urls;
 		}
+		if(url == null || url.isEmpty()){
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		if(url.contains(File.separator+employeeId+".")){
 		FileInputStream fi = null;
 			File file = new File(url);
@@ -734,7 +744,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				fi.close();
 			} else {
 				logger.error("payslip file not found for user - "+userId);
-				return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
 			}
 		}else{
 			logger.error("unable to download payslip as the filename is not matching with the userId "+userId+" filename is "+url);

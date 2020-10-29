@@ -399,6 +399,25 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				employee_Work_Permit_Details = (Employee_Work_Permit_Details) workpermitDetails_List.iterator().next();
 			}
 			if (employee_Work_Permit_Details != null) {
+				String wpNum = "";
+				String workpermit = employee_Work_Permit_Details.getWork_permit_number();
+				if(workpermit != null && !workpermit.isEmpty() && workpermit.contains(",")){
+				String[] regx =	workpermit.split(",");
+				if(!"-".equalsIgnoreCase(regx[0]) && !"undefined".equalsIgnoreCase(regx[0])){
+					wpNum = regx[0].replaceAll("\\w(?=\\w{4})", "*");
+				}
+				}else{
+				if(workpermit != null && !workpermit.isEmpty() && !"-".equalsIgnoreCase(workpermit) && !"undefined".equalsIgnoreCase(workpermit)){
+				wpNum = workpermit.replaceAll("\\w(?=\\w{4})", "*");
+				}
+				}
+				employee_Work_Permit_Details.setWork_permit_number(wpNum);
+				String passportNum = "";
+				String passport = employee_Work_Permit_Details.getPassport_number();
+				if(passport != null && !passport.isEmpty()){
+					passportNum = passport.replaceAll("\\w(?=\\w{4})", "*");
+				}
+				employee_Work_Permit_Details.setPassport_number(passportNum);
 				emp.setEmployeeWorkPermitDetails(employee_Work_Permit_Details);
 			}
 		} catch (Exception e) {

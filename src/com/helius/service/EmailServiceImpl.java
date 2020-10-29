@@ -25,75 +25,7 @@ public class EmailServiceImpl implements EmailService {
 	@Autowired
 	private JavaMailSender mailSender;
 
-	/*@Autowired
-	private JavaMailSender timesheetMailSender;*/
-	
-	// @Autowired
-	// private SimpleMailMessage preConfiguredMessage;
-
-/* public JavaMailSender getMailSender() {
-		return mailSender;
-	}
-
-	public void setMailSender(JavaMailSender mailSender) {
-		this.mailSender = mailSender;
-	}
-*/
-	/*	@Bean
-	public JavaMailSender getJavaMailSender() {
-		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost("smtp.gmail.com");
-		mailSender.setPort(587);
-		mailSender.setUsername("vinaynaiduer@gmail.com");
-		mailSender.setPassword("bgoqfjdhgtzcvnwn");
-	//	mailSender.setPassword("Rvrcamv@789");
-		Properties props = mailSender.getJavaMailProperties();
-		props.put("mail.transport.protocol", "smtp");
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.debug", "true");
-		return mailSender;
-	}
-*/
-/*	@Bean
-	public JavaMailSender getJavaMailSender() {
-		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost("smtp.office365.com");
-		mailSender.setPort(587);
-	//	mailSender.setPort(26);
-		mailSender.setUsername("hap@helius-tech.com");
-		mailSender.setPassword("Helius@123");
-		Properties props = mailSender.getJavaMailProperties();
-		props.put("mail.transport.protocol", "smtp");
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.debug", "false");
-		props.put("mail.smtp.ssl.enable", "false");
-	//	props.put("mail.smtp.host", "mail.helius-tech.com");        
-	//	props.put("mail.smtp.port", "465");
-		return mailSender;
-	} */
-	/*@Bean
-	public JavaMailSender timesheetMail() {
-		JavaMailSenderImpl timesheetMailSender = new JavaMailSenderImpl();
-		timesheetMailSender.setHost(Utils.getProperty("emailHost"));
-		timesheetMailSender.setPort(Integer.parseInt(Utils.getProperty("emailPort")));
-		timesheetMailSender.setUsername(Utils.getHapProperty("timesheetUserName"));
-		timesheetMailSender.setPassword(Utils.getHapProperty("timesheetPassword"));
-		Properties props = timesheetMailSender.getJavaMailProperties();
-		props.put("mail.transport.protocol", Utils.getProperty("mail.transport.protocol"));
-		props.put("mail.smtp.auth", Utils.getProperty("mail.smtp.auth"));
-		props.put("mail.smtp.starttls.enable", Utils.getProperty("mail.smtp.starttls.enable"));
-		props.put("mail.debug", Utils.getProperty("mail.debug"));
-		props.put("mail.smtp.ssl.enable", Utils.getProperty("mail.smtp.ssl.enable"));
-	//	props.put("mail.smtp.host", "mail.helius-tech.com");        
-	//	props.put("mail.smtp.port", "465");
-		return timesheetMailSender;
-	}*/
-	
-	
 	@Bean
-	//@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public JavaMailSender getJavaMailSender() {
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		mailSender.setHost(Utils.getProperty("emailHost"));
@@ -106,23 +38,8 @@ public class EmailServiceImpl implements EmailService {
 		props.put("mail.smtp.starttls.enable", Utils.getProperty("mail.smtp.starttls.enable"));
 		props.put("mail.debug", Utils.getProperty("mail.debug"));
 		props.put("mail.smtp.ssl.enable", Utils.getProperty("mail.smtp.ssl.enable"));
-	//	props.put("mail.smtp.host", "mail.helius-tech.com");        
-	//	props.put("mail.smtp.port", "465");
 		return mailSender;
 	}
-	
-	/*public FreeMarkerConfigurationFactoryBean getFreeMarkerConfiguration() {
-        FreeMarkerConfigurationFactoryBean freemarkerConfig = new FreeMarkerConfigurationFactoryBean();
-        freemarkerConfig.setTemplateLoaderPath("/WEB-INF");  
-        return freemarkerConfig;
-    }*/
-	
-	/*@Bean 
-	public FreeMarkerConfigurer freemarkerConfig() { 
-	    FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer(); 
-	    freeMarkerConfigurer.setTemplateLoaderPath("/AlertTemplate/");
-	    return freeMarkerConfigurer; 
-	}*/
 	
 	@Async
 	public void sendEmail(String to,String[] cc,String[] bcc, String subject, String text )throws MessagingException {

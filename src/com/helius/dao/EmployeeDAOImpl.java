@@ -401,15 +401,27 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			if (employee_Work_Permit_Details != null) {
 				String wpNum = "";
 				String workpermit = employee_Work_Permit_Details.getWork_permit_number();
-				if(workpermit != null && !workpermit.isEmpty() && workpermit.contains(",")){
-				String[] regx =	workpermit.split(",");
-				if(!"-".equalsIgnoreCase(regx[0]) && !"undefined".equalsIgnoreCase(regx[0])){
-					wpNum = regx[0].replaceAll("\\w(?=\\w{4})", "*");
-				}
-				}else{
-				if(workpermit != null && !workpermit.isEmpty() && !"-".equalsIgnoreCase(workpermit) && !"undefined".equalsIgnoreCase(workpermit)){
-				wpNum = workpermit.replaceAll("\\w(?=\\w{4})", "*");
-				}
+				if (workpermit != null && !workpermit.isEmpty() && workpermit.contains(",")) {
+					if (!",".equalsIgnoreCase(workpermit)) {
+						String[] regx = workpermit.split(",");
+						if (!"".equalsIgnoreCase(regx[0]) && !"-".equalsIgnoreCase(regx[0])
+								&& !"undefined".equalsIgnoreCase(regx[0])) {
+							wpNum = regx[0].replaceAll("\\w(?=\\w{4})", "*");
+						}
+						if (regx.length == 2) { // to handle arrayoutofbound
+												// exception
+							if (!"".equalsIgnoreCase(regx[1]) && !"-".equalsIgnoreCase(regx[1])
+									&& !"undefined".equalsIgnoreCase(regx[1])) {
+								String wpassNum = regx[1].replaceAll("\\w(?=\\w{4})", "*");
+								wpNum = wpNum + "," + wpassNum;
+							}
+						}
+					}
+				} else {
+					if (workpermit != null && !workpermit.isEmpty() && !"-".equalsIgnoreCase(workpermit)
+							&& !"undefined".equalsIgnoreCase(workpermit)) {
+						wpNum = workpermit.replaceAll("\\w(?=\\w{4})", "*");
+					}
 				}
 				employee_Work_Permit_Details.setWork_permit_number(wpNum);
 				String passportNum = "";
@@ -422,7 +434,6 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			}
 		} catch (Exception e) {
 			logger.error("issue in fetcing employee details for employee "+employeeid +" find stacktrace",e);
-			return null;
 		}finally{
 			session.close();
 		}

@@ -728,6 +728,9 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		if(payslipUrl.size() > 1){
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		if(payslipUrl.size() == 0){
+		return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
+		}
 		String url = null;
 		for(String urls : payslipUrl){
 			url = urls;
@@ -765,22 +768,27 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
-			String query = "SELECT a.employee_id,a.employee_name from Employee_Personal_Details a LEFT JOIN Employee_Work_Permit_Details b ON a.employee_id=b.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
+			String query = "SELECT a.employee_id,a.employee_name from Employee_Personal_Details a LEFT JOIN Employee_Work_Permit_Details b ON a.employee_id=b.employee_id where a.employee_status='Active' AND b.work_country = 'Singapore'";
 			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
-			
-			/*Object[] obj5 = new Object[]{"7030","Shashikala Kalaga"};
-			Object[] obj1 = new Object[]{"7262","Ramakanth Vaddi"};
-			Object[] obj2 = new Object[]{"7263","Pavan Siddartha Kakarlamudi"};
-			Object[] obj3 = new Object[]{"7321","Ramu Mangani"};
-			Object[] obj4 = new Object[]{"7330","Sandeep Sirugudi"};
-			Object[] obj6 = new Object[]{"7187","Umesh Hattekar"};
+			System.out.println("total emp ==="+EmpQuery.size());
+			HashMap<String,String> succesMap = new HashMap<String,String>();
+			HashMap<String,String> failMap = new HashMap<String,String>();
+			/*Object[] obj5 = new Object[]{"011","Stanley Li Chen"};
+			Object[] obj1 = new Object[]{"067","SREENIVASULU  NARRAVULA"};
+			Object[] obj2 = new Object[]{"1374","Praveen Kumar Jana"};
+			Object[] obj3 = new Object[]{"032","George Pancho"};
+			Object[] obj4 = new Object[]{"1181","Cindy Tech"};
+			Object[] obj6 = new Object[]{"1531","Zhuo xinni"};
+			Object[] obj7 = new Object[]{"10097","Emmanuel Elijacob Kuizon Delfino"};
+
 			ArrayList<Object[]> EmpQuery = new ArrayList<Object[]>();
 				EmpQuery.add(obj1);
 				EmpQuery.add(obj2);
 				EmpQuery.add(obj3);
 				EmpQuery.add(obj4);
 				EmpQuery.add(obj5);
-				EmpQuery.add(obj6);*/
+				EmpQuery.add(obj6);
+				EmpQuery.add(obj7);*/
 			for(Object[] obj : EmpQuery){
 				try{
 				String employee_id = obj[0].toString();
@@ -820,38 +828,56 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
-			String query = "SELECT a.employee_id,a.employee_name,b.personal_email_id,d.token from Employee_Personal_Details a left join Employee_Offer_Details b ON a.employee_id = b.employee_id LEFT JOIN Employee_Work_Permit_Details c ON a.employee_id = c.employee_id LEFT JOIN Employee_Selfcare_Users d ON a.employee_id=d.employee_id where a.employee_status='Active' AND b.work_country = 'India'";
+			String query = "SELECT a.employee_id,a.employee_name,b.personal_email_id,d.token from Employee_Personal_Details a left join Employee_Offer_Details b ON a.employee_id = b.employee_id LEFT JOIN Employee_Work_Permit_Details c ON a.employee_id = c.employee_id LEFT JOIN Employee_Selfcare_Users d ON a.employee_id=d.employee_id where a.employee_status='Active' AND b.work_country = 'Singapore'";
 			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
-			String appUrl = "https://hap.heliusapp.com/Employee_selfcare/changepwd.html";
-			String loginLink = "https://hap.heliusapp.com/Employee_selfcare/login.html";
+			System.out.println("total list ==="+EmpQuery.size());
+			String appUrl = "https://hap-testing.heliusapp.com/Employee_selfcare/changepwd.html";
+			//String appUrl = "https://hap.heliusapp.com/Employee_selfcare/changepwd.html";
+			int index  = appUrl.lastIndexOf("/");
+			String urlindex = appUrl.substring(0, index);
+			String loginLink = urlindex+"/login.html";
+			HashMap<String,String> successMap = new HashMap<String,String>();
+			HashMap<String,String> failMap = new HashMap<String,String>();
 			for(Object[] obj : EmpQuery){
 				try{
 				String employee_id = obj[0].toString();
 				String employee_name = obj[1].toString();
 				String To = obj[2].toString();
-			    System.out.println("--To address is null ---"+To);
 				String token = obj[3].toString();
 				String subject= "Account Activation";
 				String text = "Dear " + employee_name + ","
 						+ "\n\n"+ "Welcome to Helius Self Service Portal!"
-						+ "\n\n"+ "We have developed this employee self-service portal to support remote HR needs of our employees who are working at remote customer locations for extended periods."
-						+ "\n\n"+ "As a first step, we are giving your personal details, assignment details, leave balance and last month’s payslip.  Please go through the details and in case you find any information that is not correct,"
-						+ "\n"+ "Please write to us by clicking the link for sending a request to HR."
-						+ "\n\n"+ "The upcoming features are also mentioned and please check the details that will be available in future in this portal."
-						+ "\n\n"+ "Your suggestions are welcome and please reach us at hap@helius-tech.com."
+						+ "\n\n"+ "We have developed this employee self-service portal to support remote HR needs of our employees who are working from customer locations for extended periods."
+						+ "\n\n"+ "As a first step, we are giving your personal details, assignment details, leave balance. Please go through the details and in case you find any information that is not correct,"
+						+ "\n"+ "please send us the correction request by clicking the link for sending a request to HR."
+						+ "\n\n"+ "The upcoming features are also mentioned in the portal and will be available in future."
+						+ "\n\n"+ "Please reach us at hap@helius-tech.com,   for suggestions, comments, improvement, new features."
 						+ "\n\n" + "Please click below and change your password "
 						+ "\n\n" + appUrl + "?token="+employee_id+"-fgtN"+ token+"\n\n"
-						+ "Plese click below to login "
+						+ "Please click below to login "
 						+"\n\n" + loginLink +"\n\n"
 						+"With Regards," + "\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd";
 				if (token != null && !token.isEmpty()) {
 				emailService.sendBulkEmail(To, null, null, subject, text);
+				successMap.put(employee_id, To);
+				}else{
+				failMap.put(employee_id, To);
 				}
-			    System.out.println("--email sent to ---"+employee_id);
 				}catch(Exception e){
 					e.printStackTrace();
-				    System.out.println("--failed to send email to user---"+obj[0].toString());
+					System.out.println("======check failednonce====="+obj[0].toString()+"====ashhsha==="+obj[1].toString());
+					emailService.sendBulkEmail("hap-testing@helius-tech.com", null, null, "unable to email activation link ", "unable to send activation link to : "+obj[0].toString()+" - "+obj[1].toString());
+					failMap.put(obj[0].toString(), obj[1].toString());
 				}
+			}
+			System.out.println("total success is : "+successMap.size());
+			ArrayList<String> al1 = new ArrayList<String>();
+			for(String key : successMap.keySet()){
+				System.out.println("success mails-----"+key+"-----"+successMap.get(key));
+			}
+			System.out.println("total failure is : "+failMap.size());
+			for(String key2 : failMap.keySet()){
+				System.out.println("failed mails-----"+key2+"-----"+failMap.get(key2));
 			}
 		} catch (Exception e) {
 			e.printStackTrace(); 

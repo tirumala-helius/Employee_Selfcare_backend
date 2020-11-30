@@ -831,8 +831,8 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			String query = "SELECT a.employee_id,a.employee_name,b.personal_email_id,d.token from Employee_Personal_Details a left join Employee_Offer_Details b ON a.employee_id = b.employee_id LEFT JOIN Employee_Work_Permit_Details c ON a.employee_id = c.employee_id LEFT JOIN Employee_Selfcare_Users d ON a.employee_id=d.employee_id where a.employee_status='Active' AND b.work_country = 'Singapore'";
 			List<Object[]> EmpQuery = session.createSQLQuery(query).list();
 			System.out.println("total list ==="+EmpQuery.size());
-			String appUrl = "https://hap-testing.heliusapp.com/Employee_selfcare/changepwd.html";
-			//String appUrl = "https://hap.heliusapp.com/Employee_selfcare/changepwd.html";
+			//String appUrl = "https://hap-testing.heliusapp.com/Employee_selfcare/changepwd.html";
+			String appUrl = "https://hap.heliusapp.com/Employee_selfcare/changepwd.html";
 			int index  = appUrl.lastIndexOf("/");
 			String urlindex = appUrl.substring(0, index);
 			String loginLink = urlindex+"/login.html";
@@ -866,7 +866,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 				}catch(Exception e){
 					e.printStackTrace();
 					System.out.println("======check failednonce====="+obj[0].toString()+"====ashhsha==="+obj[1].toString());
-					emailService.sendBulkEmail("hap-testing@helius-tech.com", null, null, "unable to email activation link ", "unable to send activation link to : "+obj[0].toString()+" - "+obj[1].toString());
+					emailService.sendBulkEmail("hap@helius-tech.com", null, null, "unable to email activation link ", "unable to send activation link to : "+obj[0].toString()+" - "+obj[1].toString());
 					failMap.put(obj[0].toString(), obj[1].toString());
 				}
 			}

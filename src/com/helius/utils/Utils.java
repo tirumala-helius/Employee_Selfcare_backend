@@ -19,10 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.taglibs.standard.extra.spath.AbsolutePath;
 import org.hibernate.Session;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Utf8;
@@ -591,5 +594,26 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 			File file = new File(filename);
 			file.delete();
 		}
+	}
+	
+	public static ResponseEntity<byte[]> downloadFileByUrl(String url) {
+		byte[] files = null;
+		FileInputStream fi = null;
+		try {
+			String fileUrl = Utils.getProperty("fileLocation")+ File.separator +url;
+			File file = new File(fileUrl);
+			if (file.exists()) {
+				fi = new FileInputStream(fileUrl);
+				files = IOUtils.toByteArray(fi);
+				fi.close();
+			} else {
+				return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(files, HttpStatus.OK);
+		return responseEntity;
 	}
 }

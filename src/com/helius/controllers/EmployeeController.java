@@ -383,22 +383,10 @@ public class EmployeeController {
 		}
 		return helpVid;
 	}
-	/*public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		// open/read the application context file
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("/applicationContext.xml");
-		DataSource datasource = (DataSource) ctx.getBean("dataSource");
-		EmployeeController employeeController = new EmployeeController();
-		String s = employeeController.getEmployee("123");
-		System.out.println(s);
-		try {
-			// readExcel(0,2,33);
-			// readNoClock();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}  
-	}*/
-	
-
+	 @CrossOrigin
+		@RequestMapping(value = "downloadFileByUrl", method = RequestMethod.GET, produces = "multipart/form-data")
+		public ResponseEntity<byte[]> downloadFileByUrl(@RequestParam String url) {
+			ResponseEntity<byte[]> responseEntity = Utils.downloadFileByUrl(url);	
+			return responseEntity;
+		}
 }

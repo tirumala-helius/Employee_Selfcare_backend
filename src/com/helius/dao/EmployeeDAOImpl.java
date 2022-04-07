@@ -548,10 +548,25 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		int year = date.getYear();
 		try {
 			session = sessionFactory.openSession();	
+			String emp_work_country_query = "select a.work_country from Employee_Work_Permit_Details a where a.employee_id=" + employee_id;
+			List workcountry_list = session.createQuery(emp_work_country_query).list();
+			String workcountry = (String) workcountry_list.get(0);
+			String leaveEligibility = "";
+			List<Leave_Eligibility_Details> eligibilityList =null;
 			// Leave Eligibility details
-			String leaveEligibility = "select * from  Leave_Eligibility_Details where employee_id = :employee_id AND year = :year";
-			List<Leave_Eligibility_Details> eligibilityList = session.createSQLQuery(leaveEligibility)
+			if ("Singapore".equalsIgnoreCase(workcountry)) {
+				leaveEligibility = "SELECT a.* FROM Leave_Eligibility_Details a, Employee_Assignment_Details b, client_details c  WHERE a.employee_id=:employee_id "
+						+" AND  DATE(b.sow_start_date) = DATE(a.sow_start_date) AND DATE(b.sow_expiry_date) =DATE( a.sow_expiry_date)"
+						+ " AND a.employee_id=b.employee_id AND a.client_id=c.client_id ";
+				eligibilityList = session.createSQLQuery(leaveEligibility)
+						.addEntity(Leave_Eligibility_Details.class).setParameter("employee_id", employee_id).list();
+
+			}
+			else{
+			 leaveEligibility = "select * from  Leave_Eligibility_Details where employee_id = :employee_id AND year = :year";
+			 eligibilityList = session.createSQLQuery(leaveEligibility)
 					.addEntity(Leave_Eligibility_Details.class).setParameter("employee_id", employee_id).setParameter("year",year).list();
+			}
 			List<Leave_Eligibility_Details> leave_Eligibility_DetailsList = new ArrayList<Leave_Eligibility_Details>();
 			if (!eligibilityList.isEmpty()) {
 				for (Leave_Eligibility_Details leave_Eligibility : eligibilityList) {
@@ -561,11 +576,22 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			if (leave_Eligibility_DetailsList != null && !leave_Eligibility_DetailsList.isEmpty()) {
 				employeeLeaveData.setLeavesEligibility(leave_Eligibility_DetailsList);
 			}
-			
-			String leaveUsageDetails = "select * from  Leave_Usage_Details where employee_id = :employee_id AND YEAR(usageMonth)= :year ORDER BY usageMonth DESC";
-			java.util.List leaveUsageDetailsList = session.createSQLQuery(leaveUsageDetails)
+			//Leave_Usage_details
+			String leaveUsageDetails = "";
+			java.util.List leaveUsageDetailsList = null;
+			if ("Singapore".equalsIgnoreCase(workcountry)) {
+				leaveUsageDetails = "SELECT a.* FROM Leave_Usage_Details a, Employee_Assignment_Details b, client_details c  WHERE a.employee_id=:employee_id "
+						+ " AND YEAR(usageMonth)= :year AND a.employee_id=b.employee_id AND a.client_id=c.client_id  ORDER BY usageMonth DESC";
+				System.out.println("leaveUsageDetails::"+leaveUsageDetails);
+				leaveUsageDetailsList = session.createSQLQuery(leaveUsageDetails)
+						      .addEntity(Leave_Usage_Details.class).setParameter("employee_id", employee_id).setParameter("year",year).list();
+			}
+			else{
+			leaveUsageDetails = "select * from  Leave_Usage_Details where employee_id = :employee_id AND YEAR(usageMonth)= :year ORDER BY usageMonth DESC";
+			 leaveUsageDetailsList = session.createSQLQuery(leaveUsageDetails)
 					.addEntity(Leave_Usage_Details.class).setParameter("employee_id", employee_id).setParameter("year",year).list();
-			ArrayList<Leave_Usage_Details> leave_Usage_DetailsList = new ArrayList<Leave_Usage_Details>();
+			}
+			 ArrayList<Leave_Usage_Details> leave_Usage_DetailsList = new ArrayList<Leave_Usage_Details>();
 			Leave_Usage_Details leave_Usage_Details = null;
 			if(leaveUsageDetailsList != null){
 				for(Object obj : leaveUsageDetailsList){
@@ -576,13 +602,52 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				employeeLeaveData.setLeaveUsageDetails(leave_Usage_DetailsList);
 				}
 			}
-			
-			String recordQuery = "select * from  Leave_Record_Details where employee_id = :employee_id AND YEAR(leaveMonth) = :year ORDER BY leaveMonth DESC";
-			java.util.List recordQueryList = session.createSQLQuery(recordQuery)
-					.addEntity(Leave_Record_Details.class).setParameter("employee_id", employee_id).setParameter("year", year).list();
+			//Leave_Record_Details
+			String recordQuery ="";
+			//java.util.List recordQueryList=null;
+			List<Leave_Record_Details> recordQueryList =null;
+			if ("Singapore".equalsIgnoreCase(workcountry)) {
+				recordQueryList = new ArrayList<>();
+				String annualLeaveRecordQuery = "SELECT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c  WHERE a.employee_id= :employee_id "
+						+ " AND a.type_of_leave ='Annual Leave' AND  DATE(b.sow_start_date) = DATE(a.sow_start_date) AND DATE(b.sow_expiry_date) = DATE( a.sow_expiry_date)"
+						+ " AND a.employee_id=b.employee_id AND a.client_id=c.client_id  ORDER BY leaveMonth DESC";
+				System.out.println("annualLeaveRecordQuery::" + annualLeaveRecordQuery);
+				java.util.List annualLeaveRecordQueryList = session.createSQLQuery(annualLeaveRecordQuery)
+						.addEntity(Leave_Record_Details.class).setParameter("employee_id", employee_id).list();
+
+				String sickLeaveRecordQuery = "SELECT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c  WHERE a.employee_id=:employee_id AND YEAR(leaveMonth) = :year "
+						+ "AND a.type_of_leave ='Sick Leave' AND a.employee_id=b.employee_id AND a.client_id=c.client_id  ORDER BY leaveMonth DESC";
+				System.out.println("sickLeaveRecordQuery::" + sickLeaveRecordQuery);
+				java.util.List sickLeaveRecordQueryList = session.createSQLQuery(sickLeaveRecordQuery)
+						.addEntity(Leave_Record_Details.class).setParameter("employee_id", employee_id)
+						.setParameter("year", year).list();
+				if (annualLeaveRecordQueryList != null && !annualLeaveRecordQueryList.isEmpty()
+						&& annualLeaveRecordQueryList.size() != 0) {
+					recordQueryList.addAll(annualLeaveRecordQueryList);
+				}
+				if (sickLeaveRecordQueryList != null && !sickLeaveRecordQueryList.isEmpty()
+						&& sickLeaveRecordQueryList.size() != 0) {
+					recordQueryList.addAll(sickLeaveRecordQueryList);
+				}
+
+			} else {
+				recordQuery = "select * from  Leave_Record_Details where employee_id = :employee_id AND YEAR(leaveMonth) = :year ORDER BY leaveMonth DESC";
+				recordQueryList = session.createSQLQuery(recordQuery).addEntity(Leave_Record_Details.class)
+						.setParameter("employee_id", employee_id).setParameter("year", year).list();
+			}
 			ArrayList<Leave_Record_Details> leave_Record_DetailsList = new ArrayList<Leave_Record_Details>();
 			Leave_Record_Details leaveRecordDetails = null;
-			if(leaveUsageDetailsList != null){
+			if(recordQueryList != null){
+				for(Leave_Record_Details lvRecordDetails : recordQueryList){
+					//leaveRecordDetails = (Leave_Record_Details)obj;
+					leave_Record_DetailsList.add(lvRecordDetails);
+				}
+				if(leave_Record_DetailsList != null && !leave_Record_DetailsList.isEmpty()){
+				employeeLeaveData.setLeaveRecordDetails(leave_Record_DetailsList);
+				}
+			}
+			
+			/*if(leaveUsageDetailsList != null){
 				for(Object obj : recordQueryList){
 					leaveRecordDetails = (Leave_Record_Details)obj;
 					leave_Record_DetailsList.add(leaveRecordDetails);
@@ -590,7 +655,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				if(leave_Record_DetailsList != null && !leave_Record_DetailsList.isEmpty()){
 				employeeLeaveData.setLeaveRecordDetails(leave_Record_DetailsList);
 				}
-			}
+			}*/
+			
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("failed to fetch leave details for employee "+employee_id,e);

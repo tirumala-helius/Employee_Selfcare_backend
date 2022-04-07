@@ -58,6 +58,11 @@ public class Leave_Record_Details {
 	private float leaves_used;	
 	@Column
 	private String leaveRecordPath;
+	@Column
+	private Timestamp sow_start_date;
+	@Column
+	private Timestamp sow_expiry_date;
+	
 	public String getLeaveRecordPath() {
 		return leaveRecordPath;
 	}
@@ -175,6 +180,23 @@ public class Leave_Record_Details {
 		this.last_modified_date = last_modified_date;
 	}
 
+	public Timestamp getSow_start_date() {
+		return sow_start_date;
+	}
+
+	public void setSow_start_date(Timestamp sow_start_date) {
+		this.sow_start_date = sow_start_date;
+	}
+
+	public Timestamp getSow_expiry_date() {
+		return sow_expiry_date;
+	}
+
+	public void setSow_expiry_date(Timestamp sow_expiry_date) {
+		this.sow_expiry_date = sow_expiry_date;
+	}
+
+	
 
 
 }

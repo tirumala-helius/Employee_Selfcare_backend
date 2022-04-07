@@ -70,7 +70,12 @@ public class Leave_Usage_Details {
 	@UpdateTimestamp
 	@NotAudited
 	private Timestamp last_modified_date;
-
+	
+	@Column
+	private Timestamp sow_start_date;
+	@Column
+	private Timestamp sow_expiry_date;
+	
 	public int getLeave_usage_details_id() {
 		return leave_usage_details_id;
 	}
@@ -141,6 +146,22 @@ public class Leave_Usage_Details {
 
 	public void setUsageMonth(Timestamp usageMonth) {
 		this.usageMonth = usageMonth;
+	}
+
+	public Timestamp getSow_start_date() {
+		return sow_start_date;
+	}
+
+	public void setSow_start_date(Timestamp sow_start_date) {
+		this.sow_start_date = sow_start_date;
+	}
+
+	public Timestamp getSow_expiry_date() {
+		return sow_expiry_date;
+	}
+
+	public void setSow_expiry_date(Timestamp sow_expiry_date) {
+		this.sow_expiry_date = sow_expiry_date;
 	}
 
 

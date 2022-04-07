@@ -71,6 +71,10 @@ public class Leave_Eligibility_Details {
 	@UpdateTimestamp
 	@NotAudited
 	private Timestamp last_modified_date;
+	@Column
+	private Timestamp sow_start_date;
+	@Column
+	private Timestamp sow_expiry_date;
 
 	public int getLeave_eligibility_details_id() {
 		return leave_eligibility_details_id;
@@ -134,6 +138,22 @@ public class Leave_Eligibility_Details {
 
 	public void setLast_modified_date(Timestamp last_modified_date) {
 		this.last_modified_date = last_modified_date;
+	}
+
+	public Timestamp getSow_start_date() {
+		return sow_start_date;
+	}
+
+	public void setSow_start_date(Timestamp sow_start_date) {
+		this.sow_start_date = sow_start_date;
+	}
+
+	public Timestamp getSow_expiry_date() {
+		return sow_expiry_date;
+	}
+
+	public void setSow_expiry_date(Timestamp sow_expiry_date) {
+		this.sow_expiry_date = sow_expiry_date;
 	}
 
 	

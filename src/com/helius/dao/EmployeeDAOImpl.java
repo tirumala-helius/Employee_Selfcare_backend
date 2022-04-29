@@ -555,6 +555,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			String leaveEligibility = "";
 			List<Leave_Eligibility_Details> eligibilityList =null;
 			List<Leave_Eligibility_Details> leave_Eligibility_DetailsList = null;
+			int client_id = 0;
 			// Leave Eligibility details
 			if ("Singapore".equalsIgnoreCase(workcountry)) {
 				leave_Eligibility_DetailsList = new ArrayList<Leave_Eligibility_Details>();
@@ -584,9 +585,12 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				
 				for(Iterator<Map.Entry<String, Leave_Eligibility_Details>> it = led_leavetype.entrySet().iterator(); it.hasNext(); ) {
 				    Map.Entry<String, Leave_Eligibility_Details> entry = it.next();
-				    if(entry.getKey().equalsIgnoreCase("CF Leave") && entry.getValue().getYear() == LocalDate.now().getYear() - 1) {
-				    	 it.remove();
-				    }
+					  /*  if(entry.getKey().equalsIgnoreCase("CF Leave") && entry.getValue().getYear() == LocalDate.now().getYear() - 1) {
+					    	 it.remove();
+					    }*/
+				    	Leave_Eligibility_Details le = entry.getValue();
+				    	client_id = le.getClient_id();
+				    	
 				    }
 					
 					Iterator<Leave_Eligibility_Details>  iter = led_leavetype.values().iterator();
@@ -644,22 +648,23 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			List<Leave_Record_Details> recordQueryList =null;
 			if ("Singapore".equalsIgnoreCase(workcountry)) {
 				recordQueryList = new ArrayList<>();
-				
-				recordQuery = "SELECT DISTINCT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c,Sow_Employee_Association d,Sow_Details e"
-						+ " WHERE a.employee_id = :employee_id AND a.type_of_leave IN('Annual Leave','Sick Leave') AND a.employee_id=b.employee_id AND a.client_id=c.client_id "
-						+ "AND b.client=c.client_name AND a.employee_id = d.employee_id AND d.sow_details_id=e.sow_details_id AND e.sow_status ='Active' AND a.leaveMonth"
-						+ " BETWEEN DATE_SUB(e.sow_start_date, INTERVAL 1 MONTH) AND  DATE_SUB(e.sow_expiry_date, INTERVAL -1 MONTH) ORDER BY leaveMonth DESC";
-				System.out.println("recordQuery::" + recordQuery);
-				recordQueryList = session.createSQLQuery(recordQuery)
-						.addEntity(Leave_Record_Details.class).setParameter("employee_id", employee_id).list();
+				if (client_id == 227) {
+					recordQuery = "SELECT DISTINCT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c,Sow_Employee_Association d,Sow_Details e"
+							+ " WHERE a.employee_id = :employee_id AND a.type_of_leave IN('Annual Leave','Sick Leave') AND a.employee_id=b.employee_id AND a.client_id=c.client_id "
+							+ "AND b.client=c.client_name AND a.employee_id = d.employee_id AND d.sow_details_id=e.sow_details_id AND e.sow_status ='Active' AND a.leaveMonth"
+							+ " BETWEEN DATE_SUB(e.sow_start_date, INTERVAL 1 MONTH) AND  DATE_SUB(e.sow_expiry_date, INTERVAL -1 MONTH) ORDER BY leaveMonth DESC";
+					System.out.println("recordQuery::" + recordQuery);
+					recordQueryList = session.createSQLQuery(recordQuery).addEntity(Leave_Record_Details.class)
+							.setParameter("employee_id", employee_id).list();
+				} else {
 
-				if (recordQueryList == null || recordQueryList.isEmpty()) {
 					recordQuery = "SELECT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c WHERE a.employee_id= :employee_id AND "
 							+ "a.type_of_leave IN('Annual Leave','Sick Leave') AND a.employee_id=b.employee_id AND a.client_id=c.client_id AND b.client=c.client_name AND a.leaveMonth "
 							+ "BETWEEN DATE_SUB(b.sow_start_date, INTERVAL 1 MONTH) AND DATE_SUB(b.sow_expiry_date, INTERVAL -1 MONTH) ORDER BY leaveMonth DESC";
 					System.out.println("recordQuery::" + recordQuery);
-					recordQueryList = session.createSQLQuery(recordQuery)
-							.addEntity(Leave_Record_Details.class).setParameter("employee_id", employee_id).list();
+					recordQueryList = session.createSQLQuery(recordQuery).addEntity(Leave_Record_Details.class)
+							.setParameter("employee_id", employee_id).list();
+
 				}
 
 			} else {

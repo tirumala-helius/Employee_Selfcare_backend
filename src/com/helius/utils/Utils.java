@@ -600,7 +600,7 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 		byte[] files = null;
 		FileInputStream fi = null;
 		try {
-			String fileUrl = Utils.getProperty("fileLocation")+ File.separator +url;
+			String fileUrl = Utils.getProperty("fileLocation")+ File.separator + url;
 			File file = new File(fileUrl);
 			if (file.exists()) {
 				fi = new FileInputStream(fileUrl);

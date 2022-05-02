@@ -13,7 +13,8 @@ public class Employee_Leave_Data {
 	private Leave_Record_Details deleteLeaveRecord;
 	
 	private Leave_Eligibility_Details deleteLeaveEligibility;
-
+	
+    private List<LeaveUtilization>  leaveUtilizations;
 
 	public Leave_Eligibility_Details getDeleteLeaveEligibility() {
 		return deleteLeaveEligibility;
@@ -55,8 +56,13 @@ public class Employee_Leave_Data {
 		this.leaveUsageDetails = leaveUsageDetails;
 	}
 
-	
-	
-	
+	public List<LeaveUtilization> getLeaveUtilizations() {
+		return leaveUtilizations;
+	}
+
+	public void setLeaveUtilizations(List<LeaveUtilization> leaveUtilizations) {
+		this.leaveUtilizations = leaveUtilizations;
+	}
+
 }
  

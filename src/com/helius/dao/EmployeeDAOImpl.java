@@ -74,6 +74,7 @@ import com.helius.entities.Employee_Work_Permit_Details;
 import com.helius.entities.Help_Videos;
 import com.helius.entities.Indian_Employee_Family_Member;
 import com.helius.entities.Indian_Employees_Insurance_Details;
+import com.helius.entities.LeaveUtilization;
 import com.helius.entities.Leave_Eligibility_Details;
 import com.helius.entities.Leave_Record_Details;
 import com.helius.entities.Leave_Usage_Details;
@@ -684,15 +685,95 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				}
 			}
 			
-			/*if(leaveUsageDetailsList != null){
-				for(Object obj : recordQueryList){
-					leaveRecordDetails = (Leave_Record_Details)obj;
-					leave_Record_DetailsList.add(leaveRecordDetails);
+			/* Summary of leaves entitlement and utilized */
+			List<LeaveUtilization> LeaveUtilizationList = null;
+			if ("Singapore".equalsIgnoreCase(workcountry)) {
+				LeaveUtilization utilization = null;
+				String leaveUtilizedQuery = "";
+				java.util.List leaveUtilizedList = null;
+				if (client_id == 227) {
+					leaveUtilizedQuery = "SELECT DISTINCT c.employee_id, SUM(a.leaves_used) AS utilizedLeave,a.type_of_leave AS leaveType, a.client_id FROM Leave_Record_Details a, Employee_Work_Permit_Details b,"
+							+ " Sow_Employee_Association c, Sow_Details d WHERE a.employee_id=b.employee_id AND b.work_country='Singapore' AND a.employee_id=c.employee_id AND c.sow_details_id=d.sow_details_id AND c.status='active'"
+							+ " AND d.sow_status='active' AND CAST(a.startdate AS DATE)>= CAST(d.sow_start_date AS DATE) AND CAST(a.enddate AS DATE) <= CAST(d.sow_expiry_date AS DATE) AND"
+							+ " a.employee_id='" + employee_id + "' GROUP BY a.type_of_leave";
+					System.out.println("leaveUtilizedQuery :"+leaveUtilizedQuery);
+					leaveUtilizedList = session.createSQLQuery(leaveUtilizedQuery)
+							.setResultTransformer(Transformers.aliasToBean(LeaveUtilization.class)).list();
+
+				} else {
+					leaveUtilizedQuery = "SELECT DISTINCT c.employee_id,SUM(a.leaves_used) AS utilizedLeave,a.type_of_leave AS leaveType, a.client_id FROM Leave_Record_Details a, Employee_Work_Permit_Details b,"
+							+ " Employee_Assignment_Details c WHERE a.employee_id=b.employee_id AND b.work_country='Singapore' AND a.employee_id=c.employee_id AND"
+							+ " CAST(a.startdate AS DATE)>= CAST(c.sow_start_date AS DATE) AND CAST(a.enddate AS DATE) <= CAST(c.sow_expiry_date AS DATE) AND"
+							+ " a.employee_id= " + employee_id + " GROUP BY a.type_of_leave";
+					System.out.println("leaveUtilizedQuery :"+leaveUtilizedQuery);
+					leaveUtilizedList = session.createSQLQuery(leaveUtilizedQuery)
+							.setResultTransformer(Transformers.aliasToBean(LeaveUtilization.class)).list();
+
 				}
-				if(leave_Record_DetailsList != null && !leave_Record_DetailsList.isEmpty()){
-				employeeLeaveData.setLeaveRecordDetails(leave_Record_DetailsList);
+				Map<String, Leave_Eligibility_Details> eligibilityMap = new HashMap<>();
+				if (leave_Eligibility_DetailsList != null && !leave_Eligibility_DetailsList.isEmpty()) {
+					for (Leave_Eligibility_Details list : leave_Eligibility_DetailsList) {
+						if (!eligibilityMap.containsKey(list.getType_of_leave())) {
+							eligibilityMap.put(list.getType_of_leave(), list);
+						}
 				}
-			}*/
+				}
+
+				float cfLeave = 0;
+				if (leaveUtilizedList != null && !leaveUtilizedList.isEmpty()) {
+					utilization = new LeaveUtilization();
+					LeaveUtilizationList = new ArrayList<LeaveUtilization>();
+
+					for (Object obj : leaveUtilizedList) {
+						LeaveUtilization leaveUtilization = new LeaveUtilization();
+						utilization = (LeaveUtilization) obj;
+						leaveUtilization.setEmployee_id(utilization.getEmployee_id());
+						leaveUtilization.setClient_id(utilization.getClient_id());
+						leaveUtilization.setUtilizedLeave(utilization.getUtilizedLeave());
+						float eligible = 0;
+						if (eligibilityMap.containsKey(utilization.getLeaveType())) {
+
+							for (Leave_Eligibility_Details details : eligibilityMap.values()) {
+								if (details.getType_of_leave().equalsIgnoreCase("CF Leave")) {
+									cfLeave = details.getNumber_of_days();
+								}
+								if (details.getType_of_leave().equals(utilization.getLeaveType())) {
+
+									eligible = details.getNumber_of_days();
+									leaveUtilization.setLeaveType(utilization.getLeaveType());
+									leaveUtilization.setEntitlement(eligible);
+									if (utilization.getLeaveType().equalsIgnoreCase("Annual Leave")) {
+										leaveUtilization.setCarryForward(cfLeave);
+										float annualAndCFLeave = eligible + cfLeave;
+										leaveUtilization.setBalanceLeave(annualAndCFLeave - utilization.getUtilizedLeave());
+									} else {
+										leaveUtilization.setBalanceLeave(eligible - utilization.getUtilizedLeave());
+									}
+								}
+
+							}
+
+						} else {
+							leaveUtilization.setLeaveType(utilization.getLeaveType());
+							leaveUtilization.setEntitlement(eligible);
+							leaveUtilization.setBalanceLeave(eligible - utilization.getUtilizedLeave());
+						}
+						if (utilization.getLeaveType().equalsIgnoreCase("Annual Leave")
+								|| utilization.getLeaveType().equalsIgnoreCase("Sick Leave")
+								|| utilization.getLeaveType().equalsIgnoreCase("Childcare Leave")
+								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
+
+							LeaveUtilizationList.add(leaveUtilization);
+						}
+
+					}
+					//LeaveUtilizationList.stream().forEach(System.out::println);
+				}
+
+			}
+			 if(LeaveUtilizationList != null && !LeaveUtilizationList.isEmpty()){
+					employeeLeaveData.setLeaveUtilizations(LeaveUtilizationList);
+					}
 			
 		}catch(Exception e){
 			e.printStackTrace();

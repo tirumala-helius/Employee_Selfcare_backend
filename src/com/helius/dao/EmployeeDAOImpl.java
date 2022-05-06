@@ -550,7 +550,9 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		int year = date.getYear();
 		try {
 			session = sessionFactory.openSession();	
-			String emp_work_country_query = "select a.work_country from Employee_Work_Permit_Details a where a.employee_id=" + employee_id;
+			//String emp_work_country_query = "select a.work_country from Employee_Work_Permit_Details a where a.employee_id=" + employee_id;
+			String emp_work_country_query = "select a.work_country from Employee_Work_Permit_Details a where a.employee_id='"+employee_id+"'" ;
+			System.out.println("emp_work_country_query :"+emp_work_country_query);
 			List workcountry_list = session.createQuery(emp_work_country_query).list();
 			String workcountry = (String) workcountry_list.get(0);
 			String leaveEligibility = "";
@@ -651,7 +653,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				recordQueryList = new ArrayList<>();
 				if (client_id == 227) {
 					recordQuery = "SELECT DISTINCT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c,Sow_Employee_Association d,Sow_Details e"
-							+ " WHERE a.employee_id = :employee_id AND a.type_of_leave IN('Annual Leave','Sick Leave') AND a.employee_id=b.employee_id AND a.client_id=c.client_id "
+							+ " WHERE a.employee_id = :employee_id  AND a.employee_id=b.employee_id AND a.client_id=c.client_id "
 							+ "AND b.client=c.client_name AND a.employee_id = d.employee_id AND d.sow_details_id=e.sow_details_id AND e.sow_status ='Active' AND a.leaveMonth"
 							+ " BETWEEN DATE_SUB(e.sow_start_date, INTERVAL 1 MONTH) AND  DATE_SUB(e.sow_expiry_date, INTERVAL -1 MONTH) ORDER BY leaveMonth DESC";
 					System.out.println("recordQuery::" + recordQuery);
@@ -660,7 +662,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				} else {
 
 					recordQuery = "SELECT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c WHERE a.employee_id= :employee_id AND "
-							+ "a.type_of_leave IN('Annual Leave','Sick Leave') AND a.employee_id=b.employee_id AND a.client_id=c.client_id AND b.client=c.client_name AND a.leaveMonth "
+							+ " a.employee_id=b.employee_id AND a.client_id=c.client_id AND b.client=c.client_name AND a.leaveMonth "
 							+ "BETWEEN DATE_SUB(b.sow_start_date, INTERVAL 1 MONTH) AND DATE_SUB(b.sow_expiry_date, INTERVAL -1 MONTH) ORDER BY leaveMonth DESC";
 					System.out.println("recordQuery::" + recordQuery);
 					recordQueryList = session.createSQLQuery(recordQuery).addEntity(Leave_Record_Details.class)
@@ -687,6 +689,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			
 			/* Summary of leaves entitlement and utilized */
 			List<LeaveUtilization> LeaveUtilizationList = null;
+			
 			if ("Singapore".equalsIgnoreCase(workcountry)) {
 				LeaveUtilization utilization = null;
 				String leaveUtilizedQuery = "";
@@ -718,11 +721,11 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						}
 				}
 				}
-
+				LeaveUtilizationList = new ArrayList<LeaveUtilization>();
 				float cfLeave = 0;
 				if (leaveUtilizedList != null && !leaveUtilizedList.isEmpty()) {
 					utilization = new LeaveUtilization();
-					LeaveUtilizationList = new ArrayList<LeaveUtilization>();
+				//	LeaveUtilizationList = new ArrayList<LeaveUtilization>();
 
 					for (Object obj : leaveUtilizedList) {
 						LeaveUtilization leaveUtilization = new LeaveUtilization();
@@ -750,7 +753,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 										leaveUtilization.setBalanceLeave(eligible - utilization.getUtilizedLeave());
 									}
 								}
-
+								
 							}
 
 						} else {
@@ -764,13 +767,71 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
 
 							LeaveUtilizationList.add(leaveUtilization);
+							
 						}
-
+						
 					}
-					//LeaveUtilizationList.stream().forEach(System.out::println);
+					
+					LeaveUtilizationList.stream().forEach(System.out::println);
 				}
+				Map<String, LeaveUtilization> utilizationMap= new HashMap<>();
+				//LeaveUtilization leave = new LeaveUtilization();
+				if(LeaveUtilizationList !=null && !LeaveUtilizationList.isEmpty()){
+				for (Object object : LeaveUtilizationList) {
+					LeaveUtilization leave = new LeaveUtilization();
+					 leave =(LeaveUtilization) object;
+					 if (!utilizationMap.containsKey(leave.getLeaveType())) {
+						 utilizationMap.put(leave.getLeaveType(), leave);
+					}
+				}
+				}
+				if (eligibilityMap!=null && !eligibilityMap.isEmpty()) {
+					float utilizedLeave =0;
+					LeaveUtilization eligibilityUtlizedLeave =null;
+					List<LeaveUtilization> utilizationList  = new ArrayList<>();
+					//LeaveUtilizationList =new ArrayList<>();
+					for (Leave_Eligibility_Details details : eligibilityMap.values()) {
+						eligibilityUtlizedLeave =new LeaveUtilization();
+						float eligible =0;
+						if (details.getType_of_leave().equalsIgnoreCase("CF Leave")) {
+							 cfLeave = details.getNumber_of_days(); 
+						 }
+							if (!utilizationMap.containsKey(details.getType_of_leave())) {
+								if (!details.getType_of_leave().equalsIgnoreCase("CF Leave")) {
+									//eligibilityUtlizedLeave =new LeaveUtilization();
+									eligible =details.getNumber_of_days();
+								
+									eligibilityUtlizedLeave.setEmployee_id(details.getEmployee_id());
+									eligibilityUtlizedLeave.setClient_id(details.getClient_id());
+								 if (details.getType_of_leave().equalsIgnoreCase("Annual Leave")) {
+									 eligibilityUtlizedLeave.setCarryForward(cfLeave);
+										float annualAndCFLeave = eligible + cfLeave;
+										eligibilityUtlizedLeave.setBalanceLeave(annualAndCFLeave - utilizedLeave);
 
+								}
+								 else{
+									 eligibilityUtlizedLeave.setBalanceLeave(eligible - utilizedLeave); 
+								 }
+								 eligibilityUtlizedLeave.setLeaveType(details.getType_of_leave());
+								 eligibilityUtlizedLeave.setEntitlement(details.getNumber_of_days());
+								
+								if (details.getType_of_leave().equalsIgnoreCase("Annual Leave")
+										||details.getType_of_leave().equalsIgnoreCase("Sick Leave")
+										||details.getType_of_leave().equalsIgnoreCase("Off In Lieu")) {
+									utilizationList.add(eligibilityUtlizedLeave);
+								}
+								
+							}
+						}
+					
+					}
+					//utilizationList.stream().forEach(System.out::println);
+					LeaveUtilizationList.addAll(utilizationList);
+					
+					
+				}
 			}
+			
 			 if(LeaveUtilizationList != null && !LeaveUtilizationList.isEmpty()){
 					employeeLeaveData.setLeaveUtilizations(LeaveUtilizationList);
 					}

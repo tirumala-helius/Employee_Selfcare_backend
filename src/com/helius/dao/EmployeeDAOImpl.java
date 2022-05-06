@@ -764,7 +764,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						if (utilization.getLeaveType().equalsIgnoreCase("Annual Leave")
 								|| utilization.getLeaveType().equalsIgnoreCase("Sick Leave")
 								|| utilization.getLeaveType().equalsIgnoreCase("Childcare Leave")
-								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
+								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu") 
+							    || utilization.getLeaveType().equalsIgnoreCase("Lieu")) {
 
 							LeaveUtilizationList.add(leaveUtilization);
 							
@@ -830,11 +831,25 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					
 					
 				}
+				
 			}
-			
+			List<LeaveUtilization> finalLeaveUtilizationList =null;
+			finalLeaveUtilizationList =new ArrayList<>();
 			 if(LeaveUtilizationList != null && !LeaveUtilizationList.isEmpty()){
-					employeeLeaveData.setLeaveUtilizations(LeaveUtilizationList);
-					}
+				 for (Object object : LeaveUtilizationList) {
+						LeaveUtilization leaveutil =new LeaveUtilization();
+						leaveutil=(LeaveUtilization) object;
+						if(leaveutil.getLeaveType().equalsIgnoreCase("Sick Leave")){
+							leaveutil.setLeaveType("Medical Leave");
+						}
+						finalLeaveUtilizationList.add(leaveutil);
+						}
+				 finalLeaveUtilizationList.stream().forEach(System.out::println);
+				 if(finalLeaveUtilizationList !=null && !finalLeaveUtilizationList.isEmpty()){
+					 employeeLeaveData.setLeaveUtilizations(finalLeaveUtilizationList);
+				 }
+					
+				}
 			
 		}catch(Exception e){
 			e.printStackTrace();

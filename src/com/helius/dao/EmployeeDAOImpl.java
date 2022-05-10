@@ -680,6 +680,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			//Leave_Record_Details leaveRecordDetails = null;
 			if(recordQueryList != null){
 				for(Leave_Record_Details lvRecordDetails : recordQueryList){
+					if ("Singapore".equalsIgnoreCase(workcountry)) {
+						if (lvRecordDetails.getType_of_leave().equalsIgnoreCase("Lieu")) {
+							lvRecordDetails.setType_of_leave("Off In Lieu");
+						}
+						if (lvRecordDetails.getType_of_leave().equalsIgnoreCase("Sick Leave")) {
+							lvRecordDetails.setType_of_leave("Medical Leave");
+						}
+					}
+					
 					leave_Record_DetailsList.add(lvRecordDetails);
 				}
 				if(leave_Record_DetailsList != null && !leave_Record_DetailsList.isEmpty()){
@@ -713,6 +722,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 							.setResultTransformer(Transformers.aliasToBean(LeaveUtilization.class)).list();
 
 				}
+				 List<LeaveUtilization> summaryOfLeaveUtilization = getConvertLieuTypeInOffInLieu(leaveUtilizedList);
+				
 				Map<String, Leave_Eligibility_Details> eligibilityMap = new HashMap<>();
 				if (leave_Eligibility_DetailsList != null && !leave_Eligibility_DetailsList.isEmpty()) {
 					for (Leave_Eligibility_Details list : leave_Eligibility_DetailsList) {
@@ -721,13 +732,14 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						}
 				}
 				}
+				
 				LeaveUtilizationList = new ArrayList<LeaveUtilization>();
 				float cfLeave = 0;
-				if (leaveUtilizedList != null && !leaveUtilizedList.isEmpty()) {
+				if (summaryOfLeaveUtilization != null && !summaryOfLeaveUtilization.isEmpty()) {
 					utilization = new LeaveUtilization();
 				//	LeaveUtilizationList = new ArrayList<LeaveUtilization>();
 
-					for (Object obj : leaveUtilizedList) {
+					for (Object obj : summaryOfLeaveUtilization) {
 						LeaveUtilization leaveUtilization = new LeaveUtilization();
 						utilization = (LeaveUtilization) obj;
 						leaveUtilization.setEmployee_id(utilization.getEmployee_id());
@@ -759,13 +771,13 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						} else {
 							leaveUtilization.setLeaveType(utilization.getLeaveType());
 							leaveUtilization.setEntitlement(eligible);
+							leaveUtilization.setUtilizedLeave(utilization.getUtilizedLeave());
 							leaveUtilization.setBalanceLeave(eligible - utilization.getUtilizedLeave());
 						}
 						if (utilization.getLeaveType().equalsIgnoreCase("Annual Leave")
 								|| utilization.getLeaveType().equalsIgnoreCase("Sick Leave")
 								|| utilization.getLeaveType().equalsIgnoreCase("Childcare Leave")
-								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu") 
-							    || utilization.getLeaveType().equalsIgnoreCase("Lieu")) {
+								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
 
 							LeaveUtilizationList.add(leaveUtilization);
 							
@@ -773,7 +785,6 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						
 					}
 					
-					LeaveUtilizationList.stream().forEach(System.out::println);
 				}
 				Map<String, LeaveUtilization> utilizationMap= new HashMap<>();
 				//LeaveUtilization leave = new LeaveUtilization();
@@ -862,6 +873,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	}
 	
 	
+	
+
 	@Override
 	public void offUpdate(Employee employee, MultipartHttpServletRequest request) throws Throwable {
 		Session session = null;
@@ -1585,4 +1598,56 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	}
 	*/
 	
+	private List<LeaveUtilization> getConvertLieuTypeInOffInLieu(List leaveUtilizedList) {
+		double lieuTypeLeave = 0;
+		Map<String, LeaveUtilization> lieumap = null;
+		Map<String, LeaveUtilization> OffInLieuMap = null;
+		List<LeaveUtilization> lieuList = null;
+		try {
+			lieumap = new HashMap<>();
+			lieuList = new ArrayList<>();
+			OffInLieuMap = new HashMap<>();
+			if (leaveUtilizedList != null && !leaveUtilizedList.isEmpty()) {
+				for (Object object : leaveUtilizedList) {
+					LeaveUtilization leaveUtilization = new LeaveUtilization();
+					leaveUtilization = (LeaveUtilization) object;
+					if (leaveUtilization.getLeaveType().equalsIgnoreCase("Lieu")) {
+						lieumap.put(leaveUtilization.getLeaveType(), leaveUtilization);
+						
+					}
+					if (leaveUtilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
+						OffInLieuMap.put(leaveUtilization.getLeaveType(), leaveUtilization);
+					}
+				}
+				for (Object object : leaveUtilizedList) {
+					LeaveUtilization leaveUtilization = new LeaveUtilization();
+					leaveUtilization = (LeaveUtilization) object;
+					if (leaveUtilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
+						double offinlieuTypeLeave = leaveUtilization.getUtilizedLeave();
+						if (lieumap != null && !lieumap.isEmpty()) {
+							for (LeaveUtilization leave : lieumap.values()) {
+								lieuTypeLeave = leave.getUtilizedLeave();
+							}
+							leaveUtilization.setUtilizedLeave(offinlieuTypeLeave + lieuTypeLeave);
+						}
+					} else {
+						if (leaveUtilization.getLeaveType().equalsIgnoreCase("Lieu")) {
+							
+							if (OffInLieuMap == null || OffInLieuMap.isEmpty()) {
+								leaveUtilization.setLeaveType("Off In Lieu");
+							}
+						}
+					}
+					if (!leaveUtilization.getLeaveType().equalsIgnoreCase("Lieu")) {
+						lieuList.add(leaveUtilization);
+					}
+				}
+				//lieuList.stream().forEach(System.out::println);
+			}
+
+		} catch (Exception e) {
+			throw e;
+		}
+		return lieuList;
+	}
 }

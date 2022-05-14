@@ -82,6 +82,7 @@ import com.helius.entities.Leaves_Eligibility_defined_By_Client_Policy;
 import com.helius.entities.Singapore_Employee_Family_Member;
 import com.helius.entities.Singapore_Employee_Insurance_Details;
 import com.helius.entities.Sow_Ctc_Breakup;
+import com.helius.entities.Sow_Details;
 import com.helius.entities.Sow_Employee_Association;
 import com.helius.entities.Timesheet_Email;
 import com.helius.entities.Work_Permit_Master;
@@ -160,13 +161,26 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			}
 
 			// Assignment Details
+			
 			String employee_assignment_query = "select assignments.* from Employee_Assignment_Details assignments where employee_id = :employee_id ";
 			java.util.List assignmentList = session.createSQLQuery(employee_assignment_query)
 					.addEntity(Employee_Assignment_Details.class).setParameter("employee_id", employeeid).list();
 			Employee_Assignment_Details employee_Assigmnent_Details = null;
 			if (!assignmentList.isEmpty()) {
 				employee_Assigmnent_Details = (Employee_Assignment_Details) assignmentList.iterator().next();
+				List<Sow_Details> sow_details_list =null;
+				String sowquery = "select * from Sow_Employee_Association a, Sow_Details b where a.employee_id=:employee_id"
+						+ " and a.sow_details_id=b.sow_details_id and a.status='active' and  b.sow_status='active' ";
+				sow_details_list = session.createSQLQuery(sowquery).addEntity(Sow_Details.class)
+						.setParameter("employee_id", employeeid).list();
+				if(sow_details_list != null && !sow_details_list.isEmpty()){
+					
+					Sow_Details sowdetails =  sow_details_list.iterator().next();
+					employee_Assigmnent_Details.setSow_start_date(sowdetails.getSowStartDate());
+					employee_Assigmnent_Details.setSow_expiry_date(sowdetails.getSowExpiryDate());
+				}
 			}
+			
 			if (employee_Assigmnent_Details != null) {
 				emp.setEmployeeAssignmentDetails(employee_Assigmnent_Details);
 			}
@@ -649,9 +663,16 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			//Leave_Record_Details
 			String recordQuery ="";
 			List<Leave_Record_Details> recordQueryList =null;
+			List<Sow_Details> sow_details =null;
+			String sowquery = "select * from Sow_Employee_Association a, Sow_Details b where a.employee_id=:employee_id"
+					+ " and a.sow_details_id=b.sow_details_id and a.status='active' and  b.sow_status='active' ";
+			sow_details = session.createSQLQuery(sowquery).addEntity(Sow_Details.class)
+					.setParameter("employee_id", employee_id).list();
 			if ("Singapore".equalsIgnoreCase(workcountry)) {
 				recordQueryList = new ArrayList<>();
-				if (client_id == 227) {
+				
+				//if (client_id == 227) {
+				if(sow_details != null && !sow_details.isEmpty()) {
 					recordQuery = "SELECT DISTINCT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c,Sow_Employee_Association d,Sow_Details e"
 							+ " WHERE a.employee_id = :employee_id  AND a.employee_id=b.employee_id AND a.client_id=c.client_id "
 							+ "AND b.client=c.client_name AND a.employee_id = d.employee_id AND d.sow_details_id=e.sow_details_id AND e.sow_status ='Active' AND a.leaveMonth"
@@ -703,7 +724,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				LeaveUtilization utilization = null;
 				String leaveUtilizedQuery = "";
 				java.util.List leaveUtilizedList = null;
-				if (client_id == 227) {
+				//if (client_id == 227) {
+				if(sow_details != null && !sow_details.isEmpty()) {
 					leaveUtilizedQuery = "SELECT DISTINCT c.employee_id, SUM(a.leaves_used) AS utilizedLeave,a.type_of_leave AS leaveType, a.client_id FROM Leave_Record_Details a, Employee_Work_Permit_Details b,"
 							+ " Sow_Employee_Association c, Sow_Details d WHERE a.employee_id=b.employee_id AND b.work_country='Singapore' AND a.employee_id=c.employee_id AND c.sow_details_id=d.sow_details_id AND c.status='active'"
 							+ " AND d.sow_status='active' AND CAST(a.startdate AS DATE)>= CAST(d.sow_start_date AS DATE) AND CAST(a.enddate AS DATE) <= CAST(d.sow_expiry_date AS DATE) AND"
@@ -776,7 +798,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						}
 						if (utilization.getLeaveType().equalsIgnoreCase("Annual Leave")
 								|| utilization.getLeaveType().equalsIgnoreCase("Sick Leave")
-								|| utilization.getLeaveType().equalsIgnoreCase("Childcare Leave")
+								/*|| utilization.getLeaveType().equalsIgnoreCase("Childcare Leave")*/
 								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
 
 							LeaveUtilizationList.add(leaveUtilization);
@@ -855,7 +877,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						}
 						finalLeaveUtilizationList.add(leaveutil);
 						}
-				 finalLeaveUtilizationList.stream().forEach(System.out::println);
+				 //finalLeaveUtilizationList.stream().forEach(System.out::println);
 				 if(finalLeaveUtilizationList !=null && !finalLeaveUtilizationList.isEmpty()){
 					 employeeLeaveData.setLeaveUtilizations(finalLeaveUtilizationList);
 				 }

@@ -171,4 +171,14 @@ public class UserManager {
 		}
 		return new Status(true, "email service successfully");
 	}
+	
+	public Status deactivateExitEmpSelfcareAccount() throws Throwable{
+		try {
+			userService.deactivateExitEmpSelfcareAccount();
+		} catch (Throwable e) {
+			e.printStackTrace();
+			throw new Throwable(e.getMessage());
+		}
+		return new Status(true, "selfcare Users deactivated successfully");
+	}
 }

@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
@@ -32,7 +36,9 @@ import org.springframework.stereotype.Service;
 import com.helius.dao.EmployeeDAOImpl;
 import com.helius.entities.Employee;
 import com.helius.entities.Employee_Beeline_Details;
+import com.helius.entities.Employee_Personal_Details;
 import com.helius.entities.Employee_Selfcare_Users;
+import com.helius.entities.User;
 import com.helius.utils.Logindetails;
 import com.helius.utils.Utils;
 
@@ -626,13 +632,14 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		for (int i = 0; i < rr.length; i++) {
 			GrantedAuthority ga = new SimpleGrantedAuthority("ROLE_"+rr[i]);
 			role.add(ga);
-		}	*/		
+		}*/			
 		org.springframework.security.core.userdetails.User user_sec =
 				new org.springframework.security.core.userdetails.User(user.getEmployee_id(),decodedpassword,true,true,true,true,role);
 		inMemoryUserDetailsManager.updateUser(user_sec);
 		logger.info(" - user updated in memory "+user.getEmployee_id());
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see com.helius.service.UserService#getUser(java.lang.String)
 	 */
@@ -885,5 +892,73 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		}finally{
 			session.close();
 		}
+	}
+
+	@Override
+   @Scheduled(cron = "0 1 1 ? * *")
+	public void deactivateExitEmpSelfcareAccount() throws Throwable {
+		Session session =null;
+		Transaction transaction = null;
+		String exitEmpQuery="SELECT * FROM Employee_Personal_Details WHERE employee_status ='Exited' AND DATE(relieving_date)=DATE_SUB(CURDATE(), INTERVAL 1 DAY)";
+		List<String> processEmpSelfcareUser =null;
+		List<String> UnprocessEmpSelfcareUser =null;
+		String emailsubject = "Deactivate Employee selfcare User ";
+		String emailto = Utils.getProperty("emailUserName");
+		try {
+			session = sessionFactory.openSession();
+			transaction= session.beginTransaction();
+			processEmpSelfcareUser =new ArrayList<>();
+			UnprocessEmpSelfcareUser =new ArrayList<>();
+			List<Employee_Personal_Details> exitDetails = session.createSQLQuery(exitEmpQuery).addEntity(Employee_Personal_Details.class).list();
+			 
+			for (Employee_Personal_Details employee_Personal_Details : exitDetails) {
+				Employee_Selfcare_Users users = getUser(employee_Personal_Details.getEmployee_id());
+				try {
+					if (users !=null) {
+					    users.setActive("No");
+						session.update(users);
+						updateuser_to_memory(users);
+						processEmpSelfcareUser.add(users.getEmployee_id());
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					UnprocessEmpSelfcareUser.add(employee_Personal_Details.getEmployee_id());
+				}
+				}
+			transaction.commit();
+			if (processEmpSelfcareUser != null && !processEmpSelfcareUser.isEmpty()) {
+				StringBuffer message = new StringBuffer();
+				message.append("Hi," + "\n\n" + "Running daily service deactivate exit Employee Selfcare Account"
+						+ "\n\n" + "Total number of deactivate selfcare Account : " + processEmpSelfcareUser.size()
+						+ "\n\n");
+				for (String empidd : processEmpSelfcareUser) {
+					message.append(empidd + " ," + "\n");
+				}
+				message.append("\n\n" + "Thanks," + "\n\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd");
+				emailService.sendEmail(emailto, null, null, emailsubject, message.toString());
+				System.out.println("processExitEmployeeList::" + processEmpSelfcareUser);
+			}
+			if (UnprocessEmpSelfcareUser != null && !UnprocessEmpSelfcareUser.isEmpty()) {
+				StringBuffer message = new StringBuffer();
+				message.append("Hi," + "\n\n" + "issue in deactivate exit Employee Selfcare Account"
+						+ "\n\n");
+				for (String empidd : UnprocessEmpSelfcareUser) {
+					message.append(empidd + " ," + "\n");
+				}
+				message.append("\n\n" + "Thanks," + "\n\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd");
+				emailService.sendEmail(emailto, null, null, emailsubject, message.toString());
+				System.out.println("processExitEmployeeList::" + processEmpSelfcareUser);
+			}
+			
+		} catch (Exception e) {
+			StringBuffer message = new StringBuffer();
+			message.append("Hi," + "\n\n" + "Issue in deactivate exit employee selfcare Account " + "\n\n");
+			message.append("\n\n" + "Thanks," + "\n\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd");
+			emailService.sendEmail(emailto, null, null, emailsubject, message.toString());
+			e.printStackTrace();
+			throw new Throwable("Failed to Deactivate Exit Employee Login Account");
+		}
+		
 	}
 }

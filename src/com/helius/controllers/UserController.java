@@ -347,5 +347,20 @@ public class UserController {
 		}
 		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
 	}  
+	
+	@CrossOrigin
+    @RequestMapping(value = "dactivateSelcareUser", method = RequestMethod.GET)
+	public ResponseEntity<String> deactivateExitEmpSelfcareAccount() {
+		Status status = null;
+		try {
+			status = userManager.deactivateExitEmpSelfcareAccount();
+		} catch (Exception e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
+	}  
 
+	
 }

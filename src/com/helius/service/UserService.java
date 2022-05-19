@@ -36,6 +36,7 @@ public interface UserService {
 	ResponseEntity<byte[]> getPayslipFIle(String userId, String date) throws Throwable;
 	public void createBulkUserIdService() throws Throwable;
 	public void sendBulkNotifyForUserIdActivationLinkService() throws Throwable;
+	public void deactivateExitEmpSelfcareAccount() throws Throwable;
 
 
 }

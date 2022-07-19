@@ -86,8 +86,11 @@ public class Employee_Terms_And_Conditions {
 	private Timestamp create_date;
 	@Column	
 	private String created_by;
+	@Column
+	private String contract_startdate;
+	@Column
+	private String contract_enddate;
 
-	
 	public String getWaiving_of_commitment_amount() {
 		return waiving_of_commitment_amount;
 	}
@@ -199,7 +202,17 @@ public class Employee_Terms_And_Conditions {
 	public void setReservist_leave_allowed(String reservist_leave_allowed) {
 		this.reservist_leave_allowed = reservist_leave_allowed;
 	}
-	
-	
+	public String getContract_startdate() {
+		return contract_startdate;
+	}
+	public void setContract_startdate(String contract_startdate) {
+		this.contract_startdate = contract_startdate;
+	}
+	public String getContract_enddate() {
+		return contract_enddate;
+	}
+	public void setContract_enddate(String contract_enddate) {
+		this.contract_enddate = contract_enddate;
+	}
 	
 }

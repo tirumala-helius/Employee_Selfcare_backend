@@ -580,7 +580,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				int previousYear = LocalDate.now().getYear() - 1 ;
 				
 				leaveEligibility = "SELECT a.* FROM Leave_Eligibility_Details a, Employee_Assignment_Details b, client_details c  WHERE a.employee_id=:employee_id "
-						+ "AND a.employee_id=b.employee_id AND a.client_id=c.client_id AND   b.client=c.client_name and a.year IN("+previousYear+","+currentYear+")";
+						+ "AND a.employee_id=b.employee_id AND a.client_id=c.client_id AND   b.client=c.client_name and a.year ='"+currentYear+"'";
 				eligibilityList = session.createSQLQuery(leaveEligibility)
 						.addEntity(Leave_Eligibility_Details.class).setParameter("employee_id", employee_id).list();
 				
@@ -663,15 +663,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			//Leave_Record_Details
 			String recordQuery ="";
 			List<Leave_Record_Details> recordQueryList =null;
-			List<Sow_Details> sow_details =null;
+			/*List<Sow_Details> sow_details =null;
 			String sowquery = "select * from Sow_Employee_Association a, Sow_Details b where a.employee_id=:employee_id"
 					+ " and a.sow_details_id=b.sow_details_id and a.status='active' and  b.sow_status='active' ";
 			sow_details = session.createSQLQuery(sowquery).addEntity(Sow_Details.class)
-					.setParameter("employee_id", employee_id).list();
+					.setParameter("employee_id", employee_id).list();*/
 			if ("Singapore".equalsIgnoreCase(workcountry)) {
 				recordQueryList = new ArrayList<>();
 				
-				//if (client_id == 227) {
+				/*//if (client_id == 227) {
 				if(sow_details != null && !sow_details.isEmpty()) {
 					recordQuery = "SELECT DISTINCT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c,Sow_Employee_Association d,Sow_Details e"
 							+ " WHERE a.employee_id = :employee_id  AND a.employee_id=b.employee_id AND a.client_id=c.client_id "
@@ -689,7 +689,17 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					recordQueryList = session.createSQLQuery(recordQuery).addEntity(Leave_Record_Details.class)
 							.setParameter("employee_id", employee_id).list();
 
-				}
+				}*/
+				
+				    recordQuery = "SELECT DISTINCT a.* FROM Leave_Record_Details a, Employee_Assignment_Details b, client_details c,Employee_Terms_And_Conditions d "
+						+ "WHERE a.employee_id=b.employee_id AND a.employee_id = d.employee_id AND a.client_id=c.client_id AND b.client=c.client_name AND a.leaveMonth "
+						+ "AND CAST(a.startdate AS DATE)>= CAST(d.contract_startdate AS DATE) AND CAST(a.enddate AS DATE) <= CAST(d.contract_enddate AS DATE) AND "
+						+ "a.employee_id= :employee_id ORDER BY leaveMonth DESC";
+				    System.out.println("recordQuery::"+recordQuery);
+				    
+				    recordQueryList = session.createSQLQuery(recordQuery).addEntity(Leave_Record_Details.class)
+							.setParameter("employee_id", employee_id).list();
+				    
 
 			} else {
 				recordQuery = "select * from  Leave_Record_Details where employee_id = :employee_id AND YEAR(leaveMonth) = :year ORDER BY leaveMonth DESC";
@@ -725,7 +735,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				String leaveUtilizedQuery = "";
 				java.util.List leaveUtilizedList = null;
 				//if (client_id == 227) {
-				if(sow_details != null && !sow_details.isEmpty()) {
+				/*if(sow_details != null && !sow_details.isEmpty()) {
 					leaveUtilizedQuery = "SELECT DISTINCT c.employee_id, SUM(a.leaves_used) AS utilizedLeave,a.type_of_leave AS leaveType, a.client_id FROM Leave_Record_Details a, Employee_Work_Permit_Details b,"
 							+ " Sow_Employee_Association c, Sow_Details d WHERE a.employee_id=b.employee_id AND b.work_country='Singapore' AND a.employee_id=c.employee_id AND c.sow_details_id=d.sow_details_id AND c.status='active'"
 							+ " AND d.sow_status='active' AND CAST(a.startdate AS DATE)>= CAST(d.sow_start_date AS DATE) AND CAST(a.enddate AS DATE) <= CAST(d.sow_expiry_date AS DATE) AND"
@@ -743,7 +753,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					leaveUtilizedList = session.createSQLQuery(leaveUtilizedQuery)
 							.setResultTransformer(Transformers.aliasToBean(LeaveUtilization.class)).list();
 
-				}
+				}*/
+				leaveUtilizedQuery ="SELECT DISTINCT c.employee_id, SUM(a.leaves_used) AS utilizedLeave,a.type_of_leave AS leaveType, a.client_id FROM "
+						+ "Leave_Record_Details a, Employee_Work_Permit_Details b,Employee_Terms_And_Conditions c,Employee_Assignment_Details d,client_details e"
+						+ " WHERE a.employee_id=b.employee_id AND a.employee_id=c.employee_id AND a.employee_id = d.employee_id AND d.client =e.client_name AND "
+						+ "b.work_country='Singapore' AND CAST(a.startdate AS DATE)>= CAST(c.contract_startdate AS DATE) AND CAST(a.enddate AS DATE) <= CAST(c.contract_enddate AS DATE) "
+						+ "AND d.client !='Helius' AND a.employee_id ='" + employee_id + "' GROUP BY a.type_of_leave";
+				leaveUtilizedList = session.createSQLQuery(leaveUtilizedQuery)
+						.setResultTransformer(Transformers.aliasToBean(LeaveUtilization.class)).list();
+				
 				 List<LeaveUtilization> summaryOfLeaveUtilization = getConvertLieuTypeInOffInLieu(leaveUtilizedList);
 				
 				Map<String, Leave_Eligibility_Details> eligibilityMap = new HashMap<>();

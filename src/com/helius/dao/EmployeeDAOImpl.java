@@ -803,6 +803,10 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 										leaveUtilization.setBalanceLeave(annualAndCFLeave - utilization.getUtilizedLeave());
 									} else {
 										leaveUtilization.setBalanceLeave(eligible - utilization.getUtilizedLeave());
+										
+										if(utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")){
+											leaveUtilization.setBalanceLeave(eligible);
+										}
 									}
 								}
 								

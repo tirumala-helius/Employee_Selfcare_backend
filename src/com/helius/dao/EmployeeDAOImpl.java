@@ -1647,6 +1647,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		Map<String, LeaveUtilization> lieumap = null;
 		Map<String, LeaveUtilization> OffInLieuMap = null;
 		List<LeaveUtilization> lieuList = null;
+		logger.info("entering getConvertLieuTypeInOffInLieu at " + System.currentTimeMillis());
+		//System.out.println("entering getConvertLieuTypeInOffInLieu at " + System.currentTimeMillis()) ;
 		try {
 			lieumap = new HashMap<>();
 			lieuList = new ArrayList<>();
@@ -1688,6 +1690,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				}
 				//lieuList.stream().forEach(System.out::println);
 			}
+			logger.info("leaving getConvertLieuTypeInOffInLieu at " + System.currentTimeMillis());
+			//System.out.println("leaving getConvertLieuTypeInOffInLieu at " + System.currentTimeMillis()) ;
 
 		} catch (Exception e) {
 			throw e;

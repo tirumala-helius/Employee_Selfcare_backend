@@ -580,7 +580,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				int previousYear = LocalDate.now().getYear() - 1 ;
 				
 				leaveEligibility = "SELECT a.* FROM Leave_Eligibility_Details a, Employee_Assignment_Details b, client_details c  WHERE a.employee_id=:employee_id "
-						+ "AND a.employee_id=b.employee_id AND a.client_id=c.client_id AND   b.client=c.client_name and a.year ='"+currentYear+"'";
+						+ "AND a.employee_id=b.employee_id AND a.client_id=c.client_id AND   b.client=c.client_name and a.year In('"+currentYear+"','"+previousYear+"')";
+				System.out.println("leaveEligibility:"+leaveEligibility);
 				eligibilityList = session.createSQLQuery(leaveEligibility)
 						.addEntity(Leave_Eligibility_Details.class).setParameter("employee_id", employee_id).list();
 				

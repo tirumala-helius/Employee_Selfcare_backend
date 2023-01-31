@@ -757,9 +757,10 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				}*/
 				leaveUtilizedQuery ="SELECT DISTINCT c.employee_id, SUM(a.leaves_used) AS utilizedLeave,a.type_of_leave AS leaveType, a.client_id FROM "
 						+ "Leave_Record_Details a, Employee_Work_Permit_Details b,Employee_Terms_And_Conditions c,Employee_Assignment_Details d,client_details e"
-						+ " WHERE a.employee_id=b.employee_id AND a.employee_id=c.employee_id AND a.employee_id = d.employee_id AND d.client =e.client_name AND "
+						+ " WHERE a.employee_id=b.employee_id AND a.employee_id=c.employee_id AND a.employee_id = d.employee_id AND d.client =e.client_name AND a.client_id=e.client_id AND "
 						+ "b.work_country='Singapore' AND CAST(a.startdate AS DATE)>= CAST(c.contract_startdate AS DATE) AND CAST(a.enddate AS DATE) <= CAST(c.contract_enddate AS DATE) "
 						+ "AND d.client !='Helius' AND a.employee_id ='" + employee_id + "' GROUP BY a.type_of_leave";
+				System.out.println("leaveUtilizedQuery::"+leaveUtilizedQuery);
 				leaveUtilizedList = session.createSQLQuery(leaveUtilizedQuery)
 						.setResultTransformer(Transformers.aliasToBean(LeaveUtilization.class)).list();
 				

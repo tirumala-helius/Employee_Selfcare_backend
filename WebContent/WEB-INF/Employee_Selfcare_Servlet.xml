@@ -31,13 +31,13 @@
 	 <property name="url" value="jdbc:mysql://localhost:3306/leavemgmt?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
 		<property name="username" value="root" />
 		<property name="password" value="1234" />-->
-	  <property name="url" value="jdbc:mysql://hap.heliusapp.com:3306/helius_app?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
+	 <!--  <property name="url" value="jdbc:mysql://hap.heliusapp.com:3306/helius_app?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
 		<property name="username" value="vinay_app" />
-		<property name="password" value="123" />
+		<property name="password" value="123" /> -->
 		
-		<!-- <property name="url" value="jdbc:mysql://13.234.100.223:3306/helius_testing?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
+		<property name="url" value="jdbc:mysql://13.234.100.223:3306/helius_testing?zeroDateTimeBehavior=convertToNull&amp;useEncoding=true&amp;characterEncoding=UTF-8" />
 	<property name="username" value="vinay_app" />
-	<property name="password" value="123" /> -->
+	<property name="password" value="123" />
 		
 		
 	

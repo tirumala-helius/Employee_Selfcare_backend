@@ -15,5 +15,4 @@ public interface EmailService {
 	public void sendBulkEmail(String to,String[] cc,String[] bcc, String subject, String text) throws MessagingException;
 	public void sendEmailWithAttachment(String to,String[] cc,String[] bc, String subject, String message, List<File> files) throws MessagingException;
 	public void sendBulkEmailWithAttachment(String to,String[] cc,String[] bc, String subject, String message, List<File> files) throws MessagingException;
-	public void sendMessageWithAttachment(String to,String[] cc, String subject, String message, List<String> urlList) throws MessagingException;
 }

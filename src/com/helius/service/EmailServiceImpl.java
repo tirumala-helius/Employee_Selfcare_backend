@@ -10,6 +10,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -169,5 +170,35 @@ public class EmailServiceImpl implements EmailService {
 			}	
 			}
 			mailSender.send(message);
+	}
+	
+	
+	@Async
+	public void sendMessageWithAttachment(String to,String[] cc, String subject, String text,
+			List<String> pathToAttachment) throws MessagingException {
+			MimeMessage message = mailSender.createMimeMessage();
+			MimeMessageHelper helper = new MimeMessageHelper(message, true);
+			String from = (((JavaMailSenderImpl) mailSender).getUsername());
+			helper.setSubject(subject);
+			helper.setText(text.toString());
+			helper.setFrom(new InternetAddress(from));
+			String check =	Utils.getHapProperty("hcm_testing");
+			if ("yes".equalsIgnoreCase(check)) {
+				to = "hap-testing@helius-tech.com";
+				String[] testCC = new String[] { "hap-testing@helius-tech.com" };
+				cc = testCC;
+			}
+			helper.setTo(to);
+			if(cc!=null){
+			helper.setCc(cc);
+			}
+			if(!pathToAttachment.isEmpty() || pathToAttachment.size()!=0){
+			for (String file : pathToAttachment) {
+				FileSystemResource fr = new FileSystemResource(file);
+				helper.addAttachment(fr.getFilename(), fr); 
+			}	
+			}
+			mailSender.send(message);
+		//	syncSentItems(message);		    
 	}
 }

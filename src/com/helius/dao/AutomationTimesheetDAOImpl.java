@@ -459,10 +459,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 				return responseEntity = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
 			}
-			List<LocalDate> publicHolidayDates = publicholiday.stream()
-					.map(s -> LocalDate.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS][.S]")))
-					.collect(Collectors.toList());
-
+			
+			List<LocalDate> publicHolidayDates =  publicholiday.stream().map(ss ->LocalDate.parse(ss, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS][.S]"))).collect(Collectors.toList());
+			
 			int rowIndex = 7;
 			int workingDaysCount = 0;
 			double dayscount = 0;
@@ -1824,6 +1823,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
+		}
+		finally {
+			session.close();
 		}
 	}
 }

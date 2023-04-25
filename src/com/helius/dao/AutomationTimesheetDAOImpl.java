@@ -1824,8 +1824,5 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			e.printStackTrace();
 			throw e;
 		}
-		finally {
-			session.close();
-		}
 	}
 }

@@ -19,7 +19,7 @@ public class TimesheetAutomation {
 	private String empmailid;
 	private List<LeaveDetails> leaveDetails;
 	private List<OverTime> overTimes;
-	private Timestamp workingOnPH;
+	private List<WorkingOnPublicHolidays> workingOnPH;
 	private List<WorkedOnShifts> onShifts;
 
 	public String getEmpId() {
@@ -102,11 +102,11 @@ public class TimesheetAutomation {
 		this.overTimes = overTimes;
 	}
 
-	public Timestamp getWorkingOnPH() {
+	public List<WorkingOnPublicHolidays> getWorkingOnPH() {
 		return workingOnPH;
 	}
 
-	public void setWorkingOnPH(Timestamp workingOnPH) {
+	public void setWorkingOnPH(List<WorkingOnPublicHolidays> workingOnPH) {
 		this.workingOnPH = workingOnPH;
 	}
 

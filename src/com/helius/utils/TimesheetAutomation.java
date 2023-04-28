@@ -21,6 +21,7 @@ public class TimesheetAutomation {
 	private List<OverTime> overTimes;
 	private List<WorkingOnPublicHolidays> workingOnPH;
 	private List<WorkedOnShifts> onShifts;
+	private List<WorkingOnWeekEnds> workingOnWeekEnds;
 
 	public String getEmpId() {
 		return empId;
@@ -132,6 +133,14 @@ public class TimesheetAutomation {
 
 	public void setLeaveDetails(List<LeaveDetails> leaveDetails) {
 		this.leaveDetails = leaveDetails;
+	}
+
+	public List<WorkingOnWeekEnds> getWorkingOnWeekEnds() {
+		return workingOnWeekEnds;
+	}
+
+	public void setWorkingOnWeekEnds(List<WorkingOnWeekEnds> workingOnWeekEnds) {
+		this.workingOnWeekEnds = workingOnWeekEnds;
 	}
 
 }

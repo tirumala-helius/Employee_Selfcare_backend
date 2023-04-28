@@ -21,8 +21,6 @@ public class LeaveDetails {
 
 	private String remarks;
 
-	private Timestamp leaveMonth;
-
 	private Timestamp startdate;
 
 	private Timestamp enddate;
@@ -79,14 +77,6 @@ public class LeaveDetails {
 
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
-	}
-
-	public Timestamp getLeaveMonth() {
-		return leaveMonth;
-	}
-
-	public void setLeaveMonth(Timestamp leaveMonth) {
-		this.leaveMonth = leaveMonth;
 	}
 
 	public String getType_of_leave() {

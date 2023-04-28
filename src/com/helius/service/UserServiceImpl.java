@@ -716,6 +716,7 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	public ResponseEntity<byte[]> getPayslipFIle(String userId,String date) throws Throwable {
 		Session session = null;
 		byte[] files = null;
+		String check = Utils.awsCheckFlag();
 		try{
 		session = sessionFactory.openSession();
 		HashMap<String,String> assosc = getOldANDNewEmpIdAssosc();
@@ -745,17 +746,28 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		if(url == null || url.isEmpty()){
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		//if(url.contains("/"+employeeId+".")){
 		if(url.contains(File.separator+employeeId+".")){
 		FileInputStream fi = null;
 			File file = new File(url);
-			if (file.exists()) {
-				fi = new FileInputStream(url);
-				files = IOUtils.toByteArray(fi);
-				fi.close();
-			} else {
-				logger.error("payslip file not found for user - "+userId);
-				return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
+			if ("no".equalsIgnoreCase(check)) {
+				if (file.exists()) {
+					fi = new FileInputStream(url);
+					files = IOUtils.toByteArray(fi);
+					fi.close();
+				} else {
+					logger.error("payslip file not found for user - "+userId);
+					return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
+				}
 			}
+			if ("yes".equalsIgnoreCase(check)) {
+				try {
+					files = Utils.downloadFileByAWSS3Bucket(url);
+				} catch (Exception e) {
+					return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+				}
+			}
+			
 		}else{
 			logger.error("unable to download payslip as the filename is not matching with the userId "+userId+" filename is "+url);
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);

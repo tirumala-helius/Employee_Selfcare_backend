@@ -3,11 +3,9 @@ package com.helius.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,35 +16,46 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.taglibs.standard.extra.spath.AbsolutePath;
 import org.hibernate.Session;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.codec.Utf8;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-
-import java.util.Properties;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee;
 import com.helius.entities.Workpermit_Worklocation;
 import com.helius.entities.workpermit;
-import com.helius.service.UserServiceImpl;
-import com.microsoft.schemas.office.x2006.encryption.CTKeyEncryptor.Uri;
+
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 public class Utils {
 	public static Properties instance = null;
 	public static Properties happrop = null;
-
+    public static Properties awsprop = null;
+    private static String bucketName;
+	public static S3Client s3Client ;
+	
+	Utils(S3Client s3Client) {
+		this.s3Client = s3Client;
+	}
 	static{
 		String path = System.getProperty("jboss.server.home.dir")+"/conf/helius_hcm.properties";
 		//String path1 = "C:"+File.separator+"Users"+File.separator+"HELIUS"+File.separator+"git"+File.separator+"Helius-HCM-Server"+File.separator+"WebContent"+File.separator+"WEB-INF"+File.separator+"helius_hcm.properties";
@@ -77,12 +86,26 @@ public class Utils {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }	
+        }
+        
+		InputStream aws = null;
+		try {
+			awsprop = new Properties();
+			aws = Utils.class.getResourceAsStream("/com/helius/utils/awsconfig.properties");
+			awsprop.load(aws);
+			bucketName = awsprop.getProperty("aws.bucketname");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public Utils(){
-	
-	}
+	/*
+	 * public Utils(){
+	 * 
+	 * }
+	 */
 	
 	public static String getProperty(String key) {
 		return instance.getProperty(key);
@@ -91,7 +114,11 @@ public class Utils {
 	public static String getHapProperty(String key) {
 		return happrop.getProperty(key);
 	}
-
+    
+	public static String getAwsprop(String key) {
+		return awsprop.getProperty(key);
+	}
+	
 	private  org.hibernate.internal.SessionFactoryImpl sessionFactory;
 
 	/**
@@ -474,17 +501,22 @@ if(!(group_subgroups.containsValue(subgrp))){
 	
 	
 	public static FilecopyStatus copyFiles(MultipartHttpServletRequest request, Map<String,String> modifiedFilenames, String filefolder) throws Exception {
+		String check = Utils.awsCheckFlag();
 		List<String> copied_with_success = new ArrayList<String>();
 		FilecopyStatus success = new FilecopyStatus();
 		success.setOk(true);
 		String clientfilelocation = Utils.getProperty("fileLocation") + File.separator + filefolder;
-		File fileDir = new File(clientfilelocation);
-		if (!fileDir.exists()) {
-			boolean iscreated = fileDir.mkdirs();
-			if (!iscreated) {
-				throw new Exception("Failed to copy files Directory not available");
+		if ("no".equalsIgnoreCase(check)) {
+			
+			File fileDir = new File(clientfilelocation);
+			if (!fileDir.exists()) {
+				boolean iscreated = fileDir.mkdirs();
+				if (!iscreated) {
+					throw new Exception("Failed to copy files Directory not available");
+				}
 			}
 		}
+		
 		Iterator<String> fileNames = request.getFileNames();
 		//String filename = "";
 		while(fileNames.hasNext()) {		
@@ -495,16 +527,35 @@ if(!(group_subgroups.containsValue(subgrp))){
 			// filename = id + "_" + file.getOriginalFilename();
 			String fileUrl = clientfilelocation;
 			// fileUrl = fileUrl.replaceAll("\\\\", "\\\\\\\\");
-			try {
-				file.transferTo(new File(new File(fileUrl), modifiedfilename));
-				copied_with_success.add(fileUrl+File.separator + modifiedfilename);
-			} catch (IllegalStateException | IOException e) {
-				// TODO Auto-generated catch block
-				//success = false;
-				success.setOk(false);
-				deleteFiles(copied_with_success);
-				throw new Exception("Failed to save the files")	;					
+			
+			if ("no".equalsIgnoreCase(check)) {
+				try {
+					file.transferTo(new File(new File(fileUrl), modifiedfilename));
+					copied_with_success.add(fileUrl+File.separator + modifiedfilename);
+				} catch (IllegalStateException | IOException e) {
+					// TODO Auto-generated catch block
+					//success = false;
+					success.setOk(false);
+					deleteFiles(copied_with_success);
+					throw new Exception("Failed to save the files")	;					
+				}
 			}
+			//upload file aws s3-bucket
+			if ("yes".equalsIgnoreCase(check)) {
+				String sucessMsg = "";
+				try {
+					String folder_path = filefolder + "/";
+					sucessMsg = saveAwsS3bucket(file, modifiedfilename, folder_path);
+					copied_with_success.add(sucessMsg);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					success.setOk(false);
+					deleteFiles(copied_with_success);
+					throw new Exception(e.getMessage());
+				}
+			}
+			
 		}
 		success.setCopied_with_success(copied_with_success);
 		return success;
@@ -616,4 +667,148 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 		ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(files, HttpStatus.OK);
 		return responseEntity;
 	}
+	public static byte[] downloadFileByAWSS3Bucket(String filePath) throws Exception {
+		byte[] bytes = null;
+		String fileUrl = removeExistingPath(filePath);
+	try {
+			boolean fileExist = doesKeyExist(bucketName, fileUrl, s3Client);
+			if (fileExist == true) {
+				 software.amazon.awssdk.core.ResponseBytes<GetObjectResponse> s3Object = s3Client.getObject(
+		                    GetObjectRequest.builder().bucket(bucketName).key(fileUrl).build(),
+		                    ResponseTransformer.toBytes());
+				 bytes = s3Object.asByteArray();
+
+			} else {
+				throw new Exception("File Not Found");
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return bytes;
+	}
+	
+	//creating aws s3client Object
+	/*
+	 * public static S3Client s3client() { return S3Client.builder().build();
+	 * 
+	 * }
+	 */
+	
+	public static boolean doesKeyExist(String bucket, String key, S3Client s3Client) {
+		ListObjectsV2Response listObjects = s3Client
+				.listObjectsV2(ListObjectsV2Request.builder().bucket(bucket).prefix(key).build());
+		return !listObjects.contents().isEmpty();
+	}
+	
+	public static void convertXlsxAndPdfFileToByte(byte[] pdfBytes, String out) {
+		
+		PutObjectResponse response = s3Client.putObject(PutObjectRequest.builder().bucket(bucketName).key(out).build(),
+				RequestBody.fromBytes(pdfBytes));
+		System.out.println(response);
+		/*
+		 * InputStream inp =new ByteArrayInputStream(pdfBytes);
+		 * 
+		 * PutObjectRequest putObjectRequest =
+		 * PutObjectRequest.builder().bucket(bucketName).key(out)
+		 * .contentType("application/pdf").build(); s3Client.putObject(putObjectRequest,
+		 * RequestBody.fromInputStream(inp, pdfBytes.length));
+		 */
+		 
+	}
+	public static Boolean checkFileExist(String invoicepdfpathfolder) {
+		boolean fileExist = doesKeyExist(bucketName, invoicepdfpathfolder, s3Client);
+		return fileExist;
+	}
+
+	public static String removeExistingPath(String filePath) {
+		String url = "";
+		String[] p = filePath.split("/", 5);
+		String newpath = "";
+		if (p.length >= 5) {
+
+			newpath = p[0] + "/" + p[1] + "/" + p[2] + "/" + p[3] + "/";
+
+			if (newpath.equalsIgnoreCase("/opt/wildfly-10.1.0.Final/haptesting/")) {
+				url = filePath.replace(newpath, "");
+			} else {
+				// condn for /opt/wildfly-10.1.0.Final/ if it is match replace it ""
+				newpath = p[0] + "/" + p[1] + "/" + p[2] + "/";
+				if (newpath.equalsIgnoreCase("/opt/wildfly-10.1.0.Final/")) {
+					url = filePath.replace(newpath, "");
+				} else {
+					url = filePath;
+				}
+
+			}
+		} else {
+			url = filePath;
+		}
+		return url;
+	}
+
+	public static String awsCheckFlag() {
+		String awsCheck = "";
+		 awsCheck = Utils.getHapProperty("aws_s3flag");
+		//awsCheck = Utils.getHapProperty("hcm_testing");
+		return awsCheck;
+
+	}
+	 public static void deleteFiles(File dirPath) {
+	      File filesList[] = dirPath.listFiles();
+	      for(File file : filesList) {
+	         if(file.isFile()) {
+	            file.delete();
+	         } else {
+	            deleteFiles(file);
+	         }
+	      }
+	 }
+	 
+	 public static String saveAwsS3bucket(MultipartFile file, String modifiedfilename, String folder)throws Exception {
+			boolean flag=false;
+			String sucessMsg="";
+			try {
+
+				File file1 = convertMultipartToFile(file);
+			
+				String filepath=folder + modifiedfilename;
+		        
+				PutObjectRequest request = PutObjectRequest.builder()
+		                            .bucket(bucketName).key(filepath).build();
+		         
+				s3Client.putObject(request, RequestBody.fromFile(file1));  
+				     flag = doesKeyExist(bucketName, filepath,s3Client);
+				
+			
+			if (flag == true) {
+				sucessMsg=bucketName+"/"+filepath;
+			}
+			else {
+				throw new Exception("Failed to save File");
+			}
+				
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new Exception(e.getMessage());
+			}
+			return sucessMsg;	
+			}
+	 
+	 private static File convertMultipartToFile(MultipartFile file){
+			
+	     File converFile = new File(file.getOriginalFilename());
+	     FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(converFile);
+			fos.write(file.getBytes());
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+ 	return converFile;
+		}
 }

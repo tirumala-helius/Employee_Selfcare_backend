@@ -85,7 +85,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 	InputStream is = null;
 	String extension = null;
-
+     private String check = Utils.awsCheckFlag();
 	private void readinvoice_template() {
 
 		String url = Utils.getProperty("fileLocation") + File.separator + "DAH2timesheet_details" + File.separator
@@ -168,7 +168,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	@Override
 	public ResponseEntity<byte[]> createAutomationTimesheet(String clientjson, MultipartHttpServletRequest request)
 			throws Throwable, JsonProcessingException {
-
+        // String check = Utils.awsCheckFlag();
 		Session session = null;
 		Transaction transaction = null;
 
@@ -1049,20 +1049,33 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 			// write the workbook to a server
 			try {
+				 ByteArrayOutputStream bos = new ByteArrayOutputStream();
+               if ("no".equalsIgnoreCase(check)) {
+            	   String tempfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details";
+   				File fileDir = new File(tempfilelocation);
+   				if (!fileDir.exists()) {
+   					boolean iscreated = fileDir.mkdirs();
+   					if (!iscreated) {
+   						throw new Exception("Failed to create Directory");
+   					}
+   				}
 
-				String tempfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details";
-				File fileDir = new File(tempfilelocation);
-				if (!fileDir.exists()) {
-					boolean iscreated = fileDir.mkdirs();
-					if (!iscreated) {
-						throw new Exception("Failed to create Directory");
-					}
-				}
-
-				String path = fileDir + File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-				FileOutputStream fileOut = new FileOutputStream(path);
-				workbook.write(fileOut);
-				fileOut.close();
+   				String path = fileDir + File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+   				FileOutputStream fileOut = new FileOutputStream(path);
+   				workbook.write(fileOut);
+   				fileOut.close();
+			}
+               if ("yes".equalsIgnoreCase(check)) {
+            	   //windows path
+            	 //  String path1 =  "timesheet_details"+"/" + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+            	   //linux path
+            	  String path1 =  "timesheet_details" +File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+            	   workbook.write(bos);
+            	   System.out.println("bos"+bos.toByteArray().length);
+            	   Utils.convertXlsxAndPdfFileToByte(bos.toByteArray(),path1);
+            	   bos.close();
+			}
+				
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1074,13 +1087,19 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			FileInputStream fi = null;
 			String clientfilelocation = null;
 			try {
-				// if("no".equalsIgnoreCase(check)) {
+				if("no".equalsIgnoreCase(check)) {
 				clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
 						+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
 				fi = new FileInputStream(clientfilelocation);
 				files = IOUtils.toByteArray(fi);
 				fi.close();
-				// }
+				}
+				
+				if ("yes".equalsIgnoreCase(check)) {
+					clientfilelocation ="timesheet_details"	+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+					//clientfilelocation ="timesheet_details"	+ "/" + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
+				}
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();
 				throw new Throwable("Unable to get files " + e1.getMessage());
@@ -1702,7 +1721,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 	@Override
 	public void sendTimesheetAutomationmail(String json, MultipartHttpServletRequest request) throws Throwable {
-
+        
 		ObjectMapper obm = new ObjectMapper();
 		SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
 		Session session = null;
@@ -1834,13 +1853,18 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			List<String> urlList = new ArrayList<String>();
 
 			try {
-				// if("no".equalsIgnoreCase(check)) {
+				 if("no".equalsIgnoreCase(check)) {
 				clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
 						+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
 				fi = new FileInputStream(clientfilelocation);
 				files = IOUtils.toByteArray(fi);
 				fi.close();
-				// }
+				 }
+				 if("yes".equalsIgnoreCase(check)) {
+						clientfilelocation = "timesheet_details"+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+						//clientfilelocation = "timesheet_details" +"/"+ empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+						files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
+						 }
 
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();
@@ -1863,13 +1887,19 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					FileInputStream fi1 = null;
 					String clientfilelocation1 = null;
 					try {
-						// if("no".equalsIgnoreCase(check)) {
+						 if("no".equalsIgnoreCase(check)) {
 						clientfilelocation1 = Utils.getProperty("fileLocation") + File.separator + "leaverecords"
 								+ File.separator + empid + "_" + client + "_" + leaveDetails2.getLeaveRecordPath();
 						fi1 = new FileInputStream(clientfilelocation1);
 						file1 = IOUtils.toByteArray(fi1);
 						fi1.close();
-						// }
+						}
+						 if ("yes".equalsIgnoreCase(check)) {
+							 clientfilelocation1 =  "leaverecords"+ File.separator + empid + "_" + client + "_" + leaveDetails2.getLeaveRecordPath();
+							//  clientfilelocation1 =  "leaverecords"+ "/" + empid + "_" + client + "_" + leaveDetails2.getLeaveRecordPath();
+							  file1 = Utils.downloadFileByAWSS3Bucket(clientfilelocation1);
+
+						}
 
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();

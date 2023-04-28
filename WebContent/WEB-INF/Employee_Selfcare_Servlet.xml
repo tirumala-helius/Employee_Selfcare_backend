@@ -138,6 +138,8 @@
 		<property name="automationTimesheetDAO" ref="automationTimesheetDAO" />
 	</bean>
 	
+	<bean id="awsconfig" class="com.helius.utils.AwsS3BucketConfig" />
+	
 	<bean id="Utils" class="com.helius.utils.Utils">
 	 </bean>
 	<!-- <bean id="clientDAO" class="com.helius.dao.ClientDAOImpl">

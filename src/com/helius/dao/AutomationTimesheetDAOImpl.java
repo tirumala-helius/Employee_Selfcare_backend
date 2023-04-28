@@ -66,6 +66,7 @@ import com.helius.utils.TimesheetAutomationHolidays;
 import com.helius.utils.Utils;
 import com.helius.utils.WorkedOnShifts;
 import com.helius.utils.WorkingOnPublicHolidays;
+import com.helius.utils.WorkingOnWeekEnds;
 
 public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
@@ -406,7 +407,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			headerCell7.setCellValue(client);
 			Row headerRow41 = sheet.getRow(4);
 			Cell headerCell9 = headerRow41.getCell(3);
-			headerCell9.setCellValue(managername);
+			headerCell9.setCellValue("N/A");
 			Row headerRow51 = sheet.getRow(5);
 			Cell headerCell11 = headerRow51.getCell(3);
 			headerCell11.setCellValue(monthYearString);
@@ -427,6 +428,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			LocalDate endDate1 = automation.getEnddate().toLocalDateTime().toLocalDate();
 
 			List<WorkingOnPublicHolidays> workingOnPublicHolidays = automation.getWorkingOnPH();
+			List<WorkingOnWeekEnds> onWeekEnds = automation.getWorkingOnWeekEnds();
 			List<LeaveDetails> leaveDetails = automation.getLeaveDetails();
 			List<WorkedOnShifts> onShifts = automation.getOnShifts();
 			List<String> publicholiday = new ArrayList<>();
@@ -610,7 +612,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						cell.setCellValue(0);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
 
-						cell = row.createCell(9, CellType.STRING); 
+						cell = row.createCell(9, CellType.STRING);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
 					}
 				}
@@ -976,6 +978,33 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					LocalDate workingonPH = onPublicHolidays.getWorkedonPublicHoliday().toLocalDateTime().toLocalDate();
 
 					if (date.isEqual(workingonPH)) {
+						cell = row.createCell(5, CellType.STRING);
+						cell.setCellValue("PRESENT");
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+						cell = row.createCell(6, CellType.STRING);
+						cell.setCellValue("FULL DAY");
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+						cell = row.createCell(7, CellType.STRING);
+						cell.setCellValue(1);
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+						cell = row.createCell(8, CellType.STRING);
+						cell.setCellValue(8);
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+						cell = row.createCell(9, CellType.STRING);
+						cell.setCellValue("AM");
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+					}
+
+				}
+
+				for (WorkingOnWeekEnds workingOnWeekEnds : onWeekEnds) {
+					LocalDate workingonweekend = workingOnWeekEnds.getWorkOnWeekEnd().toLocalDateTime().toLocalDate();
+
+					if (date.isEqual(workingonweekend)) {
 						cell = row.createCell(5, CellType.STRING);
 						cell.setCellValue("PRESENT");
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
@@ -1711,7 +1740,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					record_Details.setType_of_leave(leaveDetails2.getType_of_leave());
 					record_Details.setAmpm(leaveDetails2.getAmpm());
 					record_Details.setRemarks(leaveDetails2.getRemarks());
-					record_Details.setLeaveMonth(leaveDetails2.getLeaveMonth());
+					record_Details.setLeaveMonth(automation.getLeaveMonth());
 					record_Details.setStartdate(leaveDetails2.getStartdate());
 					record_Details.setEnddate(leaveDetails2.getEnddate());
 					record_Details.setLeaves_used(leaveDetails2.getLeaves_used());
@@ -1940,5 +1969,5 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			throw e;
 		}
 	}
-	
+
 }

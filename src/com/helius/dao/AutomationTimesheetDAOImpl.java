@@ -1079,7 +1079,10 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				return responseEntity = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+				Map<String, String> errorDetails = new HashMap<>();
+				errorDetails.put("message", "Failed to Generate Automation Timesheet File :Failed To Save File");
+				String json = new ObjectMapper().writeValueAsString(errorDetails);
+				return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.INTERNAL_SERVER_ERROR).body(json.getBytes());
 			}
 			// To get Automation timesheet from server
 
@@ -1100,18 +1103,21 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					//clientfilelocation ="timesheet_details"	+ "/" + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
 					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
 				}
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-				throw new Throwable("Unable to get files " + e1.getMessage());
-			} catch (IOException e) {
+			}  catch (Exception e) {
 				e.printStackTrace();
-
-				return responseEntity = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+				Map<String, String> errorDetails = new HashMap<>();
+				errorDetails.put("message", "Failed to Generate Automation Timesheet File :Failed to Get File From Server ");
+				String json = new ObjectMapper().writeValueAsString(errorDetails);
+				return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.NOT_FOUND).body(json.getBytes());
 			}
 			responseEntity = new ResponseEntity<byte[]>(files, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			//return responseEntity = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			Map<String, String> errorDetails = new HashMap<>();
+			errorDetails.put("message", "Failed to Generate Automation Timesheet File,Contact Your Manager");
+			String json = new ObjectMapper().writeValueAsString(errorDetails);
+			return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.INTERNAL_SERVER_ERROR).body(json.getBytes());
 
 		} finally {
 			session.close();

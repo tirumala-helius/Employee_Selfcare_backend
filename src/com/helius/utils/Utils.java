@@ -648,18 +648,35 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 	}
 	
 	public static ResponseEntity<byte[]> downloadFileByUrl(String url) {
+		String awsCheck = awsCheckFlag();
 		byte[] files = null;
 		FileInputStream fi = null;
 		try {
-			String fileUrl = Utils.getProperty("fileLocation")+ File.separator + url;
-			File file = new File(fileUrl);
-			if (file.exists()) {
-				fi = new FileInputStream(fileUrl);
-				files = IOUtils.toByteArray(fi);
-				fi.close();
-			} else {
-				return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			
+			if ("no".equalsIgnoreCase(awsCheck)) {
+				String fileUrl = Utils.getProperty("fileLocation")+ File.separator + url;
+				File file = new File(fileUrl);
+				if (file.exists()) {
+					fi = new FileInputStream(fileUrl);
+					files = IOUtils.toByteArray(fi);
+					fi.close();
+				} else {
+					return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+				}
 			}
+			if ("yes".equalsIgnoreCase(awsCheck)) {
+				try {
+					if (url!=null &&!url.isEmpty()) {
+						files = downloadFileByAWSS3Bucket(url);
+					}else {
+						return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+				}
+			}
+			
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);

@@ -4,9 +4,14 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,10 +27,10 @@ import com.helius.utils.Utils;
 
 @Service("emailService")
 public class EmailServiceImpl implements EmailService {
-
+    String awsCheck = Utils.awsCheckFlag();
 	@Autowired
 	private JavaMailSender mailSender;
-
+   
 	@Bean
 	public JavaMailSender getJavaMailSender() {
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -192,12 +197,40 @@ public class EmailServiceImpl implements EmailService {
 			if(cc!=null){
 			helper.setCc(cc);
 			}
-			if(!pathToAttachment.isEmpty() || pathToAttachment.size()!=0){
+			
+			if((!pathToAttachment.isEmpty() || pathToAttachment.size()!=0)&&
+					"no".equalsIgnoreCase(awsCheck)){
 			for (String file : pathToAttachment) {
 				FileSystemResource fr = new FileSystemResource(file);
 				helper.addAttachment(fr.getFilename(), fr); 
-			}	
 			}
+			}
+			if ((!pathToAttachment.isEmpty() || pathToAttachment.size()!=0)&&
+					"yes".equalsIgnoreCase(awsCheck)) {
+	           	 MimeMultipart multipart = new MimeMultipart();
+	   	         MimeBodyPart messageBodyPart = new MimeBodyPart();
+	   	        // messageBodyPart.setContent(text, "text/html");
+	   	         messageBodyPart.setText(text);
+	   	         multipart.addBodyPart(messageBodyPart);
+					for (String file : pathToAttachment) {
+						try {
+							File file1 = new File(file);
+						     String filename = file1.getName();
+							byte[] content =Utils.downloadFileByAWSS3Bucket(file);
+							 MimeBodyPart attachmentPart = new MimeBodyPart();
+							 DataSource source = new ByteArrayDataSource(content, "application/octet-stream");
+					            attachmentPart.setDataHandler(new DataHandler(source));
+					            attachmentPart.setFileName(filename);
+					            multipart.addBodyPart(attachmentPart);
+						
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					}
+					message.setContent(multipart);
+				}
 			mailSender.send(message);
 		//	syncSentItems(message);		    
 	}

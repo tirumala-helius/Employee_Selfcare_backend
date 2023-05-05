@@ -99,6 +99,7 @@
 			 	<value>com.helius.entities.Leave_Eligibility_Details</value>
 			 	<value>com.helius.entities.Leave_Usage_Details</value>
 			 	<value>com.helius.entities.Leave_Record_Details</value>
+			 	<value>com.helius.entities.ClientTimesheetMaster</value>
 			 	
 			</list>
 		</property>
@@ -136,6 +137,13 @@
 	</bean>
 	<bean id="automationManager" class="com.helius.managers.TimesheetAutomationManager">
 		<property name="automationTimesheetDAO" ref="automationTimesheetDAO" />
+	</bean>
+	
+	<bean id="clientTimesheetMasterDAO" class="com.helius.dao.ClientTimesheetMasterDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	<bean id="timesheetMasterManager" class="com.helius.managers.ClientTimesheetMasterManager">
+		<property name="clientTimesheetMasterDAO" ref="clientTimesheetMasterDAO" />
 	</bean>
 	
 	<bean id="awsconfig" class="com.helius.utils.AwsS3BucketConfig" />

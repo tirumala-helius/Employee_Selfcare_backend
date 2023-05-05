@@ -588,7 +588,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					cell.setCellValue(8);
 					cell.setCellStyle(getHeaderCellStyle2(workbook));
 					cell = row.createCell(9, CellType.STRING);
-					cell.setCellValue("AM");
+					//cell.setCellValue("AM");
 					cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 					if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
@@ -819,7 +819,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 							} else {
 								if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
 									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("COM");
+									cell.setCellValue("COMP");
 									cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 									cell = row.createCell(6, CellType.STRING);
@@ -843,7 +843,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 								} else {
 
 									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("COM");
+									cell.setCellValue("COMP");
 									cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 									cell = row.createCell(6, CellType.STRING);
@@ -924,7 +924,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 								} else {
 
 									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("CL");
+									cell.setCellValue("OFF");
 									cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 									cell = row.createCell(6, CellType.STRING);
@@ -995,7 +995,6 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 						cell = row.createCell(9, CellType.STRING);
-						cell.setCellValue("AM");
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
 					}
 
@@ -1022,7 +1021,6 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 						cell = row.createCell(9, CellType.STRING);
-						cell.setCellValue("AM");
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
 					}
 

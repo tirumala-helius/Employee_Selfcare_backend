@@ -5,16 +5,27 @@ import java.sql.Timestamp;
 
 public class WorkedOnShifts {
 
-	private Timestamp date;
+	private Timestamp startDate;
+	
+	private Timestamp endDate;
 
 	private String shiftName;
 
-	public Timestamp getDate() {
-		return date;
+
+	public Timestamp getStartDate() {
+		return startDate;
 	}
 
-	public void setDate(Timestamp date) {
-		this.date = date;
+	public void setStartDate(Timestamp startDate) {
+		this.startDate = startDate;
+	}
+
+	public Timestamp getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Timestamp endDate) {
+		this.endDate = endDate;
 	}
 
 	public String getShiftName() {

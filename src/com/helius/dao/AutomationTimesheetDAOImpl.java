@@ -61,6 +61,7 @@ import com.helius.entities.Leave_Usage_Details;
 import com.helius.service.EmailService;
 import com.helius.utils.FilecopyStatus;
 import com.helius.utils.LeaveDetails;
+import com.helius.utils.RotationalWeekEnds;
 import com.helius.utils.TimesheetAutomation;
 import com.helius.utils.TimesheetAutomationHolidays;
 import com.helius.utils.Utils;
@@ -85,7 +86,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 	InputStream is = null;
 	String extension = null;
-     private String awsCheck = Utils.awsCheckFlag();
+	private String awsCheck = Utils.awsCheckFlag();
+
 	private void readinvoice_template() {
 
 		String url = Utils.getProperty("fileLocation") + File.separator + "DAH2timesheet_details" + File.separator
@@ -168,7 +170,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	@Override
 	public ResponseEntity<byte[]> createAutomationTimesheet(String clientjson, MultipartHttpServletRequest request)
 			throws Throwable, JsonProcessingException {
-        // String check = Utils.awsCheckFlag();
+		// String check = Utils.awsCheckFlag();
 		Session session = null;
 		Transaction transaction = null;
 
@@ -198,6 +200,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			// new XSSFWorkbook for every employee.
 
 			/*
+			 * 
 			 * // create a new Excel workbook Workbook workbook1 = new XSSFWorkbook();
 			 * 
 			 * // create a new sheet in the workbook Sheet sheet1 =
@@ -240,8 +243,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * Cell cell = row.getCell(c); if (cell == null) { cell = row.createCell(c); }
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
-			 * Row headerRow2 = sheet1.createRow(2); // CellStyle headerCellStyle =
-			 * getHeaderCellStyle(workbook); Cell headerCell4 = headerRow2.createCell(1);
+			 * Row headerRow2 = sheet1.createRow(2); // CellStyle headerCellStyle
+			 * =getHeaderCellStyle(workbook); Cell headerCell4 = headerRow2.createCell(1);
 			 * headerCell4.setCellValue("EMP_NAME"); //
 			 * headerCell4.setCellStyle(getHeaderCellStyle(workbook));
 			 * sheet1.addMergedRegion(new CellRangeAddress(2, 2, 1, 2)); CellRangeAddress
@@ -275,7 +278,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * Cell cell = row.getCell(c); if (cell == null) { cell = row.createCell(c); }
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
-			 * Cell headerCell71= headerRow3.createCell(3);
+			 * Cell headerCell71 = headerRow3.createCell(3);
 			 * headerCell71.setCellValue(client); //
 			 * headerCell7.setCellStyle(getHeaderCellStyle(workbook));
 			 * sheet1.addMergedRegion(new CellRangeAddress(3, 3, 3, 9)); CellRangeAddress
@@ -374,9 +377,6 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * 
 			 * cell.setCellStyle(getHeaderCellStyle(workbook1)); } }
 			 * 
-			 * 
-			 * 
-			 * 
 			 * try {
 			 * 
 			 * String tempfilelocation = Utils.getProperty("fileLocation") + File.separator
@@ -390,6 +390,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * 
 			 * } catch (Exception e) { e.printStackTrace(); return responseEntity = new
 			 * ResponseEntity<byte[]>(HttpStatus.NOT_FOUND); }
+			 * 
 			 * 
 			 */
 
@@ -426,6 +427,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			LocalDate firstDayOfMonth = localDate.withDayOfMonth(1);
 			LocalDate startDate1 = automation.getStartdate().toLocalDateTime().toLocalDate();
 			LocalDate endDate1 = automation.getEnddate().toLocalDateTime().toLocalDate();
+
+			String workingonRotationalshift = automation.getWorkingOnRotationalshifts();
 
 			List<WorkingOnPublicHolidays> workingOnPublicHolidays = automation.getWorkingOnPH();
 			List<WorkingOnWeekEnds> onWeekEnds = automation.getWorkingOnWeekEnds();
@@ -472,93 +475,69 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			double weekoffcount = 0;
 			double pholidatcount = 0;
 
-			for (int i = firstDay - 1; i < lastDay; i++) {
+			if (workingonRotationalshift.equalsIgnoreCase("NO")) {
+				for (int i = firstDay - 1; i < lastDay; i++) {
 
-				LocalDate date = firstDayOfMonth.plusDays(i);
-				int newrowindex = rowIndex++;
-				Row row = sheet.createRow(newrowindex);
-				Cell cell = row.createCell(1, CellType.STRING);
+					LocalDate date = firstDayOfMonth.plusDays(i);
+					int newrowindex = rowIndex++;
+					Row row = sheet.createRow(newrowindex);
+					Cell cell = row.createCell(1, CellType.STRING);
 
-				sheet.addMergedRegion(new CellRangeAddress(newrowindex, newrowindex, 1, 2));
-				CellRangeAddress mergedRange14 = sheet.getMergedRegion(13);
-				cell.setCellValue(date.format(dateFormatter));
-				// String currentdate = date.format(dateFormatter);
-				for (int r = mergedRange14.getFirstRow(); r <= mergedRange14.getLastRow(); r++) {
-					Row row1 = sheet.getRow(r);
-					if (row1 == null) {
-						row1 = sheet.createRow(r);
-					}
-					for (int c = mergedRange14.getFirstColumn(); c <= mergedRange14.getLastColumn(); c++) {
-						Cell cell1 = row.getCell(c);
-						if (cell1 == null) {
-							cell1 = row.createCell(c);
+					sheet.addMergedRegion(new CellRangeAddress(newrowindex, newrowindex, 1, 2));
+					CellRangeAddress mergedRange14 = sheet.getMergedRegion(13);
+					cell.setCellValue(date.format(dateFormatter));
+					// String currentdate = date.format(dateFormatter);
+					for (int r = mergedRange14.getFirstRow(); r <= mergedRange14.getLastRow(); r++) {
+						Row row1 = sheet.getRow(r);
+						if (row1 == null) {
+							row1 = sheet.createRow(r);
 						}
+						for (int c = mergedRange14.getFirstColumn(); c <= mergedRange14.getLastColumn(); c++) {
+							Cell cell1 = row.getCell(c);
+							if (cell1 == null) {
+								cell1 = row.createCell(c);
+							}
 
-						if (publicHolidayDates.contains(date)) {
-							cell1.setCellStyle(getHeaderCellStyle5(workbook));
+							if (publicHolidayDates.contains(date)) {
+								cell1.setCellStyle(getHeaderCellStyle5(workbook));
 
-						} else {
-							cell1.setCellStyle(getHeaderCellStyle2(workbook));
-						}
-					}
-				}
-				cell = row.createCell(3, CellType.STRING);
-				sheet.addMergedRegion(new CellRangeAddress(newrowindex, newrowindex, 3, 4));
-				CellRangeAddress mergedRange15 = sheet.getMergedRegion(14);
-
-				cell.setCellValue(date.format(dayFormatter));
-				String day = date.format(dayFormatter);
-				for (int r = mergedRange15.getFirstRow(); r <= mergedRange15.getLastRow(); r++) {
-					Row row1 = sheet.getRow(r);
-					if (row1 == null) {
-						row1 = sheet.createRow(r);
-					}
-					for (int c = mergedRange15.getFirstColumn(); c <= mergedRange15.getLastColumn(); c++) {
-						Cell cell1 = row.getCell(c);
-						if (cell1 == null) {
-							cell1 = row.createCell(c);
-						}
-						if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")) {
-							cell1.setCellStyle(getHeaderCellStyle3(workbook));
-
-						} else {
-							cell1.setCellStyle(getHeaderCellStyle2(workbook));
+							} else {
+								cell1.setCellStyle(getHeaderCellStyle2(workbook));
+							}
 						}
 					}
-				}
+					cell = row.createCell(3, CellType.STRING);
+					sheet.addMergedRegion(new CellRangeAddress(newrowindex, newrowindex, 3, 4));
+					CellRangeAddress mergedRange15 = sheet.getMergedRegion(14);
 
-				cell = row.createCell(5, CellType.STRING);
-				// cell.setCellValue("");
-				cell.setCellStyle(getHeaderCellStyle2(workbook));
+					cell.setCellValue(date.format(dayFormatter));
+					String day = date.format(dayFormatter);
+					for (int r = mergedRange15.getFirstRow(); r <= mergedRange15.getLastRow(); r++) {
+						Row row1 = sheet.getRow(r);
+						if (row1 == null) {
+							row1 = sheet.createRow(r);
+						}
+						for (int c = mergedRange15.getFirstColumn(); c <= mergedRange15.getLastColumn(); c++) {
+							Cell cell1 = row.getCell(c);
+							if (cell1 == null) {
+								cell1 = row.createCell(c);
+							}
+							if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")) {
+								cell1.setCellStyle(getHeaderCellStyle3(workbook));
 
-				cell = row.createCell(6, CellType.STRING);
-				// cell.setCellValue("");
-				cell.setCellStyle(getHeaderCellStyle2(workbook));
-				cell = row.createCell(7, CellType.STRING);
-				cell.setCellValue(0);
-				cell.setCellStyle(getHeaderCellStyle2(workbook));
+							} else {
+								cell1.setCellStyle(getHeaderCellStyle2(workbook));
+							}
+						}
+					}
 
-				cell = row.createCell(8, CellType.STRING);
-				cell.setCellValue(0);
-				cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-				cell = row.createCell(9, CellType.STRING);
-				// cell.setCellValue("");
-				cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-				if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
-						|| publicHolidayDates.contains(date)) {
 					cell = row.createCell(5, CellType.STRING);
-					if (publicHolidayDates.contains(date)) {
-						cell.setCellValue("PH");
-						cell.setCellStyle(getHeaderCellStyle6(workbook));
-						pholidatcount = pholidatcount + 1;
-					} else {
-						cell.setCellStyle(getHeaderCellStyle6(workbook));
-					}
-					cell = row.createCell(6, CellType.STRING);
-					cell.setCellStyle(getHeaderCellStyle6(workbook));
+					// cell.setCellValue("");
+					cell.setCellStyle(getHeaderCellStyle2(workbook));
 
+					cell = row.createCell(6, CellType.STRING);
+					// cell.setCellValue("");
+					cell.setCellStyle(getHeaderCellStyle2(workbook));
 					cell = row.createCell(7, CellType.STRING);
 					cell.setCellValue(0);
 					cell.setCellStyle(getHeaderCellStyle2(workbook));
@@ -568,27 +547,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 					cell = row.createCell(9, CellType.STRING);
-					cell.setCellStyle(getHeaderCellStyle2(workbook));
-					workingDaysCount = workingDaysCount - 1;
-				}
-
-				if (date.isEqual(startDate1) || date.isEqual(endDate1)
-						|| (date.isAfter(startDate1) && date.isBefore(endDate1))) {
-
-					cell = row.createCell(5, CellType.STRING);
-					cell.setCellValue("PRESENT");
-					cell.setCellStyle(getHeaderCellStyle2(workbook));
-					cell = row.createCell(6, CellType.STRING);
-					cell.setCellValue("FULL DAY");
-					cell.setCellStyle(getHeaderCellStyle2(workbook));
-					cell = row.createCell(7, CellType.STRING);
-					cell.setCellValue(1);
-					cell.setCellStyle(getHeaderCellStyle2(workbook));
-					cell = row.createCell(8, CellType.STRING);
-					cell.setCellValue(8);
-					cell.setCellStyle(getHeaderCellStyle2(workbook));
-					cell = row.createCell(9, CellType.STRING);
-					//cell.setCellValue("AM");
+					// cell.setCellValue("");
 					cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 					if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
@@ -597,10 +556,10 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						if (publicHolidayDates.contains(date)) {
 							cell.setCellValue("PH");
 							cell.setCellStyle(getHeaderCellStyle6(workbook));
+							pholidatcount = pholidatcount + 1;
 						} else {
 							cell.setCellStyle(getHeaderCellStyle6(workbook));
 						}
-
 						cell = row.createCell(6, CellType.STRING);
 						cell.setCellStyle(getHeaderCellStyle6(workbook));
 
@@ -614,424 +573,1052 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 						cell = row.createCell(9, CellType.STRING);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
+						workingDaysCount = workingDaysCount - 1;
 					}
-				}
 
-				for (LeaveDetails details : leaveDetails) {
+					if (date.isEqual(startDate1) || date.isEqual(endDate1)
+							|| (date.isAfter(startDate1) && date.isBefore(endDate1))) {
 
-					LocalDate startDate = details.getStartdate().toLocalDateTime().toLocalDate();
-					LocalDate endDate = details.getEnddate().toLocalDateTime().toLocalDate();
-					LocalDate currentDate = date;
-
-					if (details.getType_of_leave().equalsIgnoreCase("Annual Leave")) {
-						if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
-								|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
-
-							if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
-									|| publicHolidayDates.contains(date)) {
-								cell = row.createCell(5, CellType.STRING);
-								if (publicHolidayDates.contains(date)) {
-									cell.setCellValue("PH");
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-									// pholidatcount = pholidatcount + 1;
-								} else {
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-								}
-								cell = row.createCell(6, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle6(workbook));
-
-								cell = row.createCell(7, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(8, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(9, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-							} else {
-								// If the current date matches the leave period, set the cell value as LEAVE
-								if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("ANNU");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("HALF DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0.5);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(4);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellValue(details.getAmpm());
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									annulavecount = annulavecount + 0.5;
-
-								} else {
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("ANNU");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("FULL DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									annulavecount = annulavecount + 1;
-								}
-							}
-
-						}
-
-					} else if (details.getType_of_leave().equalsIgnoreCase("Casual/Sick Leave")) {
-						if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
-								|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
-
-							if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
-									|| publicHolidayDates.contains(date)) {
-								cell = row.createCell(5, CellType.STRING);
-								if (publicHolidayDates.contains(date)) {
-									cell.setCellValue("PH");
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-									// pholidatcount = pholidatcount + 1;
-								} else {
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-								}
-
-								cell = row.createCell(6, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle6(workbook));
-
-								cell = row.createCell(7, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(8, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(9, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-							} else {
-								if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("CL");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("HALF DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0.5);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(4);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellValue(details.getAmpm());
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									csleavecount = csleavecount + 0.5;
-
-								} else {
-
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("CL");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("FULL DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									csleavecount = csleavecount + 1;
-								}
-							}
-
-						}
-					} else if (details.getType_of_leave().equalsIgnoreCase("Compensatory Off")) {
-						if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
-								|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
-
-							if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
-									|| publicHolidayDates.contains(date)) {
-								cell = row.createCell(5, CellType.STRING);
-								if (publicHolidayDates.contains(date)) {
-									cell.setCellValue("PH");
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-									// pholidatcount = pholidatcount + 1;
-								} else {
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-								}
-
-								cell = row.createCell(6, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle6(workbook));
-
-								cell = row.createCell(7, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(8, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(9, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-							} else {
-								if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("COMP");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("HALF DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0.5);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(4);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellValue(details.getAmpm());
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									compensatorycount = compensatorycount + 0.5;
-
-								} else {
-
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("COMP");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("FULL DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									compensatorycount = compensatorycount + 1;
-								}
-
-							}
-
-						}
-					} else if (details.getType_of_leave().equalsIgnoreCase("Week OFF")) {
-						if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
-								|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
-
-							if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
-									|| publicHolidayDates.contains(date)) {
-								cell = row.createCell(5, CellType.STRING);
-								if (publicHolidayDates.contains(date)) {
-									cell.setCellValue("PH");
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-									// pholidatcount = pholidatcount + 1;
-								} else {
-									cell.setCellStyle(getHeaderCellStyle6(workbook));
-								}
-								cell = row.createCell(6, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle6(workbook));
-
-								cell = row.createCell(7, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(8, CellType.STRING);
-								cell.setCellValue(0);
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-								cell = row.createCell(9, CellType.STRING);
-								// cell.setCellValue("");
-								cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-							} else {
-								if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("OFF");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("HALF DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0.5);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(4);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellValue(details.getAmpm());
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									weekoffcount = weekoffcount + 0.5;
-
-								} else {
-
-									cell = row.createCell(5, CellType.STRING);
-									cell.setCellValue("OFF");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(6, CellType.STRING);
-									cell.setCellValue("FULL DAY");
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(7, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(8, CellType.STRING);
-									cell.setCellValue(0);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									cell = row.createCell(9, CellType.STRING);
-									cell.setCellStyle(getHeaderCellStyle2(workbook));
-
-									weekoffcount = weekoffcount + 1;
-								}
-							}
-
-						}
-					}
-				}
-				for (WorkedOnShifts shift : onShifts) {
-					LocalDate currentDate = date;
-					LocalDate shiftDate = shift.getDate().toLocalDateTime().toLocalDate();
-
-					if (shift.getShiftName().equalsIgnoreCase("Morning Shift")) {
-						if (currentDate.equals(shiftDate)) {
-							cell = row.createCell(6, CellType.STRING);
-							cell.setCellValue("S1(Morning Shift)");
-							cell.setCellStyle(getHeaderCellStyle2(workbook));
-						}
-					} else if (shift.getShiftName().equalsIgnoreCase("Afternoon Shift")) {
-						if (currentDate.equals(shiftDate)) {
-							cell = row.createCell(6, CellType.STRING);
-							cell.setCellValue("S2(Afternoon Shift)");
-							cell.setCellStyle(getHeaderCellStyle2(workbook));
-						}
-					} else if (shift.getShiftName().equalsIgnoreCase("Weekend / Holiday / Night Shift")) {
-						if (currentDate.equals(shiftDate)) {
-							cell = row.createCell(6, CellType.STRING);
-							cell.setCellValue(" S3(Weekend / Holiday / Night Shift)");
-							cell.setCellStyle(getHeaderCellStyle2(workbook));
-						}
-					}
-				}
-
-				for (WorkingOnPublicHolidays onPublicHolidays : workingOnPublicHolidays) {
-					LocalDate workingonPH = onPublicHolidays.getWorkedonPublicHoliday().toLocalDateTime().toLocalDate();
-
-					if (date.isEqual(workingonPH)) {
 						cell = row.createCell(5, CellType.STRING);
 						cell.setCellValue("PRESENT");
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
-
 						cell = row.createCell(6, CellType.STRING);
 						cell.setCellValue("FULL DAY");
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
-
 						cell = row.createCell(7, CellType.STRING);
 						cell.setCellValue(1);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
-
 						cell = row.createCell(8, CellType.STRING);
 						cell.setCellValue(8);
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+						cell = row.createCell(9, CellType.STRING);
+						// cell.setCellValue("AM");
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+						if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+								|| publicHolidayDates.contains(date)) {
+							cell = row.createCell(5, CellType.STRING);
+							if (publicHolidayDates.contains(date)) {
+								cell.setCellValue("PH");
+								cell.setCellStyle(getHeaderCellStyle6(workbook));
+							} else {
+								cell.setCellStyle(getHeaderCellStyle6(workbook));
+							}
+
+							cell = row.createCell(6, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+							cell = row.createCell(7, CellType.STRING);
+							cell.setCellValue(0);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(8, CellType.STRING);
+							cell.setCellValue(0);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(9, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+						}
+					}
+
+					for (LeaveDetails details : leaveDetails) {
+
+						LocalDate startDate = details.getStartdate().toLocalDateTime().toLocalDate();
+						LocalDate endDate = details.getEnddate().toLocalDateTime().toLocalDate();
+						LocalDate currentDate = date;
+
+						if (details.getType_of_leave().equalsIgnoreCase("Annual Leave")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+										// pholidatcount = pholidatcount + 1;
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+									cell = row.createCell(6, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									// If the current date matches the leave period, set the cell value as LEAVE
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("ANNU");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										annulavecount = annulavecount + 0.5;
+
+									} else {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("ANNU");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										annulavecount = annulavecount + 1;
+									}
+								}
+
+							}
+
+						} else if (details.getType_of_leave().equalsIgnoreCase("Casual/Sick Leave")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+										// pholidatcount = pholidatcount + 1;
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+
+									cell = row.createCell(6, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("CL");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										csleavecount = csleavecount + 0.5;
+
+									} else {
+
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("CL");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										csleavecount = csleavecount + 1;
+									}
+								}
+
+							}
+						} else if (details.getType_of_leave().equalsIgnoreCase("Compensatory Off")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+										// pholidatcount = pholidatcount + 1;
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+
+									cell = row.createCell(6, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("COMP");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										compensatorycount = compensatorycount + 0.5;
+
+									} else {
+
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("COMP");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										compensatorycount = compensatorycount + 1;
+									}
+
+								}
+
+							}
+						} else if (details.getType_of_leave().equalsIgnoreCase("Week OFF")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+										// pholidatcount = pholidatcount + 1;
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+									cell = row.createCell(6, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									// cell.setCellValue("");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("OFF");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										weekoffcount = weekoffcount + 0.5;
+
+									} else {
+
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("OFF");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										weekoffcount = weekoffcount + 1;
+									}
+								}
+
+							}
+						}
+					}
+					for (WorkedOnShifts shift : onShifts) {
+						LocalDate currentDate = date;
+						LocalDate shiftStartDate = shift.getStartDate().toLocalDateTime().toLocalDate();
+						LocalDate shiftEndDate = shift.getEndDate().toLocalDateTime().toLocalDate();
+						if (shift.getShiftName().equalsIgnoreCase("Morning Shift")) {
+							if (currentDate.isEqual(shiftStartDate) || currentDate.isEqual(shiftEndDate)
+									|| (currentDate.isAfter(shiftStartDate) && currentDate.isBefore(shiftEndDate))) {
+
+								if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+										|| publicHolidayDates.contains(date)) {
+								} else {
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellValue("S1(Morning Shift)");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+								}
+							}
+						} else if (shift.getShiftName().equalsIgnoreCase("Afternoon Shift")) {
+							if (currentDate.isEqual(shiftStartDate) || currentDate.isEqual(shiftEndDate)
+									|| (currentDate.isAfter(shiftStartDate) && currentDate.isBefore(shiftEndDate))) {
+
+								if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+										|| publicHolidayDates.contains(date)) {
+								} else {
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellValue("S2(Afternoon Shift)");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+								}
+							}
+						} else if (shift.getShiftName().equalsIgnoreCase("Weekend / Holiday / Night Shift")) {
+							if (currentDate.isEqual(shiftStartDate) || currentDate.isEqual(shiftEndDate)
+									|| (currentDate.isAfter(shiftStartDate) && currentDate.isBefore(shiftEndDate))) {
+								if (day.equalsIgnoreCase("Sunday") || day.equalsIgnoreCase("Saturday")
+										|| publicHolidayDates.contains(date)) {
+								} else {
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellValue("S3(Weekend / Holiday / Night Shift)");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+								}
+							}
+						}
+					}
+
+					for (WorkingOnPublicHolidays onPublicHolidays : workingOnPublicHolidays) {
+						LocalDate workingonPH = onPublicHolidays.getWorkedonPublicHoliday().toLocalDateTime()
+								.toLocalDate();
+
+						if (date.isEqual(workingonPH)) {
+							cell = row.createCell(5, CellType.STRING);
+							cell.setCellValue("PRESENT");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(6, CellType.STRING);
+							cell.setCellValue("FULL DAY");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(7, CellType.STRING);
+							cell.setCellValue(1);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(8, CellType.STRING);
+							cell.setCellValue(8);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(9, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+						}
+
+					}
+
+					for (WorkingOnWeekEnds workingOnWeekEnds : onWeekEnds) {
+						LocalDate workingonweekend = workingOnWeekEnds.getWorkOnWeekEnd().toLocalDateTime()
+								.toLocalDate();
+
+						if (date.isEqual(workingonweekend)) {
+							cell = row.createCell(5, CellType.STRING);
+							cell.setCellValue("PRESENT");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(6, CellType.STRING);
+							cell.setCellValue("FULL DAY");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(7, CellType.STRING);
+							cell.setCellValue(1);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(8, CellType.STRING);
+							cell.setCellValue(8);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(9, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+						}
+
+					}
+
+					cell = row.getCell(7);
+					dayscount = dayscount + cell.getNumericCellValue();
+					cell = row.getCell(8);
+					hourscount = hourscount + cell.getNumericCellValue();
+					workingDaysCount = workingDaysCount + 1;
+				}
+
+			} else if (workingonRotationalshift.equalsIgnoreCase("YES")) {
+				RotationalWeekEnds rotationalWeekEnds = automation.getRotationalWeekEnds();
+				String weekEndOne = rotationalWeekEnds.getWeekEndOne();
+				String weekEndTwo = rotationalWeekEnds.getWeekEndtwo();
+
+				for (int i = firstDay - 1; i < lastDay; i++) {
+
+					LocalDate date = firstDayOfMonth.plusDays(i);
+					int newrowindex = rowIndex++;
+					Row row = sheet.createRow(newrowindex);
+					Cell cell = row.createCell(1, CellType.STRING);
+
+					sheet.addMergedRegion(new CellRangeAddress(newrowindex, newrowindex, 1, 2));
+					CellRangeAddress mergedRange14 = sheet.getMergedRegion(13);
+					cell.setCellValue(date.format(dateFormatter));
+					// String currentdate = date.format(dateFormatter);
+					for (int r = mergedRange14.getFirstRow(); r <= mergedRange14.getLastRow(); r++) {
+						Row row1 = sheet.getRow(r);
+						if (row1 == null) {
+							row1 = sheet.createRow(r);
+						}
+						for (int c = mergedRange14.getFirstColumn(); c <= mergedRange14.getLastColumn(); c++) {
+							Cell cell1 = row.getCell(c);
+							if (cell1 == null) {
+								cell1 = row.createCell(c);
+							}
+
+							if (publicHolidayDates.contains(date)) {
+								cell1.setCellStyle(getHeaderCellStyle5(workbook));
+
+							} else {
+								cell1.setCellStyle(getHeaderCellStyle2(workbook));
+							}
+						}
+					}
+					cell = row.createCell(3, CellType.STRING);
+					sheet.addMergedRegion(new CellRangeAddress(newrowindex, newrowindex, 3, 4));
+					CellRangeAddress mergedRange15 = sheet.getMergedRegion(14);
+
+					cell.setCellValue(date.format(dayFormatter));
+					String day = date.format(dayFormatter);
+					for (int r = mergedRange15.getFirstRow(); r <= mergedRange15.getLastRow(); r++) {
+						Row row1 = sheet.getRow(r);
+						if (row1 == null) {
+							row1 = sheet.createRow(r);
+						}
+						for (int c = mergedRange15.getFirstColumn(); c <= mergedRange15.getLastColumn(); c++) {
+							Cell cell1 = row.getCell(c);
+							if (cell1 == null) {
+								cell1 = row.createCell(c);
+							}
+							if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)) {
+								cell1.setCellStyle(getHeaderCellStyle3(workbook));
+
+							} else {
+								cell1.setCellStyle(getHeaderCellStyle2(workbook));
+							}
+						}
+					}
+
+					cell = row.createCell(5, CellType.STRING);
+					cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+					cell = row.createCell(6, CellType.STRING);
+					cell.setCellStyle(getHeaderCellStyle2(workbook));
+					cell = row.createCell(7, CellType.STRING);
+					cell.setCellValue(0);
+					cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+					cell = row.createCell(8, CellType.STRING);
+					cell.setCellValue(0);
+					cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+					cell = row.createCell(9, CellType.STRING);
+					cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+					if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+							|| publicHolidayDates.contains(date)) {
+						cell = row.createCell(5, CellType.STRING);
+						if (publicHolidayDates.contains(date)) {
+							cell.setCellValue("PH");
+							cell.setCellStyle(getHeaderCellStyle6(workbook));
+							pholidatcount = pholidatcount + 1;
+						} else {
+							cell.setCellStyle(getHeaderCellStyle6(workbook));
+						}
+						cell = row.createCell(6, CellType.STRING);
+						cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+						cell = row.createCell(7, CellType.STRING);
+						cell.setCellValue(0);
+						cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+						cell = row.createCell(8, CellType.STRING);
+						cell.setCellValue(0);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 						cell = row.createCell(9, CellType.STRING);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
+						workingDaysCount = workingDaysCount - 1;
 					}
 
-				}
+					if (date.isEqual(startDate1) || date.isEqual(endDate1)
+							|| (date.isAfter(startDate1) && date.isBefore(endDate1))) {
 
-				for (WorkingOnWeekEnds workingOnWeekEnds : onWeekEnds) {
-					LocalDate workingonweekend = workingOnWeekEnds.getWorkOnWeekEnd().toLocalDateTime().toLocalDate();
-
-					if (date.isEqual(workingonweekend)) {
 						cell = row.createCell(5, CellType.STRING);
 						cell.setCellValue("PRESENT");
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
-
 						cell = row.createCell(6, CellType.STRING);
 						cell.setCellValue("FULL DAY");
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
-
 						cell = row.createCell(7, CellType.STRING);
 						cell.setCellValue(1);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
-
 						cell = row.createCell(8, CellType.STRING);
 						cell.setCellValue(8);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
-
 						cell = row.createCell(9, CellType.STRING);
 						cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+						if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+								|| publicHolidayDates.contains(date)) {
+							cell = row.createCell(5, CellType.STRING);
+							if (publicHolidayDates.contains(date)) {
+								cell.setCellValue("PH");
+								cell.setCellStyle(getHeaderCellStyle6(workbook));
+							} else {
+								cell.setCellStyle(getHeaderCellStyle6(workbook));
+							}
+
+							cell = row.createCell(6, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+							cell = row.createCell(7, CellType.STRING);
+							cell.setCellValue(0);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(8, CellType.STRING);
+							cell.setCellValue(0);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(9, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+						}
 					}
 
-				}
+					for (LeaveDetails details : leaveDetails) {
 
-				cell = row.getCell(7);
-				dayscount = dayscount + cell.getNumericCellValue();
-				cell = row.getCell(8);
-				hourscount = hourscount + cell.getNumericCellValue();
-				workingDaysCount = workingDaysCount + 1;
+						LocalDate startDate = details.getStartdate().toLocalDateTime().toLocalDate();
+						LocalDate endDate = details.getEnddate().toLocalDateTime().toLocalDate();
+						LocalDate currentDate = date;
+
+						if (details.getType_of_leave().equalsIgnoreCase("Annual Leave")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									// If the current date matches the leave period, set the cell value as LEAVE
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("ANNU");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										annulavecount = annulavecount + 0.5;
+
+									} else {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("ANNU");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										annulavecount = annulavecount + 1;
+									}
+								}
+
+							}
+
+						} else if (details.getType_of_leave().equalsIgnoreCase("Casual/Sick Leave")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("CL");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										csleavecount = csleavecount + 0.5;
+
+									} else {
+
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("CL");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										csleavecount = csleavecount + 1;
+									}
+								}
+							}
+						} else if (details.getType_of_leave().equalsIgnoreCase("Compensatory Off")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("COMP");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										compensatorycount = compensatorycount + 0.5;
+
+									} else {
+
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("COMP");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										compensatorycount = compensatorycount + 1;
+									}
+								}
+							}
+						} else if (details.getType_of_leave().equalsIgnoreCase("Week OFF")) {
+							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
+									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
+
+								if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+										|| publicHolidayDates.contains(date)) {
+									cell = row.createCell(5, CellType.STRING);
+									if (publicHolidayDates.contains(date)) {
+										cell.setCellValue("PH");
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									} else {
+										cell.setCellStyle(getHeaderCellStyle6(workbook));
+									}
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle6(workbook));
+
+									cell = row.createCell(7, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(8, CellType.STRING);
+									cell.setCellValue(0);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+									cell = row.createCell(9, CellType.STRING);
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+								} else {
+									if (details.getLeaveday().equalsIgnoreCase("HALF DAY")) {
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("OFF");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("HALF DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0.5);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(4);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellValue(details.getAmpm());
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										weekoffcount = weekoffcount + 0.5;
+
+									} else {
+
+										cell = row.createCell(5, CellType.STRING);
+										cell.setCellValue("OFF");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(6, CellType.STRING);
+										cell.setCellValue("FULL DAY");
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(7, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(8, CellType.STRING);
+										cell.setCellValue(0);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										cell = row.createCell(9, CellType.STRING);
+										cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+										weekoffcount = weekoffcount + 1;
+									}
+								}
+							}
+						}
+					}
+					for (WorkedOnShifts shift : onShifts) {
+						LocalDate currentDate = date;
+						LocalDate shiftStartDate = shift.getStartDate().toLocalDateTime().toLocalDate();
+						LocalDate shiftEndDate = shift.getEndDate().toLocalDateTime().toLocalDate();
+						if (shift.getShiftName().equalsIgnoreCase("Morning Shift")) {
+							if (currentDate.isEqual(shiftStartDate) || currentDate.isEqual(shiftEndDate)
+									|| (currentDate.isAfter(shiftStartDate) && currentDate.isBefore(shiftEndDate))) {
+
+								if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+										|| publicHolidayDates.contains(date)) {
+								} else {
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellValue("S1(Morning Shift)");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+								}
+							}
+						} else if (shift.getShiftName().equalsIgnoreCase("Afternoon Shift")) {
+							if (currentDate.isEqual(shiftStartDate) || currentDate.isEqual(shiftEndDate)
+									|| (currentDate.isAfter(shiftStartDate) && currentDate.isBefore(shiftEndDate))) {
+
+								if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+										|| publicHolidayDates.contains(date)) {
+								} else {
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellValue("S2(Afternoon Shift)");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+								}
+							}
+						} else if (shift.getShiftName().equalsIgnoreCase("Weekend / Holiday / Night Shift")) {
+							if (currentDate.isEqual(shiftStartDate) || currentDate.isEqual(shiftEndDate)
+									|| (currentDate.isAfter(shiftStartDate) && currentDate.isBefore(shiftEndDate))) {
+
+								if (day.equalsIgnoreCase(weekEndOne) || day.equalsIgnoreCase(weekEndTwo)
+										|| publicHolidayDates.contains(date)) {
+								} else {
+									cell = row.createCell(6, CellType.STRING);
+									cell.setCellValue("S3(Weekend / Holiday / Night Shift)");
+									cell.setCellStyle(getHeaderCellStyle2(workbook));
+								}
+							}
+						}
+					}
+
+					for (WorkingOnPublicHolidays onPublicHolidays : workingOnPublicHolidays) {
+						LocalDate workingonPH = onPublicHolidays.getWorkedonPublicHoliday().toLocalDateTime().toLocalDate();
+
+						if (date.isEqual(workingonPH)) {
+							cell = row.createCell(5, CellType.STRING);
+							cell.setCellValue("PRESENT");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(6, CellType.STRING);
+							cell.setCellValue("FULL DAY");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(7, CellType.STRING);
+							cell.setCellValue(1);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(8, CellType.STRING);
+							cell.setCellValue(8);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(9, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+						}
+					}
+
+					for (WorkingOnWeekEnds workingOnWeekEnds : onWeekEnds) {
+						LocalDate workingonweekend = workingOnWeekEnds.getWorkOnWeekEnd().toLocalDateTime()
+								.toLocalDate();
+
+						if (date.isEqual(workingonweekend)) {
+							cell = row.createCell(5, CellType.STRING);
+							cell.setCellValue("PRESENT");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(6, CellType.STRING);
+							cell.setCellValue("FULL DAY");
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(7, CellType.STRING);
+							cell.setCellValue(1);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(8, CellType.STRING);
+							cell.setCellValue(8);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+
+							cell = row.createCell(9, CellType.STRING);
+							cell.setCellStyle(getHeaderCellStyle2(workbook));
+						}
+					}
+					cell = row.getCell(7);
+					dayscount = dayscount + cell.getNumericCellValue();
+					cell = row.getCell(8);
+					hourscount = hourscount + cell.getNumericCellValue();
+					workingDaysCount = workingDaysCount + 1;
+				}
 			}
+
 			description(sheet, workbook, headerRow11, headerRow21, headerRow31, headerRow41, headerRow51, headerRow81,
 					annulavecount, csleavecount, pholidatcount, compensatorycount, weekoffcount, dayscount);
 			totalWorkingDays(sheet, workbook, workingDaysCount, dayscount, hourscount);
@@ -1047,40 +1634,42 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 			// write the workbook to a server
 			try {
-				 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-               if ("no".equalsIgnoreCase(awsCheck)) {
-            	   String tempfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details";
-   				File fileDir = new File(tempfilelocation);
-   				if (!fileDir.exists()) {
-   					boolean iscreated = fileDir.mkdirs();
-   					if (!iscreated) {
-   						throw new Exception("Failed to create Directory");
-   					}
-   				}
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				if ("no".equalsIgnoreCase(awsCheck)) {
+					String tempfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details";
+					File fileDir = new File(tempfilelocation);
+					if (!fileDir.exists()) {
+						boolean iscreated = fileDir.mkdirs();
+						if (!iscreated) {
+							throw new Exception("Failed to create Directory");
+						}
+					}
 
-   				String path = fileDir + File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-   				FileOutputStream fileOut = new FileOutputStream(path);
-   				workbook.write(fileOut);
-   				fileOut.close();
-			}
-               if ("yes".equalsIgnoreCase(awsCheck)) {
-            	   //windows path
-            	 //  String path1 =  "timesheet_details"+"/" + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-            	   //linux path
-            	  String path1 =  "timesheet_details" +File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-            	   workbook.write(bos);
-            	   System.out.println("bos"+bos.toByteArray().length);
-            	   Utils.convertXlsxAndPdfFileToByte(bos.toByteArray(),path1);
-            	   bos.close();
-			}
-				
+					String path = fileDir + File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+					FileOutputStream fileOut = new FileOutputStream(path);
+					workbook.write(fileOut);
+					fileOut.close();
+				}
+				if ("yes".equalsIgnoreCase(awsCheck)) {
+					// windows path
+					// String path1 = "timesheet_details"+"/" + empid + "_" + client + "_" +
+					// "AutomationTimesheet.xlsx";
+					// linux path
+					String path1 = "timesheet_details" + File.separator + empid + "_" + client + "_"
+							+ "AutomationTimesheet.xlsx";
+					workbook.write(bos);
+					System.out.println("bos" + bos.toByteArray().length);
+					Utils.convertXlsxAndPdfFileToByte(bos.toByteArray(), path1);
+					bos.close();
+				}
 
 			} catch (Exception e) {
 				e.printStackTrace();
 				Map<String, String> errorDetails = new HashMap<>();
 				errorDetails.put("message", "Failed to Generate Automation Timesheet File :Failed To Save File");
 				String json = new ObjectMapper().writeValueAsString(errorDetails);
-				return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.INTERNAL_SERVER_ERROR).body(json.getBytes());
+				return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body(json.getBytes());
 			}
 			// To get Automation timesheet from server
 
@@ -1088,34 +1677,38 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			FileInputStream fi = null;
 			String clientfilelocation = null;
 			try {
-				if("no".equalsIgnoreCase(awsCheck)) {
-				clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
-						+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-				fi = new FileInputStream(clientfilelocation);
-				files = IOUtils.toByteArray(fi);
-				fi.close();
+				if ("no".equalsIgnoreCase(awsCheck)) {
+					clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
+							+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+					fi = new FileInputStream(clientfilelocation);
+					files = IOUtils.toByteArray(fi);
+					fi.close();
 				}
-				
+
 				if ("yes".equalsIgnoreCase(awsCheck)) {
-					clientfilelocation ="timesheet_details"	+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-					//clientfilelocation ="timesheet_details"	+ "/" + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+					clientfilelocation = "timesheet_details" + File.separator + empid + "_" + client + "_"
+							+ "AutomationTimesheet.xlsx";
+					// clientfilelocation ="timesheet_details" + "/" + empid + "_" + client + "_" +
+					// "AutomationTimesheet.xlsx";
 					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
 				}
-			}  catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				Map<String, String> errorDetails = new HashMap<>();
-				errorDetails.put("message", "Failed to Generate Automation Timesheet File :Failed to Get File From Server ");
+				errorDetails.put("message",
+						"Failed to Generate Automation Timesheet File :Failed to Get File From Server ");
 				String json = new ObjectMapper().writeValueAsString(errorDetails);
 				return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.NOT_FOUND).body(json.getBytes());
 			}
 			responseEntity = new ResponseEntity<byte[]>(files, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			//return responseEntity = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			// return responseEntity = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
 			Map<String, String> errorDetails = new HashMap<>();
 			errorDetails.put("message", "Failed to Generate Automation Timesheet File,Contact Your Manager");
 			String json = new ObjectMapper().writeValueAsString(errorDetails);
-			return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.INTERNAL_SERVER_ERROR).body(json.getBytes());
+			return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(json.getBytes());
 
 		} finally {
 			session.close();
@@ -1725,7 +2318,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 	@Override
 	public void sendTimesheetAutomationmail(String json, MultipartHttpServletRequest request) throws Throwable {
-        
+
 		ObjectMapper obm = new ObjectMapper();
 		SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
 		Session session = null;
@@ -1857,18 +2450,20 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			List<String> urlList = new ArrayList<String>();
 
 			try {
-				 if("no".equalsIgnoreCase(awsCheck)) {
-				clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
-						+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-				fi = new FileInputStream(clientfilelocation);
-				files = IOUtils.toByteArray(fi);
-				fi.close();
-				 }
-				 if("yes".equalsIgnoreCase(awsCheck)) {
-						clientfilelocation = "timesheet_details"+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-						//clientfilelocation = "timesheet_details" +"/"+ empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-						files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
-						 }
+				if ("no".equalsIgnoreCase(awsCheck)) {
+					clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
+							+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+					fi = new FileInputStream(clientfilelocation);
+					files = IOUtils.toByteArray(fi);
+					fi.close();
+				}
+				if ("yes".equalsIgnoreCase(awsCheck)) {
+					clientfilelocation = "timesheet_details" + File.separator + empid + "_" + client + "_"
+							+ "AutomationTimesheet.xlsx";
+					// clientfilelocation = "timesheet_details" +"/"+ empid + "_" + client + "_" +
+					// "AutomationTimesheet.xlsx";
+					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
+				}
 
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();
@@ -1891,17 +2486,19 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					FileInputStream fi1 = null;
 					String clientfilelocation1 = null;
 					try {
-						 if("no".equalsIgnoreCase(awsCheck)) {
-						clientfilelocation1 = Utils.getProperty("fileLocation") + File.separator + "leaverecords"
-								+ File.separator + empid + "_" + client + "_" + leaveDetails2.getLeaveRecordPath();
-						fi1 = new FileInputStream(clientfilelocation1);
-			 		file1 = IOUtils.toByteArray(fi1);
-						fi1.close();
+						if ("no".equalsIgnoreCase(awsCheck)) {
+							clientfilelocation1 = Utils.getProperty("fileLocation") + File.separator + "leaverecords"
+									+ File.separator + empid + "_" + client + "_" + leaveDetails2.getLeaveRecordPath();
+							fi1 = new FileInputStream(clientfilelocation1);
+							file1 = IOUtils.toByteArray(fi1);
+							fi1.close();
 						}
-						 if ("yes".equalsIgnoreCase(awsCheck)) {
-							 clientfilelocation1 =  "leaverecords"+ File.separator + empid + "_" + client + "_" + leaveDetails2.getLeaveRecordPath();
-							//  clientfilelocation1 =  "leaverecords"+ "/" + empid + "_" + client + "_" + leaveDetails2.getLeaveRecordPath();
-							  file1 = Utils.downloadFileByAWSS3Bucket(clientfilelocation1);
+						if ("yes".equalsIgnoreCase(awsCheck)) {
+							clientfilelocation1 = "leaverecords" + File.separator + empid + "_" + client + "_"
+									+ leaveDetails2.getLeaveRecordPath();
+							// clientfilelocation1 = "leaverecords"+ "/" + empid + "_" + client + "_" +
+							// leaveDetails2.getLeaveRecordPath();
+							file1 = Utils.downloadFileByAWSS3Bucket(clientfilelocation1);
 
 						}
 
@@ -2003,5 +2600,4 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			throw e;
 		}
 	}
-
 }

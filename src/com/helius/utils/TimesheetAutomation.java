@@ -22,6 +22,8 @@ public class TimesheetAutomation {
 	private List<WorkingOnPublicHolidays> workingOnPH;
 	private List<WorkedOnShifts> onShifts;
 	private List<WorkingOnWeekEnds> workingOnWeekEnds;
+	private String workingOnRotationalshifts;
+	private RotationalWeekEnds rotationalWeekEnds;
 
 	public String getEmpId() {
 		return empId;
@@ -143,4 +145,21 @@ public class TimesheetAutomation {
 		this.workingOnWeekEnds = workingOnWeekEnds;
 	}
 
+	public String getWorkingOnRotationalshifts() {
+		return workingOnRotationalshifts;
+	}
+
+	public void setWorkingOnRotationalshifts(String workingOnRotationalshifts) {
+		this.workingOnRotationalshifts = workingOnRotationalshifts;
+	}
+
+	public RotationalWeekEnds getRotationalWeekEnds() {
+		return rotationalWeekEnds;
+	}
+
+	public void setRotationalWeekEnds(RotationalWeekEnds rotationalWeekEnds) {
+		this.rotationalWeekEnds = rotationalWeekEnds;
+	}
+
+	
 }

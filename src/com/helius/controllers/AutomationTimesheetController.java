@@ -81,9 +81,9 @@ public class AutomationTimesheetController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "client/downloadsSavedTimesheet", method = RequestMethod.GET)
-	public ResponseEntity<byte[]> downloadsSavedTimesheet(@RequestParam String empId, String clientId) throws JsonProcessingException {
+	public ResponseEntity<byte[]> downloadsSavedTimesheet(@RequestParam String empId, String clientId, String timesheetMonth) throws JsonProcessingException {
 	
-		ResponseEntity<byte[]> responseEntity  = automationManager.downloadsSavedTimesheet(empId,clientId );
+		ResponseEntity<byte[]> responseEntity  = automationManager.downloadsSavedTimesheet(empId,clientId,timesheetMonth );
 	
 		 return responseEntity;
 

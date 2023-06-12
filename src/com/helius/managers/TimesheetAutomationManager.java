@@ -74,10 +74,10 @@ public class TimesheetAutomationManager {
 	}
 	
 	
-	public ResponseEntity<byte[]> downloadsSavedTimesheet(String empId, String clientId ) throws JsonProcessingException {
+	public ResponseEntity<byte[]> downloadsSavedTimesheet(String empId, String clientId, String timesheetMonth ) throws JsonProcessingException {
 		ResponseEntity<byte[]> response;
 		try {
-			response =automationTimesheetDAO.downloadsTimesheet(empId,clientId );
+			response =automationTimesheetDAO.downloadsTimesheet(empId,clientId,timesheetMonth );
 		} catch (Throwable e) {
 			
 			 Map<String, String> errorDetails = new HashMap<>();

@@ -1685,7 +1685,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			try {
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				if ("no".equalsIgnoreCase(awsCheck)) {
-					String tempfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details";
+					String tempfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details" + File.separator + monthYearString;
 					File fileDir = new File(tempfilelocation);
 					if (!fileDir.exists()) {
 						boolean iscreated = fileDir.mkdirs();
@@ -1701,14 +1701,25 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 				}
 				if ("yes".equalsIgnoreCase(awsCheck)) {
 					// windows path
-					// String path1 = "timesheet_details"+"/" + empid + "_" + client + "_" +
-					// "AutomationTimesheet.xlsx";
+					// String path1 = "timesheet_details"+"/" + monthYearString ;
+					String path1 = "timesheet_details" + File.separator + monthYearString;
+
+					File fileDir = new File(path1);
+					if (!fileDir.exists()) {
+						boolean iscreated = fileDir.mkdirs();
+						if (!iscreated) {
+							throw new Exception("Failed to create Directory");
+						}
+					}
 					// linux path
-					String path1 = "timesheet_details" + File.separator + empid + "_" + client + "_"
-							+ "AutomationTimesheet.xlsx";
+					String path = "timesheet_details" + File.separator + monthYearString + File.separator + empid + "_"
+							+ client + "_" + "AutomationTimesheet.xlsx";
+					// String path = "timesheet_details"+"/" + monthYearString + "/"+ empid + "_" +
+					// client + "_" + "AutomationTimesheet.xlsx";
+
 					workbook.write(bos);
 					System.out.println("bos" + bos.toByteArray().length);
-					Utils.convertXlsxAndPdfFileToByte(bos.toByteArray(), path1);
+					Utils.convertXlsxAndPdfFileToByte(bos.toByteArray(), path);
 					bos.close();
 				}
 
@@ -1733,11 +1744,12 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					files = IOUtils.toByteArray(fi);
 					fi.close();
 				}
-
 				if ("yes".equalsIgnoreCase(awsCheck)) {
-					clientfilelocation = "timesheet_details" + File.separator + empid + "_" + client + "_"
-							+ "AutomationTimesheet.xlsx";
-					// clientfilelocation ="timesheet_details" + "/" + empid + "_" + client + "_" +
+					clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator + empid
+							+ "_" + client + "_" + "AutomationTimesheet.xlsx";
+
+					// clientfilelocation ="timesheet_details" + "/" + monthYearString +"/" +empid +
+					// "_" + client + "_" +
 					// "AutomationTimesheet.xlsx";
 					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
 				}
@@ -2517,16 +2529,16 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			try {
 				if ("no".equalsIgnoreCase(awsCheck)) {
 					clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
-							+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+							+ File.separator + monthYearString +File.separator  + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
 					fi = new FileInputStream(clientfilelocation);
 					files = IOUtils.toByteArray(fi);
 					fi.close();
 				}
 				if ("yes".equalsIgnoreCase(awsCheck)) {
-					clientfilelocation = "timesheet_details" + File.separator + empid + "_" + client + "_"
+					clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator +empid + "_" + client + "_"
 							+ "AutomationTimesheet.xlsx";
-					// clientfilelocation = "timesheet_details" +"/"+ empid + "_" + client + "_" +
-					// "AutomationTimesheet.xlsx";
+					 //clientfilelocation = "timesheet_details" +"/"+ monthYearString+"/"+ empid + "_" + client + "_" +
+					 //"AutomationTimesheet.xlsx";
 					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
 				}
 
@@ -2874,7 +2886,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	}
 
 	@Override
-	public ResponseEntity<byte[]> downloadsTimesheet(String empId, String clientId) throws Throwable {
+	public ResponseEntity<byte[]> downloadsTimesheet(String empId, String clientId, String timesheetMonth) throws Throwable {
 		
 		// To get Automation timesheet from server
 
@@ -2882,19 +2894,22 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					FileInputStream fi = null;
 					String clientfilelocation = null;
 					ResponseEntity<byte[]> responseEntity = null;
+					SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
+					Date selectedMonth = sdfMonth.parse(timesheetMonth);
+					SimpleDateFormat sdfMonthYear = new SimpleDateFormat("MMM-yy", Locale.US);
+					String monthYearString = sdfMonthYear.format(selectedMonth);
 					try {
 						if ("no".equalsIgnoreCase(awsCheck)) {
-							clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
+							clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"+File.separator + monthYearString 
 									+ File.separator + empId + "_" + clientId + "_" + "AutomationTimesheet.xlsx";
 							fi = new FileInputStream(clientfilelocation);
 							files = IOUtils.toByteArray(fi);
 							fi.close();
 						}
-
 						if ("yes".equalsIgnoreCase(awsCheck)) {
-							clientfilelocation = "timesheet_details" + File.separator + empId + "_" + clientId + "_"
+							clientfilelocation = "timesheet_details" + File.separator + monthYearString +File.separator  + empId + "_" + clientId + "_"
 									+ "AutomationTimesheet.xlsx";
-							// clientfilelocation ="timesheet_details" + "/" + empId + "_" + clientId + "_" +
+							//clientfilelocation ="timesheet_details" + "/" +monthYearString +"/" + empId + "_" + clientId + "_" +
 							// "AutomationTimesheet.xlsx";
 							files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
 						}
@@ -2902,7 +2917,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						e.printStackTrace();
 						Map<String, String> errorDetails = new HashMap<>();
 						errorDetails.put("message",
-								"Failed to Download  Automation Timesheet File :Failed to Get File From Server ");
+								"Failed to Download  Automation Timesheet File :Failed to Get File From Server : "+e.getMessage());
 						String json = new ObjectMapper().writeValueAsString(errorDetails);
 						return responseEntity = ResponseEntity.<byte[]>status(HttpStatus.NOT_FOUND).body(json.getBytes());
 					}

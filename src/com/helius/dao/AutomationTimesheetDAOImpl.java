@@ -2594,7 +2594,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 			String subject = empName + "- Timesheet Approval for " + monthYearString;
 
-			String text = "Hi" + ",\n\n" + "Dear " + managerName + ",\n\n" + "Please find the attached " + empName
+			String text =  "Dear " + managerName + ",\n\n" + "Please find the attached " + empName
 					+ " timesheet for the month " + monthYearString + ". Please reply" + "\n"
 					+ "all with your approval/Rejection with reason(if any)." + "\n\n" + "Thanks," + "\n"
 					+ "Timesheet Team," + "\n" + "Helius Technologies Pte.Ltd";

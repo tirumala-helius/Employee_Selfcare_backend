@@ -39,4 +39,5 @@ public interface IEmployeeDAO {
 	public void deleteHelpVideo(String help_videos_id)throws Throwable;
 	public Employee_Leave_Data getEmployeeLeaveData(String employee_id)throws Throwable;
 	public void sendEmail(String jsonData, MultipartHttpServletRequest request) throws Throwable;
+	public ResponseEntity<byte[]> getDownloadForm16(String empId, String filePath) throws Throwable;
 	}

@@ -164,4 +164,14 @@ public class EmployeeManager {
 		}
 		return new Status(true, "video deleted successfully");	
 	}
+	
+	public ResponseEntity<byte[]> getDownloadForm16(String empId, String filePath) {
+		ResponseEntity<byte[]> res = null;
+		try {
+			res = employeeDAO.getDownloadForm16(empId, filePath);
+		} catch (Throwable e) {
+			return res;
+		}
+		return res;
+	}
 }

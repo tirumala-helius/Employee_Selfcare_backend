@@ -389,4 +389,11 @@ public class EmployeeController {
 			ResponseEntity<byte[]> responseEntity = Utils.downloadFileByUrl(url);	
 			return responseEntity;
 		}
+	
+		@CrossOrigin
+		@RequestMapping(value = "downloadForm16", method = RequestMethod.GET, produces = "multipart/form-data")
+		public ResponseEntity<byte[]> getDownloadForm16(@RequestParam String empId, @RequestParam String filePath) {
+			ResponseEntity<byte[]> responseEntity = employeemanager.getDownloadForm16(empId, filePath);
+			return responseEntity;
+		}
 }

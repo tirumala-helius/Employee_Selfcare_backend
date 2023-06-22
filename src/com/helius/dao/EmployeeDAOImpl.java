@@ -1700,4 +1700,47 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 		return lieuList;
 	}
+
+	@Override
+	public ResponseEntity<byte[]> getDownloadForm16(String empId, String filePath) throws Throwable {
+		Session session = null;
+		byte[] files = null;
+		String check = Utils.awsCheckFlag();
+		try {
+			session = sessionFactory.openSession();
+			LocalDate now = LocalDate.now();
+			String query = "SELECT employee_name FROM Employee_Personal_Details WHERE employee_id = :employee_id";
+			System.out.println("query" + query);
+			List<String> empName = session.createSQLQuery(query).setParameter("employee_id", empId).list();
+
+			String url = null;
+			String employeeName = null;
+			if (empName != null && !empName.isEmpty()) {
+				for (String emp : empName) {
+					employeeName = emp;
+				}
+
+				if (filePath == null || !filePath.isEmpty() && "yes".equalsIgnoreCase(check)) {
+					url = "form16" + "/" + "form16_" + now.getYear() + "/" + empId + "_" + employeeName + "_"
+							+ filePath;
+					try {
+						files = Utils.downloadFileByAWSS3Bucket(url);
+					} catch (Exception e) {
+						return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+					}
+				}
+
+			} else {
+				return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
+
+			}
+
+		} catch (Throwable e) {
+			logger.error("failed to download file  - " + empId, e.getMessage());
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			session.close();
+		}
+		return new ResponseEntity<byte[]>(files, HttpStatus.OK);
+	}
 }

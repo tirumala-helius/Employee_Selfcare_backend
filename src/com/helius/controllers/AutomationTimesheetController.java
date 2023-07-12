@@ -62,8 +62,6 @@ public class AutomationTimesheetController {
 	    } catch (Throwable e) {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
 	    }
-	
-		
 	}
 	
 	@CrossOrigin

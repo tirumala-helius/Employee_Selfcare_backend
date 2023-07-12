@@ -44,20 +44,15 @@ public class TimesheetAutomationManager {
 		}
 		return  response;
 	}
-	
-	
-	public List<String> sendTimesheetAutomationmail(String clientjson, MultipartHttpServletRequest request) throws Throwable {
-	    List<String> list = null;
-	    try {
-	        list = automationTimesheetDAO.sendTimesheetAutomationmail(clientjson, request);
-	    } catch (Throwable e) {
-	        throw new Throwable("Automation Time Sheet Process Failed :" + e.getMessage());
-	    }
-	    return list;
-	
+
+	public List<String> sendTimesheetAutomationmail(String clientjson, MultipartHttpServletRequest request)throws Throwable {
+		try {
+			return automationTimesheetDAO.sendTimesheetAutomationmail(clientjson, request);
+		} catch (Throwable e) {
+			throw new Throwable("Automation TimeSheet Process Failed :" + e.getMessage(), e);
+		}
 	}
-	
-	
+
 	public ResponseEntity<byte[]> getTimesheet(String timesheetMonth ) throws JsonProcessingException {
 		ResponseEntity<byte[]> response;
 		try {

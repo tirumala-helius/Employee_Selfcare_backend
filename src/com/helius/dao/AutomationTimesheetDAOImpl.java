@@ -62,6 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee_Personal_Details;
 import com.helius.entities.Leave_Record_Details;
 import com.helius.entities.Leave_Usage_Details;
+import com.helius.entities.Timesheet_Automation_Status;
 import com.helius.service.EmailService;
 import com.helius.utils.FilecopyStatus;
 import com.helius.utils.LeaveDetails;
@@ -2387,35 +2388,104 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		Session session = null;
 		List<String> copied_with_success = new ArrayList<String>();
 		Transaction transaction = null;
+
+	try {
+		TimesheetAutomation automation = obm.readValue(json, TimesheetAutomation.class);
+		
+		String empName = automation.getEmployeeName();
+		String managerName = automation.getReportingManagerName();
+		String empid = automation.getEmpId();
+		String client = automation.getClient();
+		String clientId= automation.getClientId();
+		Date selectedMonth = sdfMonth.parse(automation.getLeaveMonth().toString());
+		SimpleDateFormat sdfMonthYear = new SimpleDateFormat("MMM-yy", Locale.US);
+		String monthYearString = sdfMonthYear.format(selectedMonth);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+		 java.util.Date selectedDate = sdf.parse(automation.getLeaveMonth().toString());
+		 Timestamp leaveMonths = new Timestamp(selectedDate.getTime());
+
+		String to = automation.getReportingManagermailID();
+		String[] cc = { automation.getEmpmailid(), automation.getReportingManagermailID() };
+		
+		
+		//To avoid Duplicate TimeShhet Creation for same employee with same month
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+			String query = "SELECT * FROM `Timesheet_Automation_Status` WHERE employee_id =:employee_id  AND \r\n"
+					+ "client_id =:client_id AND timesheet_month =:timesheet_month ";
+			List<Timesheet_Automation_Status> tslist = session.createSQLQuery(query)
+					.addEntity(Timesheet_Automation_Status.class)
+					.setParameter("employee_id", empid)
+					.setParameter("client_id", clientId)
+					.setParameter("timesheet_month", leaveMonths)
+					.list();
+			if(tslist != null && !tslist.isEmpty()) {
+				throw new Exception("Dupilicate Entry: "+empName+" has Already Submited timesheet for "+monthYearString);
+			}
+			
+		} catch (Exception e) {
+			if (transaction != null) {
+	            transaction.rollback();
+	        }
+			e.printStackTrace();
+			throw new Throwable("Timesheet Faild: " + e.getMessage(), e);
+		}
+		
+		//To Cretate Timesheet with Given JSON data
 		try {
 			responseEntity =  createAutomationTimesheet(json, request);
-			 //if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
 			 if (responseEntity.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
 			        throw new Exception("Timesheet creation failed with given Data");
 			    }
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Throwable("unable to Create Timesheet please check with Manager :" + e.getMessage());
+			throw new Throwable("please check with Manager :" + e.getMessage(), e);
 		}
 		
 		list.add("Total Working Days :"+Integer.toString(total_days_count));
 		list.add("Total Days Worked :"+Double.toString(present_days));
 		list.add("Total Leaves Taken :"+Double.toString(total_leave_days));
 		
+
+		// To get Automation Timesheet from server
+
+		byte[] files = null;
+		FileInputStream fi = null;
+		String clientfilelocation = null;
+		List<String> urlList = new ArrayList<String>();
+
 		try {
-			TimesheetAutomation automation = obm.readValue(json, TimesheetAutomation.class);
+			if ("no".equalsIgnoreCase(awsCheck)) {
+				clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
+						+ File.separator + monthYearString +File.separator  + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+				fi = new FileInputStream(clientfilelocation);
+				files = IOUtils.toByteArray(fi);
+				fi.close();
+			}
+			if ("yes".equalsIgnoreCase(awsCheck)) {
+				clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator +empid + "_" + client + "_"
+						+ "AutomationTimesheet.xlsx";
+				 //clientfilelocation = "timesheet_details" +"/"+ monthYearString+"/"+ empid + "_" + client + "_" +
+				 //"AutomationTimesheet.xlsx";
+				files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
+			}
 
-			String empName = automation.getEmployeeName();
-			String managerName = automation.getReportingManagerName();
-			String empid = automation.getEmpId();
-			String client = automation.getClient();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+			transaction.rollback();
+			throw new Throwable("Unable to get Automation Timesheet from server " + e1.getMessage(), e1);
+		} catch (IOException e) {
+			e.printStackTrace();
 
-			String to = automation.getReportingManagermailID();
-			String[] cc = { automation.getEmpmailid(), automation.getReportingManagermailID() };
-			Date selectedMonth = sdfMonth.parse(automation.getLeaveMonth().toString());
-			SimpleDateFormat sdfMonthYear = new SimpleDateFormat("MMM-yy", Locale.US);
-			String monthYearString = sdfMonthYear.format(selectedMonth);
+		}
 
+		String filelocation = clientfilelocation;
+		urlList.add(filelocation);
+		
+		
+			//To save/upadte Leave Details Into DB
 			try {
 				session = sessionFactory.openSession();
 				transaction = session.beginTransaction();
@@ -2489,7 +2559,6 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 									leaverecord.setLeaveRecordPath(url);
 								}
 							}
-
 							session.evict(leaverecord);
 							session.merge(leaverecord);
 						}
@@ -2503,7 +2572,6 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 							calcLeaveUsageBasedOnLeaveRecord(session, leaverecord, totalleaveUsed, recordDetailId);
 							isleaveupdated = true;
 						}
-
 					}
 					if (files12.values().size() > 0) {
 						FilecopyStatus status = Utils.copyFiles(request, templateFilenames, "leaverecords");
@@ -2515,48 +2583,14 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				transaction.rollback();
-				throw new Throwable("Unable to save leave record data into DB  " + e.getMessage());
+				if (transaction != null) {
+		            transaction.rollback();
+		        }
+
+				throw new Throwable("Unable to save leave record data into DB  " + e.getMessage(), e);
 			}
-
-			// To get Automation Timesheet from server
-
-			byte[] files = null;
-			FileInputStream fi = null;
-			String clientfilelocation = null;
-			List<String> urlList = new ArrayList<String>();
-
-			try {
-				if ("no".equalsIgnoreCase(awsCheck)) {
-					clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
-							+ File.separator + monthYearString +File.separator  + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
-					fi = new FileInputStream(clientfilelocation);
-					files = IOUtils.toByteArray(fi);
-					fi.close();
-				}
-				if ("yes".equalsIgnoreCase(awsCheck)) {
-					clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator +empid + "_" + client + "_"
-							+ "AutomationTimesheet.xlsx";
-					 //clientfilelocation = "timesheet_details" +"/"+ monthYearString+"/"+ empid + "_" + client + "_" +
-					 //"AutomationTimesheet.xlsx";
-					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
-				}
-
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-				transaction.rollback();
-				throw new Throwable("Unable to get Automation Timesheet from server " + e1.getMessage());
-			} catch (IOException e) {
-				e.printStackTrace();
-
-			}
-
-			String filelocation = clientfilelocation;
-			urlList.add(filelocation);
-
+			// To get leave Attachaments From Server
 			for (LeaveDetails leaveDetails2 : automation.getLeaveDetails()) {
-
-				// To get leave Attachaments From Server
 				if (leaveDetails2.getLeaveRecordPath() != null) {
 
 					byte[] file1 = null;
@@ -2576,22 +2610,56 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 							// clientfilelocation1 = "leaverecords"+ "/" + empid + "_" + client + "_" +
 							// leaveDetails2.getLeaveRecordPath();
 							file1 = Utils.downloadFileByAWSS3Bucket(clientfilelocation1);
-
 						}
-
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 						transaction.rollback();
-						throw new Throwable("Unable to get leave Attachaments from server" + e1.getMessage());
+						throw new Throwable("Unable to get leave Attachaments from server" + e1.getMessage(), e1);
 					} catch (IOException e) {
 						e.printStackTrace();
+						throw e;
 
 					}
 					String filelocation1 = clientfilelocation1;
 					urlList.add(filelocation1);
 				}
 			}
+			
 
+			//To save Timesheet data Into DB
+			try {
+				
+				session = sessionFactory.openSession();
+				transaction = session.beginTransaction();
+				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+				if(automation != null) {
+					Timesheet_Automation_Status automation_Status = new Timesheet_Automation_Status();
+					
+					automation_Status.setEmployee_id(empid);
+					automation_Status.setEmployee_name(empName);
+					automation_Status.setClient_id(automation.getClientId());
+					automation_Status.setClient_name(client);
+					automation_Status.setTimesheet_email(automation.getEmpmailid());
+					automation_Status.setTimesheet_month(automation.getLeaveMonth());
+					automation_Status.setTimesheet_upload_path(clientfilelocation);
+					automation_Status.setSubmited_date(timestamp);
+					
+					if(automation_Status != null ) {
+						session.save(automation_Status);
+						transaction.commit();	
+					}
+				}				
+			} catch (Exception e) {
+				e.printStackTrace();
+				if (transaction != null) {
+		            transaction.rollback();
+		        }
+
+				throw new Throwable("Unable to save Automation Timesheet Data into DB  " + e.getMessage(), e);
+			}
+			
+			
+			//To send Mail to corresponding person 
 			String subject = empName + "- Timesheet Approval for " + monthYearString;
 
 			String text =  "Dear " + managerName + ",\n\n" + "Please find the attached " + empName
@@ -2604,13 +2672,12 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 			transaction.rollback();
-			throw new Throwable("unable to Tigger Timesheet Automation Mail" + e.getMessage());
+			throw new Throwable("unable to Tigger Timesheet Automation Mail - " + e.getMessage(), e);
 
 		} finally {
 			session.close();
 		}
 		return list;
-
 	}
 
 	private void calcLeaveUsageBasedOnLeaveRecord(Session session, Leave_Record_Details leaverecord,

@@ -100,6 +100,7 @@
 			 	<value>com.helius.entities.Leave_Usage_Details</value>
 			 	<value>com.helius.entities.Leave_Record_Details</value>
 			 	<value>com.helius.entities.ClientTimesheetMaster</value>
+			 	<value>com.helius.entities.Timesheet_Automation_Status</value>
 			 	
 			</list>
 		</property>

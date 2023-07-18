@@ -2386,6 +2386,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		ResponseEntity<byte[]> responseEntity = null;
 		SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
 		Session session = null;
+		Session session1 = null;
+		Session session2 = null;
 		List<String> copied_with_success = new ArrayList<String>();
 		Transaction transaction = null;
 
@@ -2487,8 +2489,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		
 			//To save/upadte Leave Details Into DB
 			try {
-				session = sessionFactory.openSession();
-				transaction = session.beginTransaction();
+				session1= sessionFactory.openSession();
+				transaction = session1.beginTransaction();
 				Map<String, MultipartFile> files12 = request.getFileMap();
 
 				List<Leave_Record_Details> leave_Record_Details = new ArrayList<>();
@@ -2528,7 +2530,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 								+ "DATE(leaveMonth) = '" + lmonth + "' AND type_of_leave = '"
 								+ leaverecord.getType_of_leave() + "' " + "AND employee_id= '"
 								+ leaverecord.getEmployee_id() + "' AND client_id='" + leaverecord.getClient_id() + "'";
-						List<Object[]> recordList = session.createSQLQuery(leaveRecordQuery).list();
+						List<Object[]> recordList = session1.createSQLQuery(leaveRecordQuery).list();
 						float totalleaveUsed = 0;
 						if (recordList != null) {
 							for (Object[] obj : recordList) {
@@ -2549,7 +2551,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 								}
 							}
 
-							session.save(leaverecord);
+							session1.save(leaverecord);
 						} else {
 							if (leaverecord.getLeaveRecordPath() != null) {
 								if (files12.values().size() > 0) {
@@ -2559,8 +2561,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 									leaverecord.setLeaveRecordPath(url);
 								}
 							}
-							session.evict(leaverecord);
-							session.merge(leaverecord);
+							session1.evict(leaverecord);
+							session1.merge(leaverecord);
 						}
 						Timestamp leaveMonth = new Timestamp(selectedMonth1.getTime());
 						LocalDateTime localDateTime = leaveMonth.toLocalDateTime();
@@ -2569,7 +2571,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						LocalDate localdatenowMonth = LocalDate.now().with(firstDayOfMonth());
 
 						if (currenMonth.isEqual(localdatenowMonth) || previousMonth.isEqual(localdatenowMonth)) {
-							calcLeaveUsageBasedOnLeaveRecord(session, leaverecord, totalleaveUsed, recordDetailId);
+							calcLeaveUsageBasedOnLeaveRecord(session1, leaverecord, totalleaveUsed, recordDetailId);
 							isleaveupdated = true;
 						}
 					}
@@ -2629,8 +2631,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			//To save Timesheet data Into DB
 			try {
 				
-				session = sessionFactory.openSession();
-				transaction = session.beginTransaction();
+				session2 = sessionFactory.openSession();
+				transaction = session2.beginTransaction();
 				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 				if(automation != null) {
 					Timesheet_Automation_Status automation_Status = new Timesheet_Automation_Status();
@@ -2645,7 +2647,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					automation_Status.setSubmited_date(timestamp);
 					
 					if(automation_Status != null ) {
-						session.save(automation_Status);
+						session2.save(automation_Status);
 						transaction.commit();	
 					}
 				}				
@@ -2675,7 +2677,15 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			throw new Throwable("unable to Tigger Timesheet Automation Mail - " + e.getMessage(), e);
 
 		} finally {
-			session.close();
+			if (session != null && session.isOpen()) {
+	            session.close();
+	        }
+	        if (session1 != null && session1.isOpen()) {
+	            session1.close();
+	        }
+	        if (session2 != null && session2.isOpen()) {
+	            session2.close();
+	        }
 		}
 		return list;
 	}

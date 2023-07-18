@@ -2640,7 +2640,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					automation_Status.setClient_id(automation.getClientId());
 					automation_Status.setClient_name(client);
 					automation_Status.setTimesheet_email(automation.getEmpmailid());
-					automation_Status.setTimesheet_month(automation.getLeaveMonth());
+					automation_Status.setTimesheet_month(leaveMonths);
 					automation_Status.setTimesheet_upload_path(clientfilelocation);
 					automation_Status.setSubmited_date(timestamp);
 					

@@ -60,7 +60,7 @@ public class AutomationTimesheetController {
 	        List<String> list = automationManager.sendTimesheetAutomationmail(jsondata, request);
 	        return ResponseEntity.ok(list);
 	    } catch (Throwable e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.OK).body("Error: " + e.getMessage());
 	    }
 	}
 	

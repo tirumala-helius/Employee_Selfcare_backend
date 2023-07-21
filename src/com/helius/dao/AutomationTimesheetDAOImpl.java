@@ -2424,7 +2424,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					.setParameter("timesheet_month", leaveMonths)
 					.list();
 			if(tslist != null && !tslist.isEmpty()) {
-				throw new Exception("Dupilicate Entry: "+empName+" has Already Submited timesheet for "+monthYearString);
+				throw new Exception("Duplicate Entry: "+empName+" has Already Submitted timesheet for "+monthYearString);
 			}
 			
 		} catch (Exception e) {
@@ -2432,7 +2432,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	            transaction.rollback();
 	        }
 			e.printStackTrace();
-			throw new Throwable("Timesheet Faild: " + e.getMessage(), e);
+			throw new Throwable(e.getMessage(), e);
 		}
 		
 		//To Cretate Timesheet with Given JSON data
@@ -2443,7 +2443,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			    }
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Throwable("please check with Manager :" + e.getMessage(), e);
+			throw new Throwable(e.getMessage(), e);
 		}
 		
 		list.add("Total Working Days :"+Integer.toString(total_days_count));
@@ -2616,7 +2616,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 						transaction.rollback();
-						throw new Throwable("Unable to get leave Attachaments from server" + e1.getMessage(), e1);
+						throw new Throwable("Unable to get leave Attachment's from server" + e1.getMessage(), e1);
 					} catch (IOException e) {
 						e.printStackTrace();
 						throw e;
@@ -2674,7 +2674,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 			transaction.rollback();
-			throw new Throwable("unable to Tigger Timesheet Automation Mail - " + e.getMessage(), e);
+			throw new Throwable(e.getMessage(), e);
 
 		} finally {
 			if (session != null && session.isOpen()) {

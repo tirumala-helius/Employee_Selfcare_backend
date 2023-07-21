@@ -49,7 +49,7 @@ public class TimesheetAutomationManager {
 		try {
 			return automationTimesheetDAO.sendTimesheetAutomationmail(clientjson, request);
 		} catch (Throwable e) {
-			throw new Throwable("Automation TimeSheet Process Failed :" + e.getMessage(), e);
+			throw new Throwable("Automation Timesheet Process Failed :" + e.getMessage(), e);
 		}
 	}
 

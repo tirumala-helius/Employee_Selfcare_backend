@@ -1,6 +1,7 @@
 package com.helius.controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,15 +54,19 @@ public class AutomationTimesheetController {
 	@CrossOrigin
 	@RequestMapping(value = "client/sendTimesheetAutomationmail", method = RequestMethod.POST, consumes = { "multipart/form-data" })
 	public ResponseEntity<?> sendTimesheetAutomationmail(@RequestParam("model") String jsondata,MultipartHttpServletRequest request,MultipartHttpServletRequest request2) throws Throwable {
-		//List<String> list = null;
+		List<String> list = null;
 		System.out.println("clientjsondata:" + jsondata.toString());
-			
+		String errorresponse = 	"";
 		try {
-	        List<String> list = automationManager.sendTimesheetAutomationmail(jsondata, request);
+	        list = automationManager.sendTimesheetAutomationmail(jsondata, request);
 	        return ResponseEntity.ok(list);
 	    } catch (Throwable e) {
-	        return ResponseEntity.status(HttpStatus.OK).body("Error: " + e.getMessage());
+	    	list = new ArrayList<String>();
+	    	list.add(e.getMessage());
+	    	
+	    	 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(list);
 	    }
+		
 	}
 	
 	@CrossOrigin

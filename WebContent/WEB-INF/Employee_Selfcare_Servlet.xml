@@ -101,6 +101,8 @@
 			 	<value>com.helius.entities.Leave_Record_Details</value>
 			 	<value>com.helius.entities.ClientTimesheetMaster</value>
 			 	<value>com.helius.entities.Timesheet_Automation_Status</value>
+			 	<value>com.helius.entities.Employee_Ticketing_System</value>
+			    <value>com.helius.entities.Employee_Ticketing_System_Ticket_Types</value>
 			 	
 			</list>
 		</property>
@@ -149,8 +151,15 @@
 	
 	<bean id="awsconfig" class="com.helius.utils.AwsS3BucketConfig" />
 	
-	<bean id="Utils" class="com.helius.utils.Utils">
-	 </bean>
+	<bean id="Utils" class="com.helius.utils.Utils"/>
+	
+	<bean id="ticketSystemDAO" class="com.helius.dao.TicketSystemDAOImpl">
+	<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+
+    <bean id="ticketManager" class=" com.helius.managers.TicketManager">
+		<property name="ticketSystemDAO" ref="ticketSystemDAO" />
+	</bean>
 	<!-- <bean id="clientDAO" class="com.helius.dao.ClientDAOImpl">
 		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
 	</bean>

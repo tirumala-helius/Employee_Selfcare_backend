@@ -69,6 +69,7 @@ import com.helius.entities.Employee_Offer_Details;
 import com.helius.entities.Employee_Personal_Details;
 import com.helius.entities.Employee_Salary_Details;
 import com.helius.entities.Employee_Terms_And_Conditions;
+import com.helius.entities.Employee_Ticketing_System_Ticket_Types;
 import com.helius.entities.Employee_Timesheet_Status;
 import com.helius.entities.Employee_Work_Permit_Details;
 import com.helius.entities.Help_Videos;
@@ -228,6 +229,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			  if(sow_Ctc_BreakupList!= null) {
 			  emp.setSowCtcBreakup(sow_Ctc_BreakupList); 
 			  }
+			 
 			  
 			  String sowbreakuphis_query = "select breakup.* from Sow_Ctc_Breakup breakup where employee_id = :employee_id AND status = :status"; 
 			  java.util.List breakuphisList = session.createSQLQuery(sowbreakuphis_query).addEntity(Sow_Ctc_Breakup.class).setParameter("employee_id", employeeid).setParameter("status", "inactive").list();
@@ -447,6 +449,18 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				}
 				employee_Work_Permit_Details.setPassport_number(passportNum);
 				emp.setEmployeeWorkPermitDetails(employee_Work_Permit_Details);
+			}
+			
+			// get ticketingSystem types
+			String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types";
+			List<Employee_Ticketing_System_Ticket_Types> empTicketTypeList = new ArrayList<>();
+			List<Employee_Ticketing_System_Ticket_Types> ticketTypeList = session.createSQLQuery(ticketTypeQuery)
+					.addEntity(Employee_Ticketing_System_Ticket_Types.class).list();
+			if (!ticketTypeList.isEmpty()) {
+				ticketTypeList.stream().forEach(ticket -> {
+					empTicketTypeList.add(ticket);
+				});
+				emp.setEmployeeTicketTypes(empTicketTypeList);
 			}
 		} catch (Exception e) {
 			logger.error("issue in fetcing employee details for employee "+employeeid +" find stacktrace",e);

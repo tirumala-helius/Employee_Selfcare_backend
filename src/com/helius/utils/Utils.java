@@ -562,7 +562,7 @@ if(!(group_subgroups.containsValue(subgrp))){
 	}
 	
 	public static FilecopyStatus copyFiles(MultipartHttpServletRequest request, Map<String,String> modifiedFilenames, Map<String,String> filefolder) throws Exception {
-		
+		String awsCheck = Utils.awsCheckFlag();
 		List<String> copied_with_success = new ArrayList<String>();
 		FilecopyStatus success = new FilecopyStatus();
 		success.setOk(true);
@@ -577,7 +577,9 @@ if(!(group_subgroups.containsValue(subgrp))){
 			// filename = id + "_" + file.getOriginalFilename();
 			String folder = filefolder.get(filename);
 			String fileUrl = clientfilelocation + File.separator + folder;
-			File fileDir = new File(fileUrl);
+			
+			if("no".equalsIgnoreCase(awsCheck)){
+		    File fileDir = new File(fileUrl);
 			if (!fileDir.exists()) {
 				boolean iscreated = fileDir.mkdirs();
 				if (!iscreated) {
@@ -594,6 +596,23 @@ if(!(group_subgroups.containsValue(subgrp))){
 				success.setOk(false);
 				deleteFiles(copied_with_success);
 				throw new Exception("Failed to save the files")	;					
+			}
+			}
+			//save files in s3 bucket
+			if ("yes".equalsIgnoreCase(awsCheck)) {
+				String sucessMsg="";
+				try {
+					String folder_path=folder+"/";
+					sucessMsg=saveAwsS3bucket(file,modifiedfilename,folder_path);
+					copied_with_success.add(sucessMsg);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					success.setOk(false);
+					deleteFiles(copied_with_success);
+					throw new Exception(e.getMessage())	;
+				}	
+				
 			}
 		}
 		success.setCopied_with_success(copied_with_success);

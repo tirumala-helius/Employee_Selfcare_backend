@@ -43,8 +43,8 @@ public class Employee extends HeliusEntity {
 	private List<DeleteIndianEmployeeFamilyMember> deleteIndianEmployeeFamilyMember;
 	private EmployeeExitCheck employeeExitCheck;
 	private List<Sow_Ctc_Breakup> deletedsowCtcBreakup;
-	
-	
+	private List<Employee_Ticketing_System_Ticket_Types> employeeTicketTypes;
+	private Employee_Ticketing_System employeeTicketingSystem;
 	
 	public List<Sow_Ctc_Breakup> getDeletedsowCtcBreakup() {
 		return deletedsowCtcBreakup;
@@ -271,14 +271,7 @@ public class Employee extends HeliusEntity {
 	public void setEmployeeProfessionalDetails(List<Employee_Professional_Details> employeeProfessionalDetails) {
 		this.employeeProfessionalDetails = employeeProfessionalDetails;
 	}
-	/*public Employee_Professional_Details getEmployeeProfessionalDetails() {
-		return employeeProfessionalDetails;
-	}
-
 	
-	public void setEmployeeProfessionalDetails(Employee_Professional_Details employeeProfessionalDetails) {
-		this.employeeProfessionalDetails = employeeProfessionalDetails;
-	}*/
 
 	/**
 	 * @return the employeeAssignmentDetails
@@ -321,6 +314,24 @@ public class Employee extends HeliusEntity {
 	 */
 	public void setCerfifications(List<Certification> cerfifications) {
 		this.cerfifications = cerfifications;
+	}
+   
+	
+
+	public List<Employee_Ticketing_System_Ticket_Types> getEmployeeTicketTypes() {
+		return employeeTicketTypes;
+	}
+
+	public void setEmployeeTicketTypes(List<Employee_Ticketing_System_Ticket_Types> employeeTicketTypes) {
+		this.employeeTicketTypes = employeeTicketTypes;
+	}
+
+	public Employee_Ticketing_System getEmployeeTicketingSystem() {
+		return employeeTicketingSystem;
+	}
+
+	public void setEmployeeTicketingSystem(Employee_Ticketing_System employeeTicketingSystem) {
+		this.employeeTicketingSystem = employeeTicketingSystem;
 	}
 
 	/* (non-Javadoc)

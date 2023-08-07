@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 @Entity
@@ -53,12 +55,14 @@ public class Employee_Ticketing_System {
 	private String comments;
 
 	@Column
+	@UpdateTimestamp
 	private Timestamp last_modified_date;
 
 	@Column
 	private String last_modified_by;
 
 	@Column
+	@CreationTimestamp
 	private Timestamp create_date;
 
 	@Column

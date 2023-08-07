@@ -32,10 +32,10 @@ public class Employee_Ticketing_System_Ticket_Types {
 	private String singapore_helius_email_id;
 
 	@Column
+	@UpdateTimestamp
 	private Timestamp last_modified_date;
 
 	@Column
-	@UpdateTimestamp
 	private String last_modified_by;
 
 	@Column

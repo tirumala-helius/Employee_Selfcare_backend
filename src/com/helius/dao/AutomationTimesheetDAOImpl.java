@@ -194,10 +194,12 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			String empid = automation.getEmpId();
 			String client = automation.getClient();
 			String empname = automation.getEmployeeName();
-			String managername = "";
-			if(automation.getReportingManagerName() != null && !automation.getReportingManagerName().isEmpty()) {
-				 managername = automation.getReportingManagerName();
-			}	
+			String managername = "N/A";
+			/*
+			 * if(automation.getReportingManagerName() != null &&
+			 * !automation.getReportingManagerName().isEmpty()) { managername =
+			 * automation.getReportingManagerName(); }
+			 */	
 
 			Date selectedMonth = sdfMonth.parse(automation.getLeaveMonth().toString());
 			SimpleDateFormat sdfMonthYear = new SimpleDateFormat("MMM-yy", Locale.US);

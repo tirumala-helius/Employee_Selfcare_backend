@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.metamodel.source.LocalBindingContext;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -41,7 +45,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	@Autowired
 	private EmailService emailService;
 	private List<String> copied_with_success = new ArrayList<String>();
-
+ private static final Logger logger = LogManager.getLogger(EmployeeDAOImpl.class.getName());
 	@Override
 	public void saveEmpTicket(Employee emp, MultipartHttpServletRequest request) throws Throwable {
 		Session session = null;
@@ -327,6 +331,50 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 			throw e;
 		}
 		return personalEmailId;
+	}
+
+	@Override
+	public ResponseEntity<byte[]> downloadFile(String ticketid) {
+		Session session = null;
+		byte[] files = null;
+		String check = Utils.awsCheckFlag();
+		try {
+			session = sessionFactory.openSession();
+			LocalDate now = LocalDate.now();
+			String url = null;
+
+			String query = "SELECT * FROM Employee_Ticketing_System WHERE ticket_number =:ticketid";
+			List<EmployeeTicketingSystemBean> empticketlist = session.createSQLQuery(query)
+					.setResultTransformer(Transformers.aliasToBean(EmployeeTicketingSystemBean.class))
+					.setParameter("ticketid", ticketid).list();
+
+			if (!empticketlist.isEmpty() && empticketlist != null) {
+				for (EmployeeTicketingSystemBean emp : empticketlist) {
+					String filePath = emp.getTicket_attachment_path();
+
+					if (filePath != null || !filePath.isEmpty() && "yes".equalsIgnoreCase(check)) {
+
+						url = "ticketing_system" + "/" + ticketid + "_" + filePath;
+						try {
+							files = Utils.downloadFileByAWSS3Bucket(url);
+						} catch (Exception e) {
+							return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+						}
+					} else {
+						return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
+
+					}
+				}
+			}
+		} catch (Throwable e) {
+			logger.error("failed to download file - " + ticketid, e.getMessage());
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		return new ResponseEntity<byte[]>(files, HttpStatus.OK);
 	}
 
 }

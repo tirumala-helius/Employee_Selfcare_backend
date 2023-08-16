@@ -1,6 +1,7 @@
 package com.helius.managers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.helius.dao.TicketSystemDAO;
@@ -46,6 +47,16 @@ public class TicketManager {
 			return ticketdetailsById;
 		}
 		return ticketdetailsById;
+	}
+	
+	public ResponseEntity<byte[]> downloadFile(String ticketid) {
+		ResponseEntity<byte[]> res = null;
+		try {
+			 res =	ticketSystemDAO.downloadFile(ticketid);
+		} catch (Throwable e) {
+				return res;
+		}
+		return res;
 	}
 
 }

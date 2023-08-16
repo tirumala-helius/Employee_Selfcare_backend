@@ -15,7 +15,7 @@ import org.hibernate.envers.Audited;
 
 @Entity
 @Table(name = "Employee_Ticketing_System")
-//@Audited
+@Audited
 public class Employee_Ticketing_System {
 
 	@Id

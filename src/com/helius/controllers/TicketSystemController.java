@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -70,5 +71,10 @@ public class TicketSystemController {
 		return empTicketingData;
 
 	}
-
+	@CrossOrigin
+	@RequestMapping(value = "getTicketdownload", method = RequestMethod.GET, produces = "multipart/form-data")
+	public ResponseEntity<byte[]> downloadFile(@RequestParam String ticketid) {
+		ResponseEntity<byte[]> responseEntity = ticketManager.downloadFile(ticketid);
+		return responseEntity;
+	}
 }

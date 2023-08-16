@@ -44,6 +44,11 @@ public class Employee_Ticketing_System_Ticket_Types {
 
 	@Column
 	private String created_by;
+	@Column
+	private String india_spoc_name;
+	@Column
+	private String singapore_spoc_name;
+	
 
 	public int getEmployee_ticketing_system_ticket_types_id() {
 		return employee_ticketing_system_ticket_types_id;
@@ -107,6 +112,22 @@ public class Employee_Ticketing_System_Ticket_Types {
 
 	public void setCreated_by(String created_by) {
 		this.created_by = created_by;
+	}
+
+	public String getIndia_spoc_name() {
+		return india_spoc_name;
+	}
+
+	public void setIndia_spoc_name(String india_spoc_name) {
+		this.india_spoc_name = india_spoc_name;
+	}
+
+	public String getSingapore_spoc_name() {
+		return singapore_spoc_name;
+	}
+
+	public void setSingapore_spoc_name(String singapore_spoc_name) {
+		this.singapore_spoc_name = singapore_spoc_name;
 	}
 
 }

@@ -83,6 +83,14 @@ public class Employee_Assignment_Details {
 	private Timestamp create_date;
 	@Column
 	private String created_by;
+	@Column
+	private String comments;
+	@Column
+	private Timestamp client_start_date ;
+	@Column
+	private String timesheet_approver_name;
+	@Column
+	private String timesheet_approver_email_id;
 	
 	
 	
@@ -311,6 +319,47 @@ public class Employee_Assignment_Details {
 
 	public void setAssign_employee_to_sow(String assign_employee_to_sow) {
 		this.assign_employee_to_sow = assign_employee_to_sow;
+	}
+	
+	
+
+
+	public String getComments() {
+		return comments;
+	}
+
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
+
+	public Timestamp getClient_start_date() {
+		return client_start_date;
+	}
+
+
+	public void setClient_start_date(Timestamp client_start_date) {
+		this.client_start_date = client_start_date;
+	}
+
+
+	public String getTimesheet_approver_name() {
+		return timesheet_approver_name;
+	}
+
+
+	public void setTimesheet_approver_name(String timesheet_approver_name) {
+		this.timesheet_approver_name = timesheet_approver_name;
+	}
+
+	public String getTimesheet_approver_email_id() {
+		return timesheet_approver_email_id;
+	}
+
+
+	public void setTimesheet_approver_email_id(String timesheet_approver_email_id) {
+		this.timesheet_approver_email_id = timesheet_approver_email_id;
 	}
 
 

@@ -245,8 +245,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
 			 * Cell headerCell31 = headerRow1.createCell(3);
-			 * headerCell31.setCellValue(empid); //
-			 * headerCell3.setCellStyle(getHeaderCellStyle(workbook));
+			 * headerCell31.setCellValue(empid);
+			 * //headerCell3.setCellStyle(getHeaderCellStyle(workbook));
 			 * sheet1.addMergedRegion(new CellRangeAddress(1, 1, 3, 9)); CellRangeAddress
 			 * mergedRange3 = sheet1.getMergedRegion(2); for (int r =
 			 * mergedRange3.getFirstRow(); r <= mergedRange3.getLastRow(); r++) { Row row =
@@ -255,9 +255,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * Cell cell = row.getCell(c); if (cell == null) { cell = row.createCell(c); }
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
-			 * Row headerRow2 = sheet1.createRow(2); // CellStyle headerCellStyle
-			 * =getHeaderCellStyle(workbook); Cell headerCell4 = headerRow2.createCell(1);
-			 * headerCell4.setCellValue("EMP_NAME"); //
+			 * Row headerRow2 = sheet1.createRow(2); // CellStyle
+			 * headerCellStyle=getHeaderCellStyle(workbook); Cell headerCell4 =
+			 * headerRow2.createCell(1); headerCell4.setCellValue("EMP_NAME"); //
 			 * headerCell4.setCellStyle(getHeaderCellStyle(workbook));
 			 * sheet1.addMergedRegion(new CellRangeAddress(2, 2, 1, 2)); CellRangeAddress
 			 * mergedRange4 = sheet1.getMergedRegion(3); for (int r =
@@ -268,8 +268,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
 			 * Cell headerCell51 = headerRow2.createCell(3);
-			 * headerCell51.setCellValue(empname); //
-			 * headerCell5.setCellStyle(getHeaderCellStyle(workbook));
+			 * headerCell51.setCellValue(empname);
+			 * //headerCell5.setCellStyle(getHeaderCellStyle(workbook));
 			 * sheet1.addMergedRegion(new CellRangeAddress(2, 2, 3, 9)); CellRangeAddress
 			 * mergedRange5 = sheet1.getMergedRegion(4); for (int r =
 			 * mergedRange5.getFirstRow(); r <= mergedRange5.getLastRow(); r++) { Row row =
@@ -278,10 +278,10 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * Cell cell = row.getCell(c); if (cell == null) { cell = row.createCell(c); }
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
-			 * Row headerRow3 = sheet1.createRow(3); // CellStyle headerCellStyle =
-			 * getHeaderCellStyle(workbook); Cell headerCell6 = headerRow3.createCell(1);
-			 * headerCell6.setCellValue("Client"); //
-			 * headerCell6.setCellStyle(getHeaderCellStyle(workbook));
+			 * Row headerRow3 = sheet1.createRow(3); // CellStyle headerCellStyle
+			 * =getHeaderCellStyle(workbook); Cell headerCell6 = headerRow3.createCell(1);
+			 * headerCell6.setCellValue("Client");
+			 * //headerCell6.setCellStyle(getHeaderCellStyle(workbook));
 			 * sheet1.addMergedRegion(new CellRangeAddress(3, 3, 1, 2)); CellRangeAddress
 			 * mergedRange6 = sheet1.getMergedRegion(5); for (int r =
 			 * mergedRange6.getFirstRow(); r <= mergedRange6.getLastRow(); r++) { Row row =
@@ -291,8 +291,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
 			 * Cell headerCell71 = headerRow3.createCell(3);
-			 * headerCell71.setCellValue(client); //
-			 * headerCell7.setCellStyle(getHeaderCellStyle(workbook));
+			 * headerCell71.setCellValue(client);
+			 * //headerCell7.setCellStyle(getHeaderCellStyle(workbook));
 			 * sheet1.addMergedRegion(new CellRangeAddress(3, 3, 3, 9)); CellRangeAddress
 			 * mergedRange7 = sheet1.getMergedRegion(6); for (int r =
 			 * mergedRange7.getFirstRow(); r <= mergedRange7.getLastRow(); r++) { Row row =
@@ -325,7 +325,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * cell.setCellStyle(getHeaderCellStyle8(workbook1)); } }
 			 * 
 			 * Row headerRow5 = sheet1.createRow(5); Cell headerCell10 =
-			 * headerRow5.createCell(1); headerCell10.setCellValue("Month (MM/YYYY)");
+			 * headerRow5.createCell(1); headerCell10.setCellValue("Month");
 			 * sheet1.addMergedRegion(new CellRangeAddress(5, 5, 1, 2)); CellRangeAddress
 			 * mergedRange10 = sheet1.getMergedRegion(9); for (int r =
 			 * mergedRange10.getFirstRow(); r <= mergedRange10.getLastRow(); r++) { Row row
@@ -352,7 +352,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * 
 			 * // Create header row for monthly timesheet Row headerRow8 =
 			 * sheet1.createRow(6); Cell headerCell = headerRow8.createCell(1,
-			 * CellType.STRING); headerCell.setCellValue("DATES(DD/MM/YYYY)");
+			 * CellType.STRING); headerCell.setCellValue("DATES(DD-MM-YYYY)");
 			 * sheet1.addMergedRegion(new CellRangeAddress(6, 6, 1, 2));
 			 * 
 			 * headerCell = headerRow8.createCell(3, CellType.STRING);
@@ -360,7 +360,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			 * CellRangeAddress(6, 6, 3, 4));
 			 * 
 			 * headerCell = headerRow8.createCell(5, CellType.STRING);
-			 * headerCell.setCellValue("ATTANDANCE STATUS");
+			 * headerCell.setCellValue("ATTENDANCE STATUS");
 			 * headerCell.setCellStyle(getHeaderCellStyle(workbook1)); headerCell =
 			 * headerRow8.createCell(6, CellType.STRING);
 			 * headerCell.setCellValue("Full Day / Half Day");
@@ -422,8 +422,6 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			Cell headerCell9 = headerRow41.getCell(3);
 			headerCell9.setCellValue(managername);
 			Row headerRow51 = sheet.getRow(5);
-			Cell headerCell112 = headerRow51.getCell(1);
-			headerCell112.setCellValue("Month");
 			Cell headerCell11 = headerRow51.getCell(3);
 			headerCell11.setCellValue(monthYearString);
 			Row headerRow81 = sheet.getRow(6);
@@ -2914,7 +2912,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		Row lastworkinhdayRow = sheet.createRow(lastrow);
 		Cell headerCell62 = lastworkinhdayRow.createCell(1, CellType.STRING);
 		headerCell62.setCellValue(
-				"Note: For half day leave, kindly Mention 0.5 in DAYS and AM or PM in AM/PM colum. ");
+				"Note: For half day leave, kindly mention 0.5 in DAY and AM or PM in AM/PM column.");
 		sheet.addMergedRegion(new CellRangeAddress(lastrow, lastrow, 1, 9));
 		int lastMergedRegionIndex = sheet.getNumMergedRegions() - 1;
 		CellRangeAddress lwdmergedRange = sheet.getMergedRegion(lastMergedRegionIndex);
@@ -3028,7 +3026,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			double bereavCount, double ecclCount,double emlCount,double compoffCount, double dayscount) {
 
 		Cell headerCell19 = headerRow1.createCell(11);
-		headerCell19.setCellValue("Timesheet Summary");
+		headerCell19.setCellValue("TIMESHEET SUMMARY");
 		headerCell19.setCellStyle(getHeaderCellStyle(workbook));
 
 		Cell headerCell20 = headerRow1.createCell(12);

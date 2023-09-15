@@ -3372,6 +3372,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		String managerName = automation.getReportingManagerName();
 		String empid = automation.getEmpId();
 		String client = automation.getClient();
+		if(client.equalsIgnoreCase("DAH2")) {
+			managerName = "Padma";
+		}
 		String clientId= automation.getClientId();
 		Date selectedMonth = sdfMonth.parse(automation.getLeaveMonth().toString());
 		SimpleDateFormat sdfMonthYear = new SimpleDateFormat("MMM-yy", Locale.US);

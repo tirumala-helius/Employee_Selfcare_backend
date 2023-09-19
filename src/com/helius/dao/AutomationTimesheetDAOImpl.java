@@ -2957,35 +2957,35 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		}
 		
 		int i =1;
-		for( LeaveDetails details : leaveDetails) {
-			String remarks = details.getRemarks();
-			if(remarks != null && !remarks.isEmpty()) {
-				// Remark 1
-				Row remark1 = sheet.createRow(lastrow + i);
-				Cell headerCell64 = remark1.createCell(1, CellType.STRING);
-				headerCell64.setCellValue(i +") " + remarks);
-				sheet.addMergedRegion(new CellRangeAddress(lastrow + i, lastrow + i, 1, 9));
-				i++;
-				int reamekMergedRegionIndex1 = sheet.getNumMergedRegions() - 1;
-				CellRangeAddress reamrkwdmergedRange1 = sheet.getMergedRegion(reamekMergedRegionIndex1);
-				for (int r = reamrkwdmergedRange1.getFirstRow(); r <= reamrkwdmergedRange1.getLastRow(); r++) {
-					Row row = sheet.getRow(r);
-					if (row == null) {
-						row = sheet.createRow(r);
-					}
-					for (int c = reamrkwdmergedRange1.getFirstColumn(); c <= reamrkwdmergedRange1.getLastColumn(); c++) {
-						Cell cell = row.getCell(c);
-						if (cell == null) {
-							cell = row.createCell(c);
+		if(leaveDetails!= null && !leaveDetails.isEmpty()) {
+			for( LeaveDetails details : leaveDetails) {
+				String remarks = details.getRemarks();
+				if(remarks != null && !remarks.isEmpty()) {
+					// Remark 1
+					Row remark1 = sheet.createRow(lastrow + i);
+					Cell headerCell64 = remark1.createCell(1, CellType.STRING);
+					headerCell64.setCellValue(i +") " + remarks);
+					sheet.addMergedRegion(new CellRangeAddress(lastrow + i, lastrow + i, 1, 9));
+					i++;
+					int reamekMergedRegionIndex1 = sheet.getNumMergedRegions() - 1;
+					CellRangeAddress reamrkwdmergedRange1 = sheet.getMergedRegion(reamekMergedRegionIndex1);
+					for (int r = reamrkwdmergedRange1.getFirstRow(); r <= reamrkwdmergedRange1.getLastRow(); r++) {
+						Row row = sheet.getRow(r);
+						if (row == null) {
+							row = sheet.createRow(r);
 						}
+						for (int c = reamrkwdmergedRange1.getFirstColumn(); c <= reamrkwdmergedRange1.getLastColumn(); c++) {
+							Cell cell = row.getCell(c);
+							if (cell == null) {
+								cell = row.createCell(c);
+							}
 
-						cell.setCellStyle(getHeaderCellStyle7(workbook));
+							cell.setCellStyle(getHeaderCellStyle7(workbook));
+						}
 					}
 				}
 			}
-			
 		}
-		
 
 		/*
 		 * // Remark 2 Row remark2 = sheet.createRow(lastrow + 2); Cell headerCell65 =

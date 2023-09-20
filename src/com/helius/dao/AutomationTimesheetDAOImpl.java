@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ import com.helius.entities.Leave_Record_Details;
 import com.helius.entities.Leave_Usage_Details;
 import com.helius.entities.Timesheet_Automation_Status;
 import com.helius.service.EmailService;
+import com.helius.utils.ClientDetails;
 import com.helius.utils.FilecopyStatus;
 import com.helius.utils.LeaveDetails;
 import com.helius.utils.RotationalWeekEnds;
@@ -3362,6 +3364,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		Session session = null;
 		Session session1 = null;
 		Session session2 = null;
+		Session session3 = null;
 		List<String> copied_with_success = new ArrayList<String>();
 		Transaction transaction = null;
 
@@ -3376,6 +3379,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			managerName = "Padma";
 		}
 		String clientId= automation.getClientId();
+		String clientWorkCountry = null;
 		Date selectedMonth = sdfMonth.parse(automation.getLeaveMonth().toString());
 		SimpleDateFormat sdfMonthYear = new SimpleDateFormat("MMM-yy", Locale.US);
 		String monthYearString = sdfMonthYear.format(selectedMonth);
@@ -3385,7 +3389,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		 Timestamp leaveMonths = new Timestamp(selectedDate.getTime());
 
 		String to = automation.getReportingManagermailID();
-		String[] cc = { automation.getEmpmailid(), automation.getReportingManagermailID() };
+		String[] cc = { automation.getEmpmailid()};
 		
 		
 		//To avoid Duplicate TimeShhet Creation for same employee with same month
@@ -3410,6 +3414,46 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	        }
 			e.printStackTrace();
 			throw new Throwable(e.getMessage(), e);
+		}
+		
+		//To get client workcountry from client details based on client id 
+				try {
+					session3 = sessionFactory.openSession();
+					transaction = session3.beginTransaction();
+					String query = "SELECT client_id,client_name,client_short_name,client_country FROM `client_details` WHERE client_id =:client_id";
+					List<ClientDetails> clientdetails  = session3.createSQLQuery(query)
+							.setResultTransformer(Transformers.aliasToBean(ClientDetails.class))
+							.setParameter("client_id", clientId)
+							.list();
+					if(clientdetails != null && !clientdetails.isEmpty()) {
+						for(ClientDetails details :clientdetails ) {
+							clientWorkCountry =	details.getClient_country();
+						}
+					}
+					
+				} catch (Exception e) {
+					if (transaction != null) {
+			            transaction.rollback();
+			        }
+					e.printStackTrace();
+					throw new Throwable(e.getMessage(), e);
+				}
+		
+		
+		if(clientWorkCountry != null) {
+			
+			if(clientWorkCountry.equalsIgnoreCase("India")) {
+				String additionalEmail = "hrIndia@helius-tech.com"; 
+		        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
+		        ccWithAdditionalEmail[cc.length] = additionalEmail;
+		        cc = ccWithAdditionalEmail;
+			}else if(clientWorkCountry.equalsIgnoreCase("Singapore")) {
+				String additionalEmail = "timesheet@helius-tech.com"; 
+		        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
+		        ccWithAdditionalEmail[cc.length] = additionalEmail;
+		        cc = ccWithAdditionalEmail;
+			}
+			
 		}
 		
 		//To Cretate Timesheet with Given JSON data
@@ -3699,6 +3743,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	        }
 	        if (session2 != null && session2.isOpen()) {
 	            session2.close();
+	        }
+	        if (session3 != null && session3.isOpen()) {
+	            session3.close();
 	        }
 		}
 		return list;

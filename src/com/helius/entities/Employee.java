@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.helius.dao.EmployeeExitCheck;
+import com.helius.utils.Holiday_Master;
 
 /**
  * @author Tirumala
@@ -45,6 +46,7 @@ public class Employee extends HeliusEntity {
 	private List<Sow_Ctc_Breakup> deletedsowCtcBreakup;
 	private List<Employee_Ticketing_System_Ticket_Types> employeeTicketTypes;
 	private Employee_Ticketing_System employeeTicketingSystem;
+	private List<Holiday_Master> clientHolidays;
 	
 	public List<Sow_Ctc_Breakup> getDeletedsowCtcBreakup() {
 		return deletedsowCtcBreakup;
@@ -332,6 +334,16 @@ public class Employee extends HeliusEntity {
 
 	public void setEmployeeTicketingSystem(Employee_Ticketing_System employeeTicketingSystem) {
 		this.employeeTicketingSystem = employeeTicketingSystem;
+	}
+	
+	
+
+	public List<Holiday_Master> getClientHolidays() {
+		return clientHolidays;
+	}
+
+	public void setClientHolidays(List<Holiday_Master> clientHolidays) {
+		this.clientHolidays = clientHolidays;
 	}
 
 	/* (non-Javadoc)

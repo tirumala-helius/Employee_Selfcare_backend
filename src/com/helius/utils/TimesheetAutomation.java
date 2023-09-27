@@ -24,6 +24,7 @@ public class TimesheetAutomation {
 	private List<WorkingOnWeekEnds> workingOnWeekEnds;
 	private String workingOnRotationalshifts;
 	private RotationalWeekEnds rotationalWeekEnds;
+	private String workCountry;
 
 	public String getEmpId() {
 		return empId;
@@ -159,6 +160,14 @@ public class TimesheetAutomation {
 
 	public void setRotationalWeekEnds(RotationalWeekEnds rotationalWeekEnds) {
 		this.rotationalWeekEnds = rotationalWeekEnds;
+	}
+
+	public String getWorkCountry() {
+		return workCountry;
+	}
+
+	public void setWorkCountry(String workCountry) {
+		this.workCountry = workCountry;
 	}
 
 	

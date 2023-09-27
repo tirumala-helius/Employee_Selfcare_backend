@@ -90,6 +90,8 @@ import com.helius.entities.Work_Permit_Master;
 import com.helius.service.EmailService;
 import com.helius.service.UserServiceImpl;
 import com.helius.utils.FilecopyStatus;
+import com.helius.utils.Holiday_Master;
+import com.helius.utils.TimesheetAutomationHolidays;
 import com.helius.utils.Utils;
 /**
  * @author Tirumala 22-Feb-2018
@@ -137,6 +139,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	@Override
 	public Employee get(String employeeid) {
 		Employee emp = new Employee();
+		Integer client_id = 0;
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
@@ -278,6 +281,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			if (!leaveeligibilityList.isEmpty()) {
 				for (Object leave_Eligibility : leaveeligibilityList) {
 					leave_Eligibility_Details = (Leave_Eligibility_Details) leave_Eligibility;
+					client_id =  leave_Eligibility_Details.getClient_id();
 					leave_Eligibility_DetailsList.add(leave_Eligibility_Details);
 				}
 			}
@@ -462,6 +466,47 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				});
 				emp.setEmployeeTicketTypes(empTicketTypeList);
 			}
+			
+			// get client holiday list 
+						String holidaysQuery = "SELECT * FROM `Holiday_Master` WHERE client_id =:client_id";
+						List<Holiday_Master> holidayMasters = new ArrayList<>();
+						List<Holiday_Master> holidayList = session.createSQLQuery(holidaysQuery)
+								.setResultTransformer(Transformers.aliasToBean(Holiday_Master.class)).setParameter("client_id", client_id).list();
+						if (!holidayList.isEmpty()) {
+							holidayList.stream().forEach(holidays -> {
+								holidayMasters.add(holidays);
+							});
+							emp.setClientHolidays(holidayMasters);
+						}
+						else {
+							if (emp.getEmployeeOfferDetails().getWork_country().equals("Singapore")) {
+								client_id = 225;
+								String singaporeholidaysQuery = "SELECT * FROM `Holiday_Master` WHERE client_id =:client_id";
+								List<Holiday_Master> singaporeholidayMasters = new ArrayList<>();
+								List<Holiday_Master> singaporeholidayList = session.createSQLQuery(singaporeholidaysQuery)
+										.setResultTransformer(Transformers.aliasToBean(Holiday_Master.class)).setParameter("client_id", client_id).list();
+								if (!singaporeholidayList.isEmpty()) {
+									singaporeholidayList.stream().forEach(holidays -> {
+										singaporeholidayMasters.add(holidays);
+									});
+									emp.setClientHolidays(singaporeholidayMasters);
+								}
+							}else if (emp.getEmployeeOfferDetails().getWork_country().equals("India")) {
+								client_id = 226;
+								String inidaholidaysQuery = "SELECT * FROM `Holiday_Master` WHERE client_id =:client_id";
+								List<Holiday_Master> indiaholidayMasters = new ArrayList<>();
+								List<Holiday_Master> indiaholidayList = session.createSQLQuery(inidaholidaysQuery)
+										.setResultTransformer(Transformers.aliasToBean(Holiday_Master.class)).setParameter("client_id", client_id).list();
+								if (!indiaholidayList.isEmpty()) {
+									indiaholidayList.stream().forEach(holidays -> {
+										indiaholidayMasters.add(holidays);
+									});
+									emp.setClientHolidays(indiaholidayMasters);
+								}
+							}
+						}
+			
+			
 		} catch (Exception e) {
 			logger.error("issue in fetcing employee details for employee "+employeeid +" find stacktrace",e);
 		}finally{

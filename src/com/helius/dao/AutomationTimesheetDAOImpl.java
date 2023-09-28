@@ -3425,6 +3425,10 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			managerName = "Padma";
 		}
 		String clientId= automation.getClientId();
+		String workcountry = automation.getWorkCountry();
+		String contactname = null;
+		String contactEmailID = null;
+		String contactNumber = null;
 		String clientWorkCountry = null;
 		Date selectedMonth = sdfMonth.parse(automation.getLeaveMonth().toString());
 		SimpleDateFormat sdfMonthYear = new SimpleDateFormat("MMM-yy", Locale.US);
@@ -3463,43 +3467,49 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		}
 		
 		//To get client workcountry from client details based on client id 
-				try {
-					session3 = sessionFactory.openSession();
-					transaction = session3.beginTransaction();
-					String query = "SELECT client_id,client_name,client_short_name,client_country FROM `client_details` WHERE client_id =:client_id";
-					List<ClientDetails> clientdetails  = session3.createSQLQuery(query)
-							.setResultTransformer(Transformers.aliasToBean(ClientDetails.class))
-							.setParameter("client_id", clientId)
-							.list();
-					if(clientdetails != null && !clientdetails.isEmpty()) {
-						for(ClientDetails details :clientdetails ) {
-							clientWorkCountry =	details.getClient_country();
-						}
-					}
-					
-				} catch (Exception e) {
-					if (transaction != null) {
-			            transaction.rollback();
-			        }
-					e.printStackTrace();
-					throw new Throwable(e.getMessage(), e);
-				}
+		/*
+		 * try { session3 = sessionFactory.openSession(); transaction =
+		 * session3.beginTransaction(); String query =
+		 * "SELECT client_id,client_name,client_short_name,client_country FROM `client_details` WHERE client_id =:client_id"
+		 * ; List<ClientDetails> clientdetails = session3.createSQLQuery(query)
+		 * .setResultTransformer(Transformers.aliasToBean(ClientDetails.class))
+		 * .setParameter("client_id", clientId) .list(); if(clientdetails != null &&
+		 * !clientdetails.isEmpty()) { for(ClientDetails details :clientdetails ) {
+		 * clientWorkCountry = details.getClient_country(); } }
+		 * 
+		 * } catch (Exception e) { if (transaction != null) { transaction.rollback(); }
+		 * e.printStackTrace(); throw new Throwable(e.getMessage(), e); }
+		 */
 		
 		
-		if(clientWorkCountry != null) {
+		if(workcountry != null) {
 			
-			if(clientWorkCountry.equalsIgnoreCase("India")) {
+			if(workcountry.equalsIgnoreCase("India")) {
 				String additionalEmail = "hrIndia@helius-tech.com"; 
 		        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
 		        ccWithAdditionalEmail[cc.length] = additionalEmail;
 		        cc = ccWithAdditionalEmail;
-			}else if(clientWorkCountry.equalsIgnoreCase("Singapore")) {
+		        contactname ="Padma";
+		        contactEmailID = "padma@helius-tech.com";
+		        contactNumber ="+91-7331144355";
+		        
+			}else if(workcountry.equalsIgnoreCase("Singapore")) {
 				String additionalEmail = "timesheet@helius-tech.com"; 
 		        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
 		        ccWithAdditionalEmail[cc.length] = additionalEmail;
 		        cc = ccWithAdditionalEmail;
+		        contactname = "Ramu";
+		        contactEmailID = "ramu@helius-tech.com";
+		        contactNumber ="+91-7093904212";
 			}
 			
+		}
+		
+		if(clientId.equalsIgnoreCase("381")) {
+			String additionalEmail = "abhishek_rastogi@singlife.com"; 
+	        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
+	        ccWithAdditionalEmail[cc.length] = additionalEmail;
+	        cc = ccWithAdditionalEmail;
 		}
 		
 		//To Cretate Timesheet with Given JSON data
@@ -3713,8 +3723,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						if ("yes".equalsIgnoreCase(awsCheck)) {
 							clientfilelocation1 = "timesheetLeaveAttachaments" + File.separator + empid + "_" + client + "_"+ monthYearString +"_"
 								+ leaveDetails2.getLeaveRecordPath();
-							//clientfilelocation1 = "timesheetLeaveAttachaments"+ "/" + empid + "_" + client + "_"+ monthYearString +"_" +
-							 //leaveDetails2.getLeaveRecordPath();
+						  //clientfilelocation1 = "timesheetLeaveAttachaments"+ "/" + empid + "_" + client + "_"+ monthYearString +"_" +
+							//leaveDetails2.getLeaveRecordPath();
 							file1 = Utils.downloadFileByAWSS3Bucket(clientfilelocation1);
 						}
 					} catch (FileNotFoundException e1) {
@@ -3766,14 +3776,30 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			
 			
 			//To send Mail to corresponding person 
-			String subject = empName + "- Timesheet Approval for " + monthYearString;
+			String subject = "Helius Timesheet Approval Request - " + monthYearString +" - "+empName;
 
-			String text =  "Dear " + managerName + ",\n\n" + "Please find the attached " + empName
-					+ " timesheet for the month " + monthYearString + ". Please reply with " + "\n"
-					+ "all recipients in this email with your approval or reason for rejection (if applicable)." + "\n\n" + "Thanks," + "\n"
-					+ "Timesheet Team," + "\n" + "Helius Technologies Pte.Ltd";
+			String text = "THIS IS A SYSTEM GENERATED EMAIL AND PLEASE USE REPLY ALL WHILE RESPONDING TO THE EMAIL" + "\n\n"
 
-			service.sendMessageWithAttachment(to, cc, subject, text, urlList);
+					+ "Dear " + managerName + ",\n\n" 
+					+ "This timesheet is for " + empName +" working through Helius Technologies in your team with "+client +"\n\n"
+					
+					+"This timesheet  has been generated through our internal automated system based"
+					+ " on the attendance and leave inputs given by the employee in our self service "
+					+ "portal, along with required evidence attachments (where required). This currently works"
+					+ " for only India based employees and shortly will be expanded to all employees"+ "\n\n"
+					
+					
+					+"If you are ready to APPROVE the timesheet, please state APPROVED and  press REPLY ALL to this email."+"\n\n"
+					
+					+"In case you are queries and hence cannot Approve, please state REJECTED and press REPLY ALL to this email."
+					+ " We would be grateful if you can state the reasons for the rejection as well, so that the employee"
+					+ " can immediately rectify/ clarify as needed" +"\n\n"
+					
+					+"In case of queries or clarifications, please contact "+contactname+" on "+contactEmailID +" or "+ contactNumber
+					+ "\n\n" + "Kind regards," + "\n"
+					+ "Helius - Time sheet processing team" ;
+
+			service.sendMessageWithAttachmentForTimesheet(to, cc, subject, text, urlList);
 
 		} catch (Exception e) {
 			e.printStackTrace();

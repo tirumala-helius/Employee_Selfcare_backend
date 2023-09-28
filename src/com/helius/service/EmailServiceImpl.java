@@ -1,9 +1,13 @@
 package com.helius.service;
 
 import java.io.File;
+
 import java.util.List;
 import java.util.Properties;
 
+
+import javax.mail.*;
+import javax.mail.internet.*;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
@@ -233,5 +237,76 @@ public class EmailServiceImpl implements EmailService {
 				}
 			mailSender.send(message);
 		//	syncSentItems(message);		    
+	}
+
+	@Override
+	public void sendMessageWithAttachmentForTimesheet(String to, String[] cc, String subject, String text,
+			List<String> pathToAttachment) throws MessagingException {
+	    String username = "timesheet@helius-tech.com";
+	    String password = "Computech@2023";
+	    
+	    Properties props = new Properties();
+	    props.put("mail.smtp.auth", "true");
+	    props.put("mail.smtp.starttls.enable", "true");
+	    props.put("mail.smtp.host", "smtp.office365.com");
+	    props.put("mail.smtp.port", "587");
+
+	    Session session = Session.getInstance(props, new Authenticator() {
+	        @Override
+	        protected PasswordAuthentication getPasswordAuthentication() {
+	            return new PasswordAuthentication(username, password);
+	        }
+	    });
+
+	    MimeMessage message = new MimeMessage(session);
+	    MimeMessageHelper helper = new MimeMessageHelper(message, true);
+	    helper.setSubject(subject);
+		helper.setText(text.toString());
+		helper.setFrom(new InternetAddress(username));
+		String check =	Utils.getHapProperty("hcm_testing");
+		if ("yes".equalsIgnoreCase(check)) {
+			to = "hap-testing@helius-tech.com";
+			String[] testCC = new String[] { "hap-testing@helius-tech.com" };
+			cc = testCC;
+		}
+		helper.setTo(to);
+		if(cc!=null){
+		helper.setCc(cc);
+		}
+		
+		if((!pathToAttachment.isEmpty() || pathToAttachment.size()!=0)&&
+				"no".equalsIgnoreCase(awsCheck)){
+		for (String file : pathToAttachment) {
+			FileSystemResource fr = new FileSystemResource(file);
+			helper.addAttachment(fr.getFilename(), fr); 
+		}
+		}
+		if ((!pathToAttachment.isEmpty() || pathToAttachment.size()!=0)&&
+				"yes".equalsIgnoreCase(awsCheck)) {
+           	 MimeMultipart multipart = new MimeMultipart();
+   	         MimeBodyPart messageBodyPart = new MimeBodyPart();
+   	         messageBodyPart.setText(text);
+   	         multipart.addBodyPart(messageBodyPart);
+				for (String file : pathToAttachment) {
+					try {
+						File file1 = new File(file);
+					     String filename = file1.getName();
+						byte[] content =Utils.downloadFileByAWSS3Bucket(file);
+						 MimeBodyPart attachmentPart = new MimeBodyPart();
+						 DataSource source = new ByteArrayDataSource(content, "application/octet-stream");
+				            attachmentPart.setDataHandler(new DataHandler(source));
+				            attachmentPart.setFileName(filename);
+				            multipart.addBodyPart(attachmentPart);
+					
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+				}
+				message.setContent(multipart);
+			}
+		 Transport.send(message);
+	//	syncSentItems(message);		    
+		
 	}
 }

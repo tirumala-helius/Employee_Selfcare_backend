@@ -501,49 +501,46 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						publicholiday.add(items.getHoliday_date().toString());
 						PHday.add(items.getHoliday_name());
 					}
-				}else {
-					if(workCountry.equalsIgnoreCase("India")) {
-						client_id = "226";
-						String holidayIndiaQuery = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
-								+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
-
-						Query holidaysIndialist = session.createSQLQuery(holidayIndiaQuery)
-								.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
-								.setParameter("client_id", client_id).setParameter("fromdate", startDayOfMonth)
-								.setParameter("thrudate", endDayOfMonth);
-
-						List<Object> indianHolidays = holidaysIndialist.list();
-						
-						for (Object checklist : indianHolidays) {
-							TimesheetAutomationHolidays items = (TimesheetAutomationHolidays) checklist;
-							publicholiday.add(items.getHoliday_date().toString());
-							PHday.add(items.getHoliday_name());
-						}
-						
-						
-					}else if(workCountry.equalsIgnoreCase("Singapore")) {
-						
-						
-						client_id = "225";
-						String holidaySingaporeQuery = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
-								+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
-
-						Query holidaysSingaporelist = session.createSQLQuery(holidaySingaporeQuery)
-								.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
-								.setParameter("client_id", client_id).setParameter("fromdate", startDayOfMonth)
-								.setParameter("thrudate", endDayOfMonth);
-
-						List<Object> SingaporeHolidays = holidaysSingaporelist.list();
-						
-						for (Object checklist : SingaporeHolidays) {
-							TimesheetAutomationHolidays items = (TimesheetAutomationHolidays) checklist;
-							publicholiday.add(items.getHoliday_date().toString());
-							PHday.add(items.getHoliday_name());
-						}
-						
-					}
-				}
-				
+				} /*
+					 * else { if(workCountry.equalsIgnoreCase("India")) { client_id = "226"; String
+					 * holidayIndiaQuery =
+					 * " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
+					 * + "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+					 * 
+					 * Query holidaysIndialist = session.createSQLQuery(holidayIndiaQuery)
+					 * .setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.
+					 * class)) .setParameter("client_id", client_id).setParameter("fromdate",
+					 * startDayOfMonth) .setParameter("thrudate", endDayOfMonth);
+					 * 
+					 * List<Object> indianHolidays = holidaysIndialist.list();
+					 * 
+					 * for (Object checklist : indianHolidays) { TimesheetAutomationHolidays items =
+					 * (TimesheetAutomationHolidays) checklist;
+					 * publicholiday.add(items.getHoliday_date().toString());
+					 * PHday.add(items.getHoliday_name()); }
+					 * 
+					 * 
+					 * }else if(workCountry.equalsIgnoreCase("Singapore")) {
+					 * 
+					 * 
+					 * client_id = "225"; String holidaySingaporeQuery =
+					 * " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
+					 * + "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+					 * 
+					 * Query holidaysSingaporelist = session.createSQLQuery(holidaySingaporeQuery)
+					 * .setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.
+					 * class)) .setParameter("client_id", client_id).setParameter("fromdate",
+					 * startDayOfMonth) .setParameter("thrudate", endDayOfMonth);
+					 * 
+					 * List<Object> SingaporeHolidays = holidaysSingaporelist.list();
+					 * 
+					 * for (Object checklist : SingaporeHolidays) { TimesheetAutomationHolidays
+					 * items = (TimesheetAutomationHolidays) checklist;
+					 * publicholiday.add(items.getHoliday_date().toString());
+					 * PHday.add(items.getHoliday_name()); }
+					 * 
+					 * } }
+					 */
 				
 
 			} catch (Exception e) {

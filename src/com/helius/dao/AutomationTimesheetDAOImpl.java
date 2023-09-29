@@ -2580,7 +2580,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						}
 					}
 
-					String path = fileDir + File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+					String path = fileDir + File.separator + empname + "_" + client + "_" + "AutomationTimesheet.xlsx";
 					FileOutputStream fileOut = new FileOutputStream(path);
 					workbook.write(fileOut);
 					fileOut.close();
@@ -2598,9 +2598,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						}
 					}
 					// linux path
-					String path = "timesheet_details" + File.separator + monthYearString + File.separator + empid + "_"
+					String path = "timesheet_details" + File.separator + monthYearString + File.separator + empname + "_"
 							+ client + "_" + "AutomationTimesheet.xlsx";
-					// String path = "timesheet_details"+"/" + monthYearString + "/"+ empid + "_" +
+					// String path = "timesheet_details"+"/" + monthYearString + "/"+ empname + "_" +
 					// client + "_" + "AutomationTimesheet.xlsx";
 
 					workbook.write(bos);
@@ -2625,16 +2625,16 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			try {
 				if ("no".equalsIgnoreCase(awsCheck)) {
 					clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
-							+ File.separator + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+							+ File.separator + empname + "_" + client + "_" + "AutomationTimesheet.xlsx";
 					fi = new FileInputStream(clientfilelocation);
 					files = IOUtils.toByteArray(fi);
 					fi.close();
 				}
 				if ("yes".equalsIgnoreCase(awsCheck)) {
-					clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator + empid
+					clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator + empname
 							+ "_" + client + "_" + "AutomationTimesheet.xlsx";
 
-					// clientfilelocation ="timesheet_details" + "/" + monthYearString +"/" +empid +
+					// clientfilelocation ="timesheet_details" + "/" + monthYearString +"/" +empname +
 					// "_" + client + "_" +
 					// "AutomationTimesheet.xlsx";
 					files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
@@ -3540,15 +3540,15 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		try {
 			if ("no".equalsIgnoreCase(awsCheck)) {
 				clientfilelocation = Utils.getProperty("fileLocation") + File.separator + "timesheet_details"
-						+ File.separator + monthYearString +File.separator  + empid + "_" + client + "_" + "AutomationTimesheet.xlsx";
+						+ File.separator + monthYearString +File.separator  + empName + "_" + client + "_" + "AutomationTimesheet.xlsx";
 				fi = new FileInputStream(clientfilelocation);
 				files = IOUtils.toByteArray(fi);
 				fi.close();
 			}
 			if ("yes".equalsIgnoreCase(awsCheck)) {
-				clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator +empid + "_" + client + "_"
+				clientfilelocation = "timesheet_details" + File.separator + monthYearString + File.separator +empName + "_" + client + "_"
 						+ "AutomationTimesheet.xlsx";
-				 //clientfilelocation = "timesheet_details" +"/"+ monthYearString+"/"+ empid + "_" + client + "_" +
+				 //clientfilelocation = "timesheet_details" +"/"+ monthYearString+"/"+ empName + "_" + client + "_" +
 				 //"AutomationTimesheet.xlsx";
 				files = Utils.downloadFileByAWSS3Bucket(clientfilelocation);
 			}
@@ -3686,7 +3686,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 				if (details.getLeaveRecordPath() != null && !details.getLeaveRecordPath().isEmpty()) {
 					if (files12.values().size() > 0) {
-						String url = empid + "_" + client + "_" + monthYearString + "_" + details.getLeaveRecordPath();
+						String url = empName + "_" + client + "_" + monthYearString + "_" + details.getLeaveRecordPath();
 						templateFilenames.put(details.getLeaveRecordPath(), url);
 						FilecopyStatus status = Utils.copyFiles(request, templateFilenames,
 								"timesheetLeaveAttachaments");
@@ -3715,15 +3715,15 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					try {
 						if ("no".equalsIgnoreCase(awsCheck)) {
 							clientfilelocation1 = Utils.getProperty("fileLocation") + File.separator + "timesheetLeaveAttachaments"
-									+ File.separator + empid + "_" + client + "_" + monthYearString +"_"+ leaveDetails2.getLeaveRecordPath();
+									+ File.separator + empName + "_" + client + "_" + monthYearString +"_"+ leaveDetails2.getLeaveRecordPath();
 							fi1 = new FileInputStream(clientfilelocation1);
 							file1 = IOUtils.toByteArray(fi1);
 							fi1.close();
 						}
 						if ("yes".equalsIgnoreCase(awsCheck)) {
-							clientfilelocation1 = "timesheetLeaveAttachaments" + File.separator + empid + "_" + client + "_"+ monthYearString +"_"
+							clientfilelocation1 = "timesheetLeaveAttachaments" + File.separator + empName + "_" + client + "_"+ monthYearString +"_"
 								+ leaveDetails2.getLeaveRecordPath();
-						  //clientfilelocation1 = "timesheetLeaveAttachaments"+ "/" + empid + "_" + client + "_"+ monthYearString +"_" +
+						 //clientfilelocation1 = "timesheetLeaveAttachaments"+ "/" + empName + "_" + client + "_"+ monthYearString +"_" +
 							//leaveDetails2.getLeaveRecordPath();
 							file1 = Utils.downloadFileByAWSS3Bucket(clientfilelocation1);
 						}

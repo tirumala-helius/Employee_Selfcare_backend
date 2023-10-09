@@ -15,7 +15,7 @@ import org.hibernate.envers.Audited;
 
 @Entity
 @Table(name = "Employee_Ticketing_System")
-@Audited
+//@Audited
 public class Employee_Ticketing_System {
 
 	@Id
@@ -72,6 +72,18 @@ public class Employee_Ticketing_System {
 	private String ticket_attachment_path;
 	@Column
 	private String work_country;
+
+	//change
+	@Column
+	private String ticket_query;
+	
+	public String getTicket_query() {
+		return ticket_query;
+	}
+
+	public void setTicket_query(String ticket_query) {
+		this.ticket_query = ticket_query;
+	}
 
 	public int getEmployee_ticketing_system_id() {
 		return employee_ticketing_system_id;

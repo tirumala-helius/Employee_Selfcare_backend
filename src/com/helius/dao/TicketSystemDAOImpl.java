@@ -1,5 +1,8 @@
 package com.helius.dao;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -109,8 +112,22 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 				String RaisedBy = emp.getEmployeeTicketingSystem().getTicket_raised_by();
 				String Tickettype = emp.getEmployeeTicketingSystem().getTicket_type();
 				String work_country = emp.getEmployeeTicketingSystem().getWork_country();
+				String assign = emp.getEmployeeTicketingSystem().getTicket_assigned_to();
+				String query = emp.getEmployeeTicketingSystem().getTicket_query();
 
-				Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(Tickettype, session);
+				//Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(Tickettype, session);
+
+				Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(query, session);
+
+				
+				//change
+				String tikcet_query = emp.getEmployeeTicketingSystem().getTicket_query();
+				/*Timestamp date = ticketType.getCreate_date();
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");*/
+				
+				Timestamp date = emp.getEmployeeTicketingSystem().getCreate_date();
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+				String formattedDate = sdf.format(new Date(date.getTime()));
 
 				// change
 
@@ -134,39 +151,87 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 					descrion = Description;
 				}
 
-				String subject = TicketNumber + " - " + Tickettype;
+				String subject = TicketNumber + " - " + Tickettype + " raised on " +formattedDate;
 				String text = "";
 
 				Employee_Offer_Details emailid = getPersonalEmailID(emp.getEmployeeTicketingSystem().getEmployee_id(),
 						session);
 
+				String client = "";
 				if (emailid != null) {
 					to = emailid.getPersonal_email_id();
-					text = "Hi," + "\n" + "Thanks for raising a ticket regarding " + ticket_type
+					client = emailid.getClient();
+					String mno = emailid.getMobile_number();
+					/*text = "Hi," + "\n" + "Thanks for raising a ticket regarding " + ticket_type
 							+ ". Your ticket has been forwarded to the concerned team "
 							+ "and they will revert to you upon closing the issue. Please note your ticket number "
 							+ TicketNumber
 							+ " and you can quote this ticket number in all your future correspondence on this issue."
-							+ "\n\n" + "Thanks" + "\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd";
+							+ "\n\n" + "Thanks" + "\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd";*/
+					text = "Hi,"+ "\n\n" + "The ticket details are:" + "\n" 
+							+ "1. Ticket Query - "+tikcet_query + "\n" 
+							+ "2. Ticket Description - " + descrion + "\n"
+							+ "3. Raised by – employee name - " + empname + "\n"
+							+ "4. Raised by – employee contact email - " + to + "\n"
+							+ "5. Raised by – employee – phone number - "+mno + "\n"
+							+ "6. Client - "+client + "\n"
+							+ "7. Location -"+work_country+ "\n\n"
+							+ "Please log into HAP for more details and uploaded reference documents and update the"+ "\n"
+							+ "HAP ticket status once the ticket has been resolved."+"\n\n"
+							+ "Regards," + "\n"+ "Helius Operations team";
 
 					emailService.sendEmail(to, null, null, subject, text);
 				}
 
-				text = "Hi," + "\n" + "The Following ticket number " + ticketNumber
+				/*text = "Hi," + "\n" + "The Following ticket number " + ticketNumber
 						+ " has been registered for the issue raised by " + employee_name
 						+ ". Please log into HAP to check the issue raised by the employee." + "\n\n" + "Thanks" + "\n"
-						+ "HR Team," + "\n" + "Helius Technologies Pte.Ltd";
+						+ "HR Team," + "\n" + "Helius Technologies Pte.Ltd";*/
 
+				/*text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
+				       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
+					   + "details or clarifications, they will contact you for the same."+"\n\n"
+				       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
+					   + "and an email will be sent to you immediately." +"\n\n"
+				       + "Thank you for your patience."+"\n"
+					   + "Regards,"+"\n"
+				       + "Helius Operations team";*/
+				       
 				if (work_country.equalsIgnoreCase("Singapore")) {
 					to = "";
 					to = ticketType.getSingapore_helius_email_id();
-					emailService.sendEmail(to, null, null, subject, text);
+					//String cc = ticketType.getCc_helius_email_id();
+				    String[] cc = new String[]{ticketType.getCc_helius_email_id()};
+					assign= ticketType.getSingapore_spoc_name();
+					text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
+						       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
+							   + "details or clarifications, they will contact you for the same."+"\n\n"
+						       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
+							   + "and an email will be sent to you immediately." +"\n\n"
+						       + "Thank you for your patience."+"\n"
+							   + "Regards,"+"\n"
+						       + "Helius Operations team";
+					//emailService.sendEmail(to, null, null, subject, text);
+					emailService.sendEmail(to, cc, null, subject, text);
 
 				}
 				if (work_country.equalsIgnoreCase("India")) {
 					to = "";
 					to = ticketType.getIndia_helius_email_id();
-					emailService.sendEmail(to, null, null, subject, text);
+					//String cc= ticketType.getCc_helius_email_id();
+				    String[] cc = new String[]{ticketType.getCc_helius_email_id()};
+
+					assign= ticketType.getIndia_spoc_name();
+					text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
+						       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
+							   + "details or clarifications, they will contact you for the same."+"\n\n"
+						       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
+							   + "and an email will be sent to you immediately." +"\n\n"
+						       + "Thank you for your patience."+"\n"
+							   + "Regards,"+"\n"
+						       + "Helius Operations team";
+					//emailService.sendEmail(to, null, null, subject, text);
+					emailService.sendEmail(to, cc, null, subject, text);
 				}
 
 			} catch (Exception e) {
@@ -297,9 +362,25 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 		return empTicketByStatus;
 	}
 
-	public Employee_Ticketing_System_Ticket_Types getTicketType(String Tickettype, Session session) {
+	/*public Employee_Ticketing_System_Ticket_Types getTicketType(String Tickettype, Session session) {
 		String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE ticket_type='" + Tickettype
 				+ "'";
+		Employee_Ticketing_System_Ticket_Types ticket_Types = null;
+		try {
+			java.util.List ticketType = session.createSQLQuery(ticketTypeQuery)
+					.addEntity(Employee_Ticketing_System_Ticket_Types.class).list();
+
+			if (ticketType != null && !ticketType.isEmpty()) {
+				ticket_Types = (Employee_Ticketing_System_Ticket_Types) ticketType.iterator().next();
+			}
+
+		} catch (Exception e) {
+			throw e;
+		}
+		return ticket_Types;
+	}*/
+	public Employee_Ticketing_System_Ticket_Types getTicketType(String query, Session session) {
+		String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE  ticket_query = '" + query + "'";
 		Employee_Ticketing_System_Ticket_Types ticket_Types = null;
 		try {
 			java.util.List ticketType = session.createSQLQuery(ticketTypeQuery)

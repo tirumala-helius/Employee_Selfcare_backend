@@ -6,6 +6,7 @@ package com.helius.entities;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.helius.dao.EmployeeExitCheck;
 import com.helius.utils.Holiday_Master;
@@ -47,7 +48,17 @@ public class Employee extends HeliusEntity {
 	private List<Employee_Ticketing_System_Ticket_Types> employeeTicketTypes;
 	private Employee_Ticketing_System employeeTicketingSystem;
 	private List<Holiday_Master> clientHolidays;
-	
+	//change
+	private Map<String, List<String>> ticketTypeMapList;
+
+	public Map<String, List<String>> getTicketTypeMapList() {
+		return ticketTypeMapList;
+	}
+
+	public void setTicketTypeMapList(Map<String, List<String>> ticketTypeMapList) {
+		this.ticketTypeMapList = ticketTypeMapList;
+	}
+
 	public List<Sow_Ctc_Breakup> getDeletedsowCtcBreakup() {
 		return deletedsowCtcBreakup;
 	}

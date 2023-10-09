@@ -22,6 +22,25 @@ public class EmployeeTicketingSystemBean {
 	private String created_by;
 	private String ticket_attachment_path;
 	private String work_country;
+//change
+	private String ticket_query;
+	private String cc_helius_email_id;
+	
+	public String getTicket_query() {
+		return ticket_query;
+	}
+
+	public void setTicket_query(String ticket_query) {
+		this.ticket_query = ticket_query;
+	}
+
+	public String getCc_helius_email_id() {
+		return cc_helius_email_id;
+	}
+
+	public void setCc_helius_email_id(String cc_helius_email_id) {
+		this.cc_helius_email_id = cc_helius_email_id;
+	}
 
 	public int getEmployee_ticketing_system_id() {
 		return employee_ticketing_system_id;

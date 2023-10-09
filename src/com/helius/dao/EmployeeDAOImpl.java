@@ -455,7 +455,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				emp.setEmployeeWorkPermitDetails(employee_Work_Permit_Details);
 			}
 			
-			// get ticketingSystem types
+			/*// get ticketingSystem types
 			String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types";
 			List<Employee_Ticketing_System_Ticket_Types> empTicketTypeList = new ArrayList<>();
 			List<Employee_Ticketing_System_Ticket_Types> ticketTypeList = session.createSQLQuery(ticketTypeQuery)
@@ -465,7 +465,59 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					empTicketTypeList.add(ticket);
 				});
 				emp.setEmployeeTicketTypes(empTicketTypeList);
+			}*/
+			String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types";
+			List<Employee_Ticketing_System_Ticket_Types> empTicketTypeList = new ArrayList<>();
+			List<Employee_Ticketing_System_Ticket_Types> ticketTypeList = session.createSQLQuery(ticketTypeQuery)
+			        .addEntity(Employee_Ticketing_System_Ticket_Types.class).list();
+			System.out.println(ticketTypeList);
+			if (!ticketTypeList.isEmpty()) {
+			    for (Employee_Ticketing_System_Ticket_Types ticket : ticketTypeList) {
+			        empTicketTypeList.add(ticket);
+			    }
+			    emp.setEmployeeTicketTypes(empTicketTypeList);
 			}
+
+			
+//Employe_Tickt_type json
+
+	        // Define your SQL query
+	        String ticketTypeQuery1 = "SELECT ticket_type, ticket_query FROM Employee_Ticketing_System_Ticket_Types";
+	        List<Object[]> ticketTypeList1 = session.createSQLQuery(ticketTypeQuery1).list();
+
+	        // Create a map to store ticket_type as keys and lists of ticket_query as values
+	        Map<String, List<String>> ticketTypeMap = new HashMap<>();
+
+	        // Configure Jackson ObjectMapper
+	        ObjectMapper objectMapper = new ObjectMapper();
+
+	        // Iterate through the query result and populate the map
+	        for (Object[] row : ticketTypeList1) {
+	            String ticketType = (String) row[0];
+	            String ticketQuery = (String) row[1];
+
+	            // If the ticket type is already in the map, add the ticket query to the existing list
+	            if (ticketTypeMap.containsKey(ticketType)) {
+	                ticketTypeMap.get(ticketType).add(ticketQuery);
+	            } else {
+	                // If the ticket type is not in the map, create a new list and add the ticket query
+	                List<String> ticketQueries = new ArrayList<>();
+	                ticketQueries.add(ticketQuery);
+	                ticketTypeMap.put(ticketType, ticketQueries);
+	            }
+	        }
+	       
+	        // Convert the map to JSON using Jackson
+	        String json = null;
+	        try {
+	            json = objectMapper.writeValueAsString(ticketTypeMap);
+	            System.out.println(json);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }//emp.setEmployeeTicketTypes(ticketTypeMapList);
+
+	        emp.setTicketTypeMapList(ticketTypeMap);
+
 			
 			// get client holiday list 
 						String holidaysQuery = "SELECT * FROM `Holiday_Master` WHERE client_id =:client_id";

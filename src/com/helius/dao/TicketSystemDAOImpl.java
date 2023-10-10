@@ -151,7 +151,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 					descrion = Description;
 				}
 
-				String subject = TicketNumber + " - " + Tickettype + " raised on " +formattedDate;
+				String subject = "OPENED - "+Tickettype + " - " + TicketNumber + " raised on " +formattedDate;
 				String text = "";
 
 				Employee_Offer_Details emailid = getPersonalEmailID(emp.getEmployeeTicketingSystem().getEmployee_id(),

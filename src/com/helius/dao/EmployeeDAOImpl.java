@@ -1026,10 +1026,9 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					List<Employee_Off_In_Lieu_Data> employee_Off_In_Lieu_Datas = new ArrayList<>();
 					Timestamp contractEndDate = null;
 			
-					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,c.contract_enddate  FROM Employee_Personal_Details a \r\n"
+					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,b.sow_expiry_date FROM Employee_Personal_Details a \r\n"
 							+ "    LEFT JOIN Employee_Assignment_Details b\r\n"
-							+ "    ON a.employee_id = b.employee_id  LEFT JOIN Employee_Terms_And_Conditions c ON\r\n"
-							+ "    a.employee_id = c.employee_id WHERE a.employee_id ='"+employee_id+"'";
+							+ "    ON a.employee_id = b.employee_id  WHERE a.employee_id ='"+employee_id+"'";
 					List<Object[]> contractdateList =session.createSQLQuery(contractdateQuery).list();
 					if (contractdateList != null) {
 						for (Object[] obj : contractdateList) {

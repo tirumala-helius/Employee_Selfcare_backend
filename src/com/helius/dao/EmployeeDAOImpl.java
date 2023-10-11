@@ -65,6 +65,7 @@ import com.helius.entities.Employee_Bank_Details;
 import com.helius.entities.Employee_Identification_Details;
 import com.helius.entities.Employee_Leave_Data;
 import com.helius.entities.Employee_Leaves_Eligibility;
+import com.helius.entities.Employee_Off_In_Lieu;
 import com.helius.entities.Employee_Offer_Details;
 import com.helius.entities.Employee_Personal_Details;
 import com.helius.entities.Employee_Salary_Details;
@@ -89,6 +90,7 @@ import com.helius.entities.Timesheet_Email;
 import com.helius.entities.Work_Permit_Master;
 import com.helius.service.EmailService;
 import com.helius.service.UserServiceImpl;
+import com.helius.utils.Employee_Off_In_Lieu_Data;
 import com.helius.utils.FilecopyStatus;
 import com.helius.utils.Holiday_Master;
 import com.helius.utils.TimesheetAutomationHolidays;
@@ -1017,7 +1019,96 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					 employeeLeaveData.setLeaveUtilizations(finalLeaveUtilizationList);
 				 }
 					
+				} 
+           if("Singapore".equalsIgnoreCase(workcountry)) {
+				 
+				 Timestamp  conStartDate= null;
+					List<Employee_Off_In_Lieu_Data> employee_Off_In_Lieu_Datas = new ArrayList<>();
+					Timestamp contractEndDate = null;
+			
+					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,c.contract_enddate  FROM Employee_Personal_Details a \r\n"
+							+ "    LEFT JOIN Employee_Assignment_Details b\r\n"
+							+ "    ON a.employee_id = b.employee_id  LEFT JOIN Employee_Terms_And_Conditions c ON\r\n"
+							+ "    a.employee_id = c.employee_id WHERE a.employee_id ='"+employee_id+"'";
+					List<Object[]> contractdateList =session.createSQLQuery(contractdateQuery).list();
+					if (contractdateList != null) {
+						for (Object[] obj : contractdateList) {
+							if(obj[1] !=null && obj[2]!= null){
+								conStartDate = (Timestamp) obj[1];
+							}else {
+								conStartDate = (Timestamp) obj[2];
+							}
+							if(obj[3] !=null) {
+								contractEndDate = (Timestamp) obj[3];
+							}
+						}
+					}
+				
+					Integer no_of_oil_days = 0;
+					String validity = null;
+					String QueryClientdetails ="SELECT * FROM `client_details` WHERE client_id =:client_id";
+					List<com.helius.entities.ClientDetail> clientDetailsList =  session.createSQLQuery(QueryClientdetails).addEntity(com.helius.entities.ClientDetail.class)
+							.setParameter("client_id", client_id).list();
+					if(!clientDetailsList.isEmpty() && clientDetailsList.get(0).getOil_validity()!= null){
+						 validity = clientDetailsList.get(0).getOil_validity();
+						if(!validity.equalsIgnoreCase("contractEndDate")) {
+							no_of_oil_days = Integer.parseInt(validity);
+						}	
+					}
+					Date date2 = new Date();
+					Timestamp currenttimestamp = new Timestamp(date2.getTime());
+					
+					if(conStartDate!= null) {
+						String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) =:currenttimestamp";
+						List<Employee_Off_In_Lieu>  Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
+								.setParameter( "currenttimestamp",currenttimestamp).list();
+						
+						if(!Off_In_Lieus.isEmpty()) {
+							Employee_Off_In_Lieu_Data lieu = null;
+							for( Employee_Off_In_Lieu OIL_db : Off_In_Lieus) {
+								lieu= new Employee_Off_In_Lieu_Data();
+								lieu.setEmployee_off_in_lieu_id(OIL_db.getEmployee_off_in_lieu_id());
+								lieu.setClient_id(OIL_db.getClient_id());
+								lieu.setOil_public_holiday(OIL_db.getOil_public_holiday());
+								lieu.setClient_name(OIL_db.getClient_name());
+								lieu.setNo_of_days(OIL_db.getNo_of_days());
+								lieu.setOil_date(OIL_db.getOil_date());
+								lieu.setOil_day(OIL_db.getOil_day());
+								 
+							    Timestamp holidayDate =OIL_db.getOil_date();
+							 
+					            Calendar calendar = Calendar.getInstance();
+					            calendar.setTime(holidayDate);
+					            calendar.add(Calendar.DAY_OF_MONTH, 1);
+					            Timestamp validityStartDate = new Timestamp(calendar.getTime().getTime());
+
+					            Timestamp validityEndDate = null;
+					            if(no_of_oil_days !=0) {
+					            	calendar.setTime(holidayDate);
+						            calendar.add(Calendar.DAY_OF_MONTH, no_of_oil_days);
+						            validityEndDate = new Timestamp(calendar.getTime().getTime());
+					            }else if(validity !=null && validity.equalsIgnoreCase("contractEndDate")) {
+					            	validityEndDate = contractEndDate;
+					            }
+					            
+
+					            lieu.setOil_Validity_Start_Date(validityStartDate);
+					            lieu.setOil_Validity_End_Date(validityEndDate);
+					            
+					            employee_Off_In_Lieu_Datas.add(lieu);
+								
+							}
+						}
+						if (employee_Off_In_Lieu_Datas != null && !employee_Off_In_Lieu_Datas.isEmpty()) {
+							employeeLeaveData.setEmployee_Off_In_Lieu_Datas(employee_Off_In_Lieu_Datas);
+						}
+					}
+					
 				}
+			 
+			 
+			 
+			 
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1028,8 +1119,6 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 		return employeeLeaveData;		
 	}
-	
-	
 	
 
 	@Override

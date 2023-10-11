@@ -91,6 +91,9 @@ public class ClientDetail implements Serializable {
 	
 	@Column(name="budgetowner")
 	private String budgetowner;
+	
+	@Column
+	private String oil_validity; 
 	/**
 	 * @return the budgetowner
 	 */
@@ -269,6 +272,14 @@ public class ClientDetail implements Serializable {
 	 */
 	public void setIsheliusclient(String isheliusclient) {
 		this.isheliusclient = isheliusclient;
+	}
+
+	public String getOil_validity() {
+		return oil_validity;
+	}
+
+	public void setOil_validity(String oil_validity) {
+		this.oil_validity = oil_validity;
 	}
 
 	

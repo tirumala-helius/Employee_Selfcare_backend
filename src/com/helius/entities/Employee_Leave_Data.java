@@ -2,6 +2,8 @@ package com.helius.entities;
 
 import java.util.List;
 
+import com.helius.utils.Employee_Off_In_Lieu_Data;
+
 public class Employee_Leave_Data {
 
 	private List<Leave_Eligibility_Details> leavesEligibility;
@@ -15,6 +17,8 @@ public class Employee_Leave_Data {
 	private Leave_Eligibility_Details deleteLeaveEligibility;
 	
     private List<LeaveUtilization>  leaveUtilizations;
+    
+    private List<Employee_Off_In_Lieu_Data> employee_Off_In_Lieu_Datas;
 
 	public Leave_Eligibility_Details getDeleteLeaveEligibility() {
 		return deleteLeaveEligibility;
@@ -63,6 +67,15 @@ public class Employee_Leave_Data {
 	public void setLeaveUtilizations(List<LeaveUtilization> leaveUtilizations) {
 		this.leaveUtilizations = leaveUtilizations;
 	}
+
+	public List<Employee_Off_In_Lieu_Data> getEmployee_Off_In_Lieu_Datas() {
+		return employee_Off_In_Lieu_Datas;
+	}
+
+	public void setEmployee_Off_In_Lieu_Datas(List<Employee_Off_In_Lieu_Data> employee_Off_In_Lieu_Datas) {
+		this.employee_Off_In_Lieu_Datas = employee_Off_In_Lieu_Datas;
+	}
+	
 
 }
  

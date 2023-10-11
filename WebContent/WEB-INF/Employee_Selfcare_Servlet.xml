@@ -103,6 +103,7 @@
 			 	<value>com.helius.entities.Timesheet_Automation_Status</value>
 			 	<value>com.helius.entities.Employee_Ticketing_System</value>
 			    <value>com.helius.entities.Employee_Ticketing_System_Ticket_Types</value>
+			    <value>com.helius.entities.Employee_Off_In_Lieu</value>
 			 	
 			</list>
 		</property>

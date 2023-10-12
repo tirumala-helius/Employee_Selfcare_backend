@@ -243,7 +243,7 @@ public class EmailServiceImpl implements EmailService {
 	public void sendMessageWithAttachmentForTimesheet(String to, String[] cc, String subject, String text,
 			List<String> pathToAttachment) throws MessagingException {
 	    String username = "timesheet@helius-tech.com";
-	    String password = "Computech@2023";
+	    String password = "HApHELIUs@321";
 	    
 	    Properties props = new Properties();
 	    props.put("mail.smtp.auth", "true");

@@ -1050,7 +1050,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 							.setParameter("client_id", client_id).list();
 					if(!clientDetailsList.isEmpty() && clientDetailsList.get(0).getOil_validity()!= null){
 						 validity = clientDetailsList.get(0).getOil_validity();
-						if(!validity.equalsIgnoreCase("contractEndDate")) {
+						if(!validity.equalsIgnoreCase("sowEndDate")) {
 							no_of_oil_days = Integer.parseInt(validity);
 						}	
 					}
@@ -1086,7 +1086,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					            	calendar.setTime(holidayDate);
 						            calendar.add(Calendar.DAY_OF_MONTH, no_of_oil_days);
 						            validityEndDate = new Timestamp(calendar.getTime().getTime());
-					            }else if(validity !=null && validity.equalsIgnoreCase("contractEndDate")) {
+					            }else if(validity !=null && validity.equalsIgnoreCase("sowEndDate")) {
 					            	validityEndDate = contractEndDate;
 					            }
 					            

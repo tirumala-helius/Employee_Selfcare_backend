@@ -48,7 +48,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	@Autowired
 	private EmailService emailService;
 	private List<String> copied_with_success = new ArrayList<String>();
- private static final Logger logger = LogManager.getLogger(EmployeeDAOImpl.class.getName());
+    private static final Logger logger = LogManager.getLogger(EmployeeDAOImpl.class.getName());
 	@Override
 	public void saveEmpTicket(Employee emp, MultipartHttpServletRequest request) throws Throwable {
 		Session session = null;
@@ -162,12 +162,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 					to = emailid.getPersonal_email_id();
 					client = emailid.getClient();
 					String mno = emailid.getMobile_number();
-					/*text = "Hi," + "\n" + "Thanks for raising a ticket regarding " + ticket_type
-							+ ". Your ticket has been forwarded to the concerned team "
-							+ "and they will revert to you upon closing the issue. Please note your ticket number "
-							+ TicketNumber
-							+ " and you can quote this ticket number in all your future correspondence on this issue."
-							+ "\n\n" + "Thanks" + "\n" + "HR Team," + "\n" + "Helius Technologies Pte.Ltd";*/
+			
 					text = "Hi,"+ "\n\n" + "The ticket details are:" + "\n" 
 							+ "1. Ticket Query - "+tikcet_query + "\n" 
 							+ "2. Ticket Description - " + descrion + "\n"
@@ -182,20 +177,6 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 
 					emailService.sendEmail(to, null, null, subject, text);
 				}
-
-				/*text = "Hi," + "\n" + "The Following ticket number " + ticketNumber
-						+ " has been registered for the issue raised by " + employee_name
-						+ ". Please log into HAP to check the issue raised by the employee." + "\n\n" + "Thanks" + "\n"
-						+ "HR Team," + "\n" + "Helius Technologies Pte.Ltd";*/
-
-				/*text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
-				       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
-					   + "details or clarifications, they will contact you for the same."+"\n\n"
-				       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
-					   + "and an email will be sent to you immediately." +"\n\n"
-				       + "Thank you for your patience."+"\n"
-					   + "Regards,"+"\n"
-				       + "Helius Operations team";*/
 				       
 				if (work_country.equalsIgnoreCase("Singapore")) {
 					to = "";
@@ -211,7 +192,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 						       + "Thank you for your patience."+"\n"
 							   + "Regards,"+"\n"
 						       + "Helius Operations team";
-					//emailService.sendEmail(to, null, null, subject, text);
+					
 					emailService.sendEmail(to, cc, null, subject, text);
 
 				}
@@ -230,7 +211,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 						       + "Thank you for your patience."+"\n"
 							   + "Regards,"+"\n"
 						       + "Helius Operations team";
-					//emailService.sendEmail(to, null, null, subject, text);
+					
 					emailService.sendEmail(to, cc, null, subject, text);
 				}
 

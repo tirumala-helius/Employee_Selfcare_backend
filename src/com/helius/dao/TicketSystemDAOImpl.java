@@ -314,19 +314,29 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 						long daysDifference = ChronoUnit.DAYS.between(createDate, LocalDate.now());
 						empTicket.setTicket_age(Long.toString(daysDifference));
 					}*/
+					String ticket_id = empTicket.getTicket_number();
 					String ticket_type = empTicket.getTicket_type(); 
 					String country = empTicket.getWork_country();
+					String assign = empTicket.getTicket_assigned_to();
 					String query = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE ticket_type ='" + ticket_type + "'";
 					List<Employee_Ticketing_System_Ticket_Types> ltd = session.createSQLQuery(query).addEntity(Employee_Ticketing_System_Ticket_Types.class).list();
 					String india_spoc = ltd.get(0).getIndia_spoc_name();
 					String singapore_spoc = ltd.get(0).getSingapore_spoc_name();
+					
 					if("India".equalsIgnoreCase(country)){
 						empTicket.setTicket_assigned_to(india_spoc);
-					}else if("Singapore".equalsIgnoreCase(country)){
-						empTicket.setTicket_assigned_to(singapore_spoc);
-						
 					}
-					
+					else if("Singapore".equalsIgnoreCase(country)){
+						empTicket.setTicket_assigned_to(singapore_spoc);
+					}
+				
+					String qu= "SELECT * FROM Employee_Ticketing_System WHERE ticket_number ='" + ticket_id + "'";
+					List<Employee_Ticketing_System>td = session.createSQLQuery(qu).addEntity(Employee_Ticketing_System.class).list();
+					String new_spoc = td.get(0).getTicket_assigned_to();
+					if(new_spoc!=null){
+						empTicket.setTicket_assigned_to(new_spoc);
+					}
+
 				}
 			}
 

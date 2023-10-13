@@ -242,8 +242,8 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void sendMessageWithAttachmentForTimesheet(String to, String[] cc, String subject, String text,
 			List<String> pathToAttachment) throws MessagingException {
-	    String username = "timesheet@helius-tech.com";
-	    String password = "HApHELIUs@321";
+		String username =	Utils.getHapProperty("timesheetAutomationUserName");
+		String password =	Utils.getHapProperty("timesheetAutomationPassword");
 	    
 	    Properties props = new Properties();
 	    props.put("mail.smtp.auth", "true");

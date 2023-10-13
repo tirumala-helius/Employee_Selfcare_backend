@@ -309,6 +309,66 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 
 			if (!empticketlist.isEmpty() && empticketlist != null) {
 				for (EmployeeTicketingSystemBean empTicket : empticketlist) {
+					/*if (empTicket.getCreate_date() != null) {
+						LocalDate createDate = empTicket.getCreate_date().toLocalDateTime().toLocalDate();
+						long daysDifference = ChronoUnit.DAYS.between(createDate, LocalDate.now());
+						empTicket.setTicket_age(Long.toString(daysDifference));
+					}*/
+					String ticket_type = empTicket.getTicket_type(); 
+					String country = empTicket.getWork_country();
+					String query = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE ticket_type ='" + ticket_type + "'";
+					List<Employee_Ticketing_System_Ticket_Types> ltd = session.createSQLQuery(query).addEntity(Employee_Ticketing_System_Ticket_Types.class).list();
+					String india_spoc = ltd.get(0).getIndia_spoc_name();
+					String singapore_spoc = ltd.get(0).getSingapore_spoc_name();
+					if("India".equalsIgnoreCase(country)){
+						empTicket.setTicket_assigned_to(india_spoc);
+					}else if("Singapore".equalsIgnoreCase(country)){
+						empTicket.setTicket_assigned_to(singapore_spoc);
+						
+					}
+					
+				}
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		String empTicketByStatus = null;
+		String offerdetailsjson = "";
+		String empTicketjson = "";
+		if (empticketlist != null) {
+			ObjectMapper om = new ObjectMapper();
+			try {
+				empTicketjson = om.writeValueAsString(empticketlist);
+				offerdetailsjson = empTicketjson.replaceAll(":null", ":\"-\"").replaceAll(":\"\"", ":\"-\"");
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+			empTicketByStatus = "{ \"empTicketByStatus\":" + offerdetailsjson + "}";
+		} else {
+			empTicketByStatus = "No ticket data  Available";
+		}
+		return empTicketByStatus;
+	}
+	/*@Override
+	public String getTicketHistoryByEmpId(String empId) {
+		Employee emp = new Employee();
+		Session session = null;
+		List<EmployeeTicketingSystemBean> empticketlist = null;
+		try {
+			session = sessionFactory.openSession();
+			String empTicket_query = "select * from Employee_Ticketing_System where employee_id = :empId ";
+			empticketlist = session.createSQLQuery(empTicket_query)
+					.setResultTransformer(Transformers.aliasToBean(EmployeeTicketingSystemBean.class))
+					.setParameter("empId", empId).list();
+
+			if (!empticketlist.isEmpty() && empticketlist != null) {
+				for (EmployeeTicketingSystemBean empTicket : empticketlist) {
 					if (empTicket.getCreate_date() != null) {
 						LocalDate createDate = empTicket.getCreate_date().toLocalDateTime().toLocalDate();
 						long daysDifference = ChronoUnit.DAYS.between(createDate, LocalDate.now());
@@ -341,7 +401,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 			empTicketByStatus = "No ticket data  Available";
 		}
 		return empTicketByStatus;
-	}
+	}*/
 
 	/*public Employee_Ticketing_System_Ticket_Types getTicketType(String Tickettype, Session session) {
 		String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE ticket_type='" + Tickettype

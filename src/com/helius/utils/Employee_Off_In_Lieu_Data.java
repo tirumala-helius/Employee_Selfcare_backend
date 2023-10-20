@@ -23,6 +23,8 @@ public class Employee_Off_In_Lieu_Data {
 	
 	private Timestamp oil_Validity_End_Date;
 	
+	private float leavesUsed;
+	
 	
 
 	public int getEmployee_off_in_lieu_id() {
@@ -96,6 +98,16 @@ public class Employee_Off_In_Lieu_Data {
 	public void setOil_Validity_End_Date(Timestamp oil_Validity_End_Date) {
 		this.oil_Validity_End_Date = oil_Validity_End_Date;
 	}
+
+	public float getLeavesUsed() {
+		return leavesUsed;
+	}
+
+	public void setLeavesUsed(float leavesUsed) {
+		this.leavesUsed = leavesUsed;
+	}
+
+	
 	
 	
 

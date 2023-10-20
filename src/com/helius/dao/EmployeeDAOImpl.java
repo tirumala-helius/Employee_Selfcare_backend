@@ -1024,9 +1024,12 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				 
 				 Timestamp  conStartDate= null;
 					List<Employee_Off_In_Lieu_Data> employee_Off_In_Lieu_Datas = new ArrayList<>();
-					Timestamp contractEndDate = null;
+					List<Employee_Off_In_Lieu>  Off_In_Lieus = new ArrayList<>();
+					Timestamp sowEndDate = null;
+					Timestamp sowStartDate = null;
+					
 			
-					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,b.sow_expiry_date FROM Employee_Personal_Details a \r\n"
+					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,b.sow_expiry_date,b.sow_start_date FROM Employee_Personal_Details a \r\n"
 							+ "    LEFT JOIN Employee_Assignment_Details b\r\n"
 							+ "    ON a.employee_id = b.employee_id  WHERE a.employee_id ='"+employee_id+"'";
 					List<Object[]> contractdateList =session.createSQLQuery(contractdateQuery).list();
@@ -1038,7 +1041,10 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 								conStartDate = (Timestamp) obj[2];
 							}
 							if(obj[3] !=null) {
-								contractEndDate = (Timestamp) obj[3];
+								sowEndDate = (Timestamp) obj[3];
+							}
+							if(obj[4] !=null) {
+								sowStartDate = (Timestamp) obj[4];
 							}
 						}
 					}
@@ -1054,15 +1060,44 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 							no_of_oil_days = Integer.parseInt(validity);
 						}	
 					}
+					if(validity.equalsIgnoreCase("sowEndDate")) {
+						conStartDate =sowStartDate;
+					}
 					Date date2 = new Date();
 					Timestamp currenttimestamp = new Timestamp(date2.getTime());
+					String typeofleave= "Off In Lieu";
+					float totalSumofLeaves =0;
+					
+					String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
+							+ "  WHERE a.leaveMonth >= '"+conStartDate+"'  AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
+									+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";
+					List<Object[]> recordList =session.createSQLQuery(leaveRecordQuery).list();
+					if (recordList != null) {
+						for (Object[] obj : recordList) {
+							if(obj[0] !=null && obj[1] !=null
+									&& obj[2]!= null){
+								totalSumofLeaves = Float.parseFloat(obj[2].toString());
+							}
+							
+						}
+					}
 					
 					if(conStartDate!= null) {
-						String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) =:currenttimestamp";
-						List<Employee_Off_In_Lieu>  Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
-								.setParameter( "currenttimestamp",currenttimestamp).list();
+						if(validity.equalsIgnoreCase("sowEndDate")) {
+							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:sowStartDate  AND oil_date<=:sowEndDate";
+							 Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "sowStartDate",sowStartDate)
+										.setParameter( "sowEndDate",sowEndDate).list();
+							
+						}else {
+							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) =:currenttimestamp";
+							  Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
+									.setParameter( "currenttimestamp",currenttimestamp).list();
+						}
+						
+						
 						
 						if(!Off_In_Lieus.isEmpty()) {
+							//float totalleaves = totalSumofLeaves;
 							Employee_Off_In_Lieu_Data lieu = null;
 							for( Employee_Off_In_Lieu OIL_db : Off_In_Lieus) {
 								lieu= new Employee_Off_In_Lieu_Data();
@@ -1087,7 +1122,17 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						            calendar.add(Calendar.DAY_OF_MONTH, no_of_oil_days);
 						            validityEndDate = new Timestamp(calendar.getTime().getTime());
 					            }else if(validity !=null && validity.equalsIgnoreCase("sowEndDate")) {
-					            	validityEndDate = contractEndDate;
+					            	validityEndDate = sowEndDate;
+					            }
+					            if(totalSumofLeaves   >= 0.5 ) {
+					            	if(totalSumofLeaves >=1) {
+					            		lieu.setLeavesUsed(1);
+					            		totalSumofLeaves =	totalSumofLeaves -1;
+					            	}else {
+					            		lieu.setLeavesUsed(totalSumofLeaves);
+					            		totalSumofLeaves = (float) (totalSumofLeaves -0.5);
+					            	}
+					            	
 					            }
 					            
 

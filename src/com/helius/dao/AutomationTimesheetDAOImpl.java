@@ -3796,7 +3796,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					+ "\n\n" + "Kind regards," + "\n"
 					+ "Helius - Time sheet processing team" ;
 
-			service.sendMessageWithAttachmentForTimesheet(to, cc, subject, text, urlList);
+			service.sendMessageWithAttachmentForTimesheet(to, cc, subject, text, urlList, client);
 
 		} catch (Exception e) {
 			e.printStackTrace();

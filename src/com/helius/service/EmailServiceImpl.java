@@ -241,9 +241,17 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void sendMessageWithAttachmentForTimesheet(String to, String[] cc, String subject, String text,
-			List<String> pathToAttachment) throws MessagingException {
-		String username =	Utils.getHapProperty("timesheetAutomationUserName");
-		String password =	Utils.getHapProperty("timesheetAutomationPassword");
+			List<String> pathToAttachment,String client) throws MessagingException {
+		final String  username ;
+		  final String password ;
+		if(client.equalsIgnoreCase("DAH2")) {
+			 username =	Utils.getHapProperty("timesheetAutomationUserName");
+			 password =	Utils.getHapProperty("timesheetAutomationPassword");
+		}else {
+			 username =	Utils.getHapProperty("timesheetAutomationFor_Non_DAH2_UserName");
+			 password =	Utils.getHapProperty("timesheetAutomationFor_Non_DAH2_Password");
+		}
+		
 	    
 	    Properties props = new Properties();
 	    props.put("mail.smtp.auth", "true");
@@ -252,10 +260,10 @@ public class EmailServiceImpl implements EmailService {
 	    props.put("mail.smtp.port", "587");
 
 	    Session session = Session.getInstance(props, new Authenticator() {
-	        @Override
-	        protected PasswordAuthentication getPasswordAuthentication() {
-	            return new PasswordAuthentication(username, password);
-	        }
+			
+			  @Override protected PasswordAuthentication getPasswordAuthentication() {
+			  return new PasswordAuthentication(username, password); }
+			 
 	    });
 
 	    MimeMessage message = new MimeMessage(session);

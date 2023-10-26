@@ -1065,22 +1065,11 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					}
 					Date date2 = new Date();
 					Timestamp currenttimestamp = new Timestamp(date2.getTime());
+					Timestamp oildate = new Timestamp(date2.getTime());
 					String typeofleave= "Off In Lieu";
 					float totalSumofLeaves =0;
 					
-					String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
-							+ "  WHERE a.leaveMonth >= '"+conStartDate+"'  AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
-									+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";
-					List<Object[]> recordList =session.createSQLQuery(leaveRecordQuery).list();
-					if (recordList != null) {
-						for (Object[] obj : recordList) {
-							if(obj[0] !=null && obj[1] !=null
-									&& obj[2]!= null){
-								totalSumofLeaves = Float.parseFloat(obj[2].toString());
-							}
-							
-						}
-					}
+				
 					
 					if(conStartDate!= null) {
 						if(validity.equalsIgnoreCase("sowEndDate")) {
@@ -1092,6 +1081,25 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) =:currenttimestamp";
 							  Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
 									.setParameter( "currenttimestamp",currenttimestamp).list();
+						}
+						if(!Off_In_Lieus.isEmpty()) {
+							oildate = Off_In_Lieus.get(0).getOil_date();
+						}
+						
+						
+						
+						String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
+								+ "  WHERE a.leaveMonth >= '"+conStartDate+"'  AND YEAR(a.leaveMonth) >= '"+oildate+"' AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
+										+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";
+						List<Object[]> recordList =session.createSQLQuery(leaveRecordQuery).list();
+						if (recordList != null) {
+							for (Object[] obj : recordList) {
+								if(obj[0] !=null && obj[1] !=null
+										&& obj[2]!= null){
+									totalSumofLeaves = Float.parseFloat(obj[2].toString());
+								}
+								
+							}
 						}
 						
 						

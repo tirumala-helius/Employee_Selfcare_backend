@@ -1060,7 +1060,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 							no_of_oil_days = Integer.parseInt(validity);
 						}	
 					}
-					if(validity.equalsIgnoreCase("sowEndDate")) {
+					if( validity !=null  && validity.equalsIgnoreCase("sowEndDate")) {
 						conStartDate =sowStartDate;
 					}
 					Date date2 = new Date();
@@ -1072,7 +1072,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				
 					
 					if(conStartDate!= null) {
-						if(validity.equalsIgnoreCase("sowEndDate")) {
+						if(validity !=null  && validity.equalsIgnoreCase("sowEndDate")) {
 							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:sowStartDate  AND oil_date<=:sowEndDate";
 							 Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "sowStartDate",sowStartDate)
 										.setParameter( "sowEndDate",sowEndDate).list();

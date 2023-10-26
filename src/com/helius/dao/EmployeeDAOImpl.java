@@ -936,7 +936,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						if (utilization.getLeaveType().equalsIgnoreCase("Annual Leave")
 								|| utilization.getLeaveType().equalsIgnoreCase("Sick Leave")
 								/*|| utilization.getLeaveType().equalsIgnoreCase("Childcare Leave")*/
-								|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")) {
+								/*	|| utilization.getLeaveType().equalsIgnoreCase("Off In Lieu")*/ ) {
 
 							LeaveUtilizationList.add(leaveUtilization);
 							
@@ -987,8 +987,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 								 eligibilityUtlizedLeave.setEntitlement(details.getNumber_of_days());
 								
 								if (details.getType_of_leave().equalsIgnoreCase("Annual Leave")
-										||details.getType_of_leave().equalsIgnoreCase("Sick Leave")
-										||details.getType_of_leave().equalsIgnoreCase("Off In Lieu")) {
+										||details.getType_of_leave().equalsIgnoreCase("Sick Leave")) {
+							//	||details.getType_of_leave().equalsIgnoreCase("Off In Lieu")) {
 									utilizationList.add(eligibilityUtlizedLeave);
 								}
 								

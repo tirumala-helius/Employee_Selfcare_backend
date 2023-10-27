@@ -841,7 +841,12 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 								} else {
 									if (details.getLeaveday().equalsIgnoreCase("FULL DAY")) {
 										cell = row.createCell(5, CellType.STRING);
-										cell.setCellValue("CL");
+										if(workCountry.equalsIgnoreCase("Singapore")) {
+											cell.setCellValue("SL");
+										}else {
+											cell.setCellValue("CL");
+										}
+									
 										cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 										cell = row.createCell(6, CellType.STRING);
@@ -865,7 +870,11 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 									} else {
 
 										cell = row.createCell(5, CellType.STRING);
-										cell.setCellValue("CL");
+										if(workCountry.equalsIgnoreCase("Singapore")) {
+											cell.setCellValue("SL");
+										}else {
+											cell.setCellValue("CL");
+										}
 										cell.setCellStyle(getHeaderCellStyle2(workbook));
 
 										cell = row.createCell(6, CellType.STRING);
@@ -2550,8 +2559,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 				 
 				
 			description(sheet, workbook, headerRow11, headerRow21, headerRow31, headerRow41, headerRow51, headerRow81,
-					annulavecount, csleavecount, pholidatcount, hospCount , cclCount ,mateCount,
-					oilCount,nslCount,nplCount,compassCount, paternCount, bereavCount,ecclCount,emlCount,compoffCount,dayscount);
+					annulavecount, csleavecount, pholidatcount, hospCount , cclCount ,mateCount,oilCount,nslCount,nplCount,
+					compassCount, paternCount, bereavCount,ecclCount,emlCount,compoffCount,dayscount,workCountry);
 			totalWorkingDays(sheet, workbook, workingDaysCount, dayscount, hourscount);
 			noteMessage(sheet, workbook);
 			remarks(sheet, workbook, leaveDetails);
@@ -3068,7 +3077,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			Row headerRow4, Row headerRow5, Row headerRow8, double annulavecount, double csleavecount,
 			double pholidatcount,double hospCount ,double cclCount ,double mateCount,
 			double oilCount,double nslCount,double nplCount,double compassCount,double paternCount,
-			double bereavCount, double ecclCount,double emlCount,double compoffCount, double dayscount) {
+			double bereavCount, double ecclCount,double emlCount,double compoffCount, double dayscount,String workCountry) {
 
 		Cell headerCell19 = headerRow1.createCell(11);
 		headerCell19.setCellValue("TIMESHEET SUMMARY");
@@ -3107,11 +3116,21 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		headerCell30.setCellStyle(getHeaderCellStyle10(workbook));
 
 		Cell headerCell31 = headerRow3.createCell(11);
-		headerCell31.setCellValue("CASUAL/SICK LEAVE");
+		if(workCountry.equalsIgnoreCase("Singapore")) {
+			headerCell31.setCellValue("SICK LEAVE");
+		}else {
+			headerCell31.setCellValue("CASUAL/SICK LEAVE");	
+		}
+	
 		headerCell31.setCellStyle(getHeaderCellStyle10(workbook));
 
 		Cell headerCell32 = headerRow3.createCell(12);
-		headerCell32.setCellValue("CL");
+		if(workCountry.equalsIgnoreCase("Singapore")) {
+			headerCell32.setCellValue("SL");
+		}else {
+			headerCell32.setCellValue("CL");
+		}
+	
 		headerCell32.setCellStyle(getHeaderCellStyle10(workbook));
 
 		Cell headerCell33 = headerRow3.createCell(13);
@@ -4049,7 +4068,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			}
 
 			description(sheet, workbook, headerRow11, headerRow21, headerRow31, headerRow41, headerRow51, headerRow81,
-					0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0);
+					0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,null);
 			totalWorkingDays(sheet, workbook, 0, 0, 0);
 			noteMessage(sheet, workbook);
 			remarks(sheet, workbook, null);

@@ -129,8 +129,6 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
 				String formattedDate = sdf.format(new Date(date.getTime()));
 
-				// change
-
 				String tno = "";
 				if (TicketNumber != null) {
 					tno = TicketNumber;
@@ -162,7 +160,44 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 					to = emailid.getPersonal_email_id();
 					client = emailid.getClient();
 					String mno = emailid.getMobile_number();
-			
+										
+				  if (work_country.equalsIgnoreCase("india")){
+						
+					assign= ticketType.getIndia_spoc_name();
+					text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
+						       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
+							   + "details or clarifications, they will contact you for the same."+"\n\n"
+						       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
+							   + "and an email will be sent to you immediately." +"\n\n"
+						       + "Thank you for your patience."+"\n"
+							   + "Regards,"+"\n"
+						       + "Helius Operations team";
+
+					emailService.sendEmail(to, null, null, subject, text);
+				}
+					if (work_country.equalsIgnoreCase("singapore")){
+						
+						assign= ticketType.getSingapore_spoc_name();
+						text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
+							       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
+								   + "details or clarifications, they will contact you for the same."+"\n\n"
+							       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
+								   + "and an email will be sent to you immediately." +"\n\n"
+							       + "Thank you for your patience."+"\n"
+								   + "Regards,"+"\n"
+							       + "Helius Operations team";
+
+						emailService.sendEmail(to, null, null, subject, text);
+					}
+				}
+				       
+				if (work_country.equalsIgnoreCase("Singapore")) {
+					to = "";
+					to = ticketType.getSingapore_helius_email_id();
+					String mno = emailid.getMobile_number();
+				   // String[] cc = new String[]{ticketType.getCc_helius_email_id()};	
+				   //assign= ticketType.getSingapore_spoc_name();
+					
 					text = "Hi,"+ "\n\n" + "The ticket details are:" + "\n" 
 							+ "1. Ticket Query - "+tikcet_query + "\n" 
 							+ "2. Ticket Description - " + descrion + "\n"
@@ -174,26 +209,8 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 							+ "Please log into HAP for more details and uploaded reference documents and update the"+ "\n"
 							+ "HAP ticket status once the ticket has been resolved."+"\n\n"
 							+ "Regards," + "\n"+ "Helius Operations team";
-
-					emailService.sendEmail(to, null, null, subject, text);
-				}
-				       
-				if (work_country.equalsIgnoreCase("Singapore")) {
-					to = "";
-					to = ticketType.getSingapore_helius_email_id();
-					//String cc = ticketType.getCc_helius_email_id();
-				    String[] cc = new String[]{ticketType.getCc_helius_email_id()};
-					assign= ticketType.getSingapore_spoc_name();
-					text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
-						       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
-							   + "details or clarifications, they will contact you for the same."+"\n\n"
-						       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
-							   + "and an email will be sent to you immediately." +"\n\n"
-						       + "Thank you for your patience."+"\n"
-							   + "Regards,"+"\n"
-						       + "Helius Operations team";
 					
-					emailService.sendEmail(to, cc, null, subject, text);
+					emailService.sendEmail(to, null, null, subject, text);
 
 				}
 				if (work_country.equalsIgnoreCase("India")) {
@@ -202,15 +219,19 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 					//String cc= ticketType.getCc_helius_email_id();
 				    String[] cc = new String[]{ticketType.getCc_helius_email_id()};
 
-					assign= ticketType.getIndia_spoc_name();
-					text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
-						       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
-							   + "details or clarifications, they will contact you for the same."+"\n\n"
-						       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
-							   + "and an email will be sent to you immediately." +"\n\n"
-						       + "Thank you for your patience."+"\n"
-							   + "Regards,"+"\n"
-						       + "Helius Operations team";
+					String mno = emailid.getMobile_number();
+					//assign= ticketType.getIndia_spoc_name();
+					text = "Hi,"+ "\n\n" + "The ticket details are:" + "\n" 
+							+ "1. Ticket Query - "+tikcet_query + "\n" 
+							+ "2. Ticket Description - " + descrion + "\n"
+							+ "3. Raised by – employee name - " + empname + "\n"
+							+ "4. Raised by – employee contact email - " + to + "\n"
+							+ "5. Raised by – employee – phone number - "+mno + "\n"
+							+ "6. Client - "+client + "\n"
+							+ "7. Location -"+work_country+ "\n\n"
+							+ "Please log into HAP for more details and uploaded reference documents and update the"+ "\n"
+							+ "HAP ticket status once the ticket has been resolved."+"\n\n"
+							+ "Regards," + "\n"+ "Helius Operations team";
 					
 					emailService.sendEmail(to, cc, null, subject, text);
 				}

@@ -807,7 +807,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 							}
 
-						} else if (details.getType_of_leave().equalsIgnoreCase("Casual/Sick Leave")) {
+						} else if (details.getType_of_leave().equalsIgnoreCase("Casual/Sick Leave") ||details.getType_of_leave().equalsIgnoreCase("Sick Leave") ) {
 							if (currentDate.isEqual(startDate) || currentDate.isEqual(endDate)
 									|| (currentDate.isAfter(startDate) && currentDate.isBefore(endDate))) {
 

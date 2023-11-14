@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.helius.dao.EmployeeExitCheck;
+import com.helius.utils.Client_Timesheet_Automation_Status;
 import com.helius.utils.Holiday_Master;
 
 /**
@@ -50,6 +51,7 @@ public class Employee extends HeliusEntity {
 	private List<Holiday_Master> clientHolidays;
 	//change
 	private Map<String, List<String>> ticketTypeMapList;
+	private Client_Timesheet_Automation_Status Client_timesheet_Automation_Status;
 
 	public Map<String, List<String>> getTicketTypeMapList() {
 		return ticketTypeMapList;
@@ -365,5 +367,16 @@ public class Employee extends HeliusEntity {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public Client_Timesheet_Automation_Status getClient_timesheet_Automation_Status() {
+		return Client_timesheet_Automation_Status;
+	}
+
+	public void setClient_timesheet_Automation_Status(
+			Client_Timesheet_Automation_Status client_timesheet_Automation_Status) {
+		Client_timesheet_Automation_Status = client_timesheet_Automation_Status;
+	}
+
+
 
 }

@@ -519,8 +519,18 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	        }//emp.setEmployeeTicketTypes(ticketTypeMapList);
 
 	        emp.setTicketTypeMapList(ticketTypeMap);
+	        
+			// To get TimeSheet Automation Status based on client
 
-			
+			String statusQuery = "select status.* from Client_Timesheet_Automation_Status status where client_id =:client_id ";
+			List<com.helius.utils.Client_Timesheet_Automation_Status> status = session.createSQLQuery(statusQuery)
+					.setResultTransformer(Transformers.aliasToBean(com.helius.utils.Client_Timesheet_Automation_Status.class))
+					.setParameter("client_id", client_id).list();
+
+			if (!status.isEmpty()) {
+				emp.setClient_timesheet_Automation_Status(status.get(0));
+			}
+
 			// get client holiday list 
 						String holidaysQuery = "SELECT * FROM `Holiday_Master` WHERE client_id =:client_id";
 						List<Holiday_Master> holidayMasters = new ArrayList<>();

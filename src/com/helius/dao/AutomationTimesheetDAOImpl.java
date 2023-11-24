@@ -3116,17 +3116,25 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		headerCell30.setCellStyle(getHeaderCellStyle10(workbook));
 
 		Cell headerCell31 = headerRow3.createCell(11);
-		if(workCountry.equalsIgnoreCase("Singapore")) {
-			headerCell31.setCellValue("SICK LEAVE");
+		if(workCountry != null) {
+			if(workCountry.equalsIgnoreCase("Singapore")) {
+				headerCell31.setCellValue("SICK LEAVE");
+			}else {
+				headerCell31.setCellValue("CASUAL/SICK LEAVE");	
+			}
 		}else {
 			headerCell31.setCellValue("CASUAL/SICK LEAVE");	
 		}
+		
 	
 		headerCell31.setCellStyle(getHeaderCellStyle10(workbook));
-
 		Cell headerCell32 = headerRow3.createCell(12);
-		if(workCountry.equalsIgnoreCase("Singapore")) {
-			headerCell32.setCellValue("SL");
+		if(workCountry != null) {
+			if(workCountry.equalsIgnoreCase("Singapore")) {
+				headerCell32.setCellValue("SL");
+			}else {
+				headerCell32.setCellValue("CL");
+			}
 		}else {
 			headerCell32.setCellValue("CL");
 		}

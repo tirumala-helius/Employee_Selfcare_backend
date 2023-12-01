@@ -275,7 +275,8 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			// Employee leave eligibility
 			LocalDate date = LocalDate.now();
 			int year = date.getYear();
-			String leaveeligibility_query = "select leaveeligible.* from Leave_Eligibility_Details leaveeligible where employee_id = :employee_id AND year = :year";
+			String leaveeligibility_query = "select a.* from Leave_Eligibility_Details a, Employee_Assignment_Details b, client_details c  where a.employee_id = :employee_id AND a.year = :year "
+					+ "AND a.employee_id=b.employee_id AND a.client_id=c.client_id AND   b.client=c.client_name ";
 			java.util.List leaveeligibilityList = session.createSQLQuery(leaveeligibility_query)
 					.addEntity(Leave_Eligibility_Details.class).setParameter("employee_id", employeeid).setParameter("year",year).list();
 			Leave_Eligibility_Details leave_Eligibility_Details = null;

@@ -142,6 +142,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	public Employee get(String employeeid) {
 		Employee emp = new Employee();
 		Integer client_id = 0;
+		String client = null;
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
@@ -174,6 +175,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			Employee_Assignment_Details employee_Assigmnent_Details = null;
 			if (!assignmentList.isEmpty()) {
 				employee_Assigmnent_Details = (Employee_Assignment_Details) assignmentList.iterator().next();
+				client = employee_Assigmnent_Details.getClient();
 				List<Sow_Details> sow_details_list =null;
 				String sowquery = "select * from Sow_Employee_Association a, Sow_Details b where a.employee_id=:employee_id"
 						+ " and a.sow_details_id=b.sow_details_id and a.status='active' and  b.sow_status='active' ";
@@ -523,10 +525,10 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	        
 			// To get TimeSheet Automation Status based on client
 
-			String statusQuery = "select status.* from Client_Timesheet_Automation_Status status where client_id =:client_id ";
+			String statusQuery = "select status.* from Client_Timesheet_Automation_Status status where client_name =:client_name ";
 			List<com.helius.utils.Client_Timesheet_Automation_Status> status = session.createSQLQuery(statusQuery)
 					.setResultTransformer(Transformers.aliasToBean(com.helius.utils.Client_Timesheet_Automation_Status.class))
-					.setParameter("client_id", client_id).list();
+					.setParameter("client_name", client).list();
 
 			if (!status.isEmpty()) {
 				emp.setClient_timesheet_Automation_Status(status.get(0));

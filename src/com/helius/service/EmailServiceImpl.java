@@ -241,7 +241,7 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void sendMessageWithAttachmentForTimesheet(String to, String[] cc, String subject, String text,
-			List<String> pathToAttachment,String client) throws MessagingException {
+			List<String> pathToAttachment,String client) throws MessagingException, Throwable {
 		final String  username ;
 		  final String password ;
 		if(client.equalsIgnoreCase("DAH2")) {
@@ -313,7 +313,12 @@ public class EmailServiceImpl implements EmailService {
 				}
 				message.setContent(multipart);
 			}
-		 Transport.send(message);
+		try {
+			 Transport.send(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Throwable("Unable to send Email "+e.getMessage(), e);
+		}
 	//	syncSentItems(message);		    
 		
 	}

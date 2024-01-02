@@ -16,5 +16,5 @@ public interface EmailService {
 	public void sendEmailWithAttachment(String to,String[] cc,String[] bc, String subject, String message, List<File> files) throws MessagingException;
 	public void sendBulkEmailWithAttachment(String to,String[] cc,String[] bc, String subject, String message, List<File> files) throws MessagingException;
 	public void sendMessageWithAttachment(String to,String[] cc, String subject, String message, List<String> urlList) throws MessagingException;
-	public void sendMessageWithAttachmentForTimesheet(String to,String[] cc, String subject, String message, List<String> urlList,String client) throws MessagingException;
+	public void sendMessageWithAttachmentForTimesheet(String to,String[] cc, String subject, String message, List<String> urlList,String client) throws MessagingException, Throwable;
 }

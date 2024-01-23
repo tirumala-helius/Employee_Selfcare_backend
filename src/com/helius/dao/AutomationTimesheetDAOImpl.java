@@ -75,6 +75,7 @@ import com.helius.utils.Utils;
 import com.helius.utils.WorkedOnShifts;
 import com.helius.utils.WorkingOnPublicHolidays;
 import com.helius.utils.WorkingOnWeekEnds;
+import com.helius.entities.Employee_Assignment_Details;
 
 public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
@@ -3534,6 +3535,27 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
 	        ccWithAdditionalEmail[cc.length] = additionalEmail;
 	        cc = ccWithAdditionalEmail;
+		}
+		
+		//for Bank Of Singapore Client
+		if (clientId.equalsIgnoreCase("300")) {
+		    String clientmail = null;
+		    String query = "SELECT * FROM Employee_Assignment_Details WHERE employee_id =:employee_id";
+		    List<Employee_Assignment_Details> clientlist = session.createSQLQuery(query)
+		            .addEntity(Employee_Assignment_Details.class)
+		            .setParameter("employee_id", empid)
+		            .list();
+
+		    if (clientlist != null && !clientlist.isEmpty()) {
+		        clientmail = clientlist.get(0).getClient_email_id();
+		    }
+
+		    if (clientmail != null) {
+		        String additionalEmail = clientmail;
+		        String[] ccWithAdditionalEmails = Arrays.copyOf(cc, cc.length + 1);
+		        ccWithAdditionalEmails[cc.length] = additionalEmail;
+		        cc = ccWithAdditionalEmails;
+		    }
 		}
 		
 		//To Cretate Timesheet with Given JSON data

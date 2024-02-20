@@ -1986,11 +1986,39 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					}
 				}else {
 					return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
-
 				}
-
 		} catch (Throwable e) {
 			logger.error("failed to download file  - " + empId, e.getMessage());
+			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			session.close();
+		}
+		return new ResponseEntity<byte[]>(files, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<byte[]> downloadIR8(String empId, String financialYear) throws Throwable {
+		Session session = null;
+		byte[] files = null;
+		String check = Utils.awsCheckFlag();
+		try {
+			session = sessionFactory.openSession();
+			String url = null;
+				if ((financialYear != null && !financialYear.isEmpty()) && "yes".equalsIgnoreCase(check)) {
+					url = "IR8" + "/" + financialYear + "/" + empId  + ".pdf";
+					try {
+						files = Utils.downloadFileByAWSS3Bucket(url);
+					} catch (Exception e) {
+						e.printStackTrace();
+						return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+					}
+				}else {
+					logger.info(" Wrong Content for IR8 Form");
+					return new ResponseEntity<byte[]>(HttpStatus.NO_CONTENT);
+				}
+		} catch (Throwable e) {
+			logger.error("failed to download IR8  - " + empId, e.getMessage());
+			e.printStackTrace();
 			return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} finally {
 			session.close();

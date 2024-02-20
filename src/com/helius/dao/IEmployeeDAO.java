@@ -40,4 +40,5 @@ public interface IEmployeeDAO {
 	public Employee_Leave_Data getEmployeeLeaveData(String employee_id)throws Throwable;
 	public void sendEmail(String jsonData, MultipartHttpServletRequest request) throws Throwable;
 	public ResponseEntity<byte[]> getDownloadForm16(String empId, String filePath) throws Throwable;
+	public ResponseEntity<byte[]> downloadIR8(String empId, String financialYear) throws Throwable;
 	}

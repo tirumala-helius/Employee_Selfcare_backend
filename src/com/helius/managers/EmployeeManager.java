@@ -174,4 +174,14 @@ public class EmployeeManager {
 		}
 		return res;
 	}
+	
+	public ResponseEntity<byte[]> downloadIR8(String empId, String financialYear) {
+		ResponseEntity<byte[]> res = null;
+		try {
+			res = employeeDAO.downloadIR8(empId, financialYear);
+		} catch (Throwable e) {
+			return res;
+		}
+		return res;
+	}
 }

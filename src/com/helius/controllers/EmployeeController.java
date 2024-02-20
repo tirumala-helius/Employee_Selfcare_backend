@@ -24,6 +24,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -45,6 +47,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helius.dao.EmployeeDAOImpl;
 import com.helius.entities.Checklist;
 import com.helius.entities.Employee;
 import com.helius.entities.Employee_Leave_Data;
@@ -93,7 +96,7 @@ public class EmployeeController {
 	public EmployeeController() {
 		// TODO Auto-generated constructor stub
 	}
-	
+	  private static final Logger logger = LogManager.getLogger(EmployeeController.class.getName());
 	@CrossOrigin
 	@RequestMapping(value = "employee/", method = RequestMethod.GET,produces = "application/json;charset=utf-8")
 	public ResponseEntity<String> getEmployee(@RequestParam String employeeid) {
@@ -394,6 +397,15 @@ public class EmployeeController {
 		@RequestMapping(value = "downloadForm16", method = RequestMethod.GET, produces = "multipart/form-data")
 		public ResponseEntity<byte[]> getDownloadForm16(@RequestParam String empId, @RequestParam String filePath) {
 			ResponseEntity<byte[]> responseEntity = employeemanager.getDownloadForm16(empId, filePath);
+			return responseEntity;
+		}
+		
+		@CrossOrigin
+		@RequestMapping(value = "downloadIR8", method = RequestMethod.GET, produces = "multipart/form-data")
+		public ResponseEntity<byte[]> downloadIR8(@RequestParam String empId, @RequestParam String financialYear ) {
+			logger.info("Request For IR8 Form Downlaod.");
+			System.out.println("Request For IR8 Form Downlaod.");
+			ResponseEntity<byte[]> responseEntity = employeemanager.downloadIR8(empId, financialYear );
 			return responseEntity;
 		}
 }

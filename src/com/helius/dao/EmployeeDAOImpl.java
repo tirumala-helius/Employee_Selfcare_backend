@@ -1038,13 +1038,14 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				 Timestamp  conStartDate= null;
 					List<Employee_Off_In_Lieu_Data> employee_Off_In_Lieu_Datas = new ArrayList<>();
 					List<Employee_Off_In_Lieu>  Off_In_Lieus = new ArrayList<>();
+					SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
 					Timestamp sowEndDate = null;
 					Timestamp sowStartDate = null;
 					
 			
-					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,b.sow_expiry_date,b.sow_start_date FROM Employee_Personal_Details a \r\n"
-							+ "    LEFT JOIN Employee_Assignment_Details b\r\n"
-							+ "    ON a.employee_id = b.employee_id  WHERE a.employee_id ='"+employee_id+"'";
+					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,d.sow_expiry_date,d.sow_start_date FROM Employee_Personal_Details a \r\n"
+							+ "	 LEFT JOIN Employee_Assignment_Details b ON a.employee_id = b.employee_id  LEFT JOIN Sow_Employee_Association c ON a.employee_id = c.employee_id\r\n"
+							+ "	 LEFT JOIN Sow_Details d ON c.sow_details_id = d.sow_details_id  WHERE a.employee_id ='"+employee_id+"' ORDER BY c.sow_details_id DESC LIMIT 1";
 					List<Object[]> contractdateList =session.createSQLQuery(contractdateQuery).list();
 					if (contractdateList != null) {
 						for (Object[] obj : contractdateList) {
@@ -1086,23 +1087,24 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					
 					if(conStartDate!= null) {
 						if(validity !=null  && validity.equalsIgnoreCase("sowEndDate")) {
-							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:sowStartDate  AND oil_date<=:sowEndDate";
+							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:sowStartDate  AND oil_date<=:sowEndDate ORDER BY oil_date ASC";
 							 Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "sowStartDate",sowStartDate)
 										.setParameter( "sowEndDate",sowEndDate).list();
 							
 						}else {
-							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) =:currenttimestamp";
+							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) <=:currenttimestamp ORDER BY oil_date ASC";
 							  Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
 									.setParameter( "currenttimestamp",currenttimestamp).list();
 						}
 						if(!Off_In_Lieus.isEmpty()) {
 							oildate = Off_In_Lieus.get(0).getOil_date();
 						}
-						
+						 java.util.Date contractMonthData = sdfMonth.parse(conStartDate.toString());
+						 Timestamp contractMonth = new Timestamp(contractMonthData.getTime());
 						
 						
 						String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
-								+ "  WHERE a.leaveMonth >= '"+conStartDate+"'  AND YEAR(a.leaveMonth) >= '"+oildate+"' AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
+								+ "  WHERE a.leaveMonth >= '"+contractMonth+"'  AND YEAR(a.leaveMonth) >= '"+oildate+"' AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
 										+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";
 						List<Object[]> recordList =session.createSQLQuery(leaveRecordQuery).list();
 						if (recordList != null) {
@@ -2005,7 +2007,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			session = sessionFactory.openSession();
 			String url = null;
 				if ((financialYear != null && !financialYear.isEmpty()) && "yes".equalsIgnoreCase(check)) {
-					url = "IR8" + "/" + financialYear + "/" + empId  + ".pdf";
+					url = "IR8" +File.separator + financialYear + File.separator + empId  + ".pdf";
 					try {
 						files = Utils.downloadFileByAWSS3Bucket(url);
 					} catch (Exception e) {

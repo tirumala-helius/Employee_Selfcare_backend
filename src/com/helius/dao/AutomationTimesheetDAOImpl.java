@@ -3530,12 +3530,12 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			
 		}
 		
-		if(clientId.equalsIgnoreCase("381")) {
-			String additionalEmail = "abhishek_rastogi@singlife.com"; 
-	        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
-	        ccWithAdditionalEmail[cc.length] = additionalEmail;
-	        cc = ccWithAdditionalEmail;
-		}
+		/*
+		 * if(clientId.equalsIgnoreCase("381")) { String additionalEmail =
+		 * "abhishek_rastogi@singlife.com"; String[] ccWithAdditionalEmail =
+		 * Arrays.copyOf(cc, cc.length + 1); ccWithAdditionalEmail[cc.length] =
+		 * additionalEmail; cc = ccWithAdditionalEmail; }
+		 */
 		
 		//for Bank Of Singapore Client
 		if (clientId.equalsIgnoreCase("300")) {

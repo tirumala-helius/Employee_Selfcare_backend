@@ -144,6 +144,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		Integer client_id = 0;
 		String client = null;
 		Session session = null;
+		String probation_duration = null;
 		try {
 			session = sessionFactory.openSession();
 			// Employee personal Details
@@ -304,6 +305,21 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			if (employee_offer_Details != null) {
 				emp.setEmployeeOfferDetails(employee_offer_Details);
 			}
+			
+			//for getting client probation data
+			// Assuming client is obtained correctly from employee_Assigmnent_Details.getClient()
+			 client = employee_Assigmnent_Details.getClient();
+			String query = "select probationperiod_al from client_details where client_name = '" + client + "'";
+			List<Integer> probationList = session.createSQLQuery(query).list();
+
+			if (probationList != null && !probationList.isEmpty()) {
+			    int pbperiod = probationList.get(0); // Get the first probation period from the list
+			    probation_duration = String.valueOf(pbperiod);
+			} else {
+			    System.out.println("no probation period data found");
+			}
+			
+			
 			// Employee Terms and Conditions
 			String employee_TandC_query = "select TandC.* from Employee_Terms_And_Conditions TandC where employee_id = :employee_id ";
 			java.util.List TandCList = session.createSQLQuery(employee_TandC_query)
@@ -313,6 +329,9 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				Employee_Terms_And_Conditions = (Employee_Terms_And_Conditions) TandCList.iterator().next();
 			}
 			if (Employee_Terms_And_Conditions != null) {
+				if(Employee_Terms_And_Conditions.getProbation_duration()==null){
+					Employee_Terms_And_Conditions.setProbation_duration(probation_duration);
+				}
 				emp.setEmployeeTermsAndConditions(Employee_Terms_And_Conditions);
 			}
 

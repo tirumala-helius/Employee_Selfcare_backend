@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.9</version>
+			<version>8.0.33</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-dbcp</groupId>
@@ -307,16 +307,17 @@
     <artifactId>taglibs-standard-jstlel</artifactId>
     <version>1.2.1</version>
 </dependency>
+<dependency>
+ <groupId>software.amazon.awssdk</groupId>
+ <artifactId>s3</artifactId>
+ <version>2.15.51</version>
+</dependency>
 <!--<dependency>
 			<groupId>Helius-HCM-Server</groupId>
 			<artifactId>Helius-HCM-Server</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>-->
-		<dependency>
-			<groupId>Helius-HCM-Server</groupId>
-			<artifactId>Helius-HCM-Server</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		
 	</dependencies>
   
   

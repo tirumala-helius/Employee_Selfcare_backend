@@ -196,6 +196,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 			String empid = automation.getEmpId();
 			String client = automation.getClient();
+			if(client.equalsIgnoreCase("BANK OF JULIUS BAER")) {
+				client = "BANK JULIUS BAER";
+			}
 			String empname = automation.getEmployeeName();
 			String workCountry = automation.getWorkCountry();
 			String managername = "N/A";

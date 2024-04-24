@@ -3452,6 +3452,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		if(client.equalsIgnoreCase("DAH2")) {
 			managerName = "Padma";
 		}
+		if(client.equalsIgnoreCase("BANK OF JULIUS BAER")) {
+			client = "BANK JULIUS BAER";
+		}
 		String clientId= automation.getClientId();
 		String workcountry = automation.getWorkCountry();
 		String contactname = null;

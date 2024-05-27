@@ -970,7 +970,11 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			emailService.sendEmail(emailto, null, null, emailsubject, message.toString());
 			e.printStackTrace();
 			throw new Throwable("Failed to Deactivate Exit Employee Login Account");
-		}
+		}finally {
+	        if (session != null) {
+	            session.close();
+	        }
+	    }
 		
 	}
 }

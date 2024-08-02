@@ -84,6 +84,9 @@ public class Leave_Record_Details {
 	@NotAudited
 	private Timestamp last_modified_date;
 	
+	@Column
+	private Timestamp Payroll_deduction_month;
+	
 	public String getAmpm() {
 		return ampm;
 	}
@@ -179,6 +182,15 @@ public class Leave_Record_Details {
 	public void setLast_modified_date(Timestamp last_modified_date) {
 		this.last_modified_date = last_modified_date;
 	}
+
+	public Timestamp getPayroll_deduction_month() {
+		return Payroll_deduction_month;
+	}
+
+	public void setPayroll_deduction_month(Timestamp payroll_deduction_month) {
+		Payroll_deduction_month = payroll_deduction_month;
+	}
+	
 
 	/*public Timestamp getSow_start_date() {
 		return sow_start_date;

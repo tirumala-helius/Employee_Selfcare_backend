@@ -57,48 +57,45 @@ public class Utils {
 		this.s3Client = s3Client;
 	}
 	static{
-		String path = System.getProperty("jboss.server.home.dir")+"/conf/helius_hcm.properties";
+		String path = System.getProperty("jboss.server.home.dir")+"/conf/helius_hcm_ssp.properties";
 		//String path1 = "C:"+File.separator+"Users"+File.separator+"HELIUS"+File.separator+"git"+File.separator+"Helius-HCM-Server"+File.separator+"WebContent"+File.separator+"WEB-INF"+File.separator+"helius_hcm.properties";
 		//String path =  System.getProperty("helius_hcm.properties");
 		InputStream inStream;
 		try {
 			inStream = new FileInputStream(path);
 			instance = new Properties();
-			instance.load(inStream);		
+			instance.load(inStream);
+			bucketName = instance.getProperty("aws.bucketname");
+			 String check =	instance.getProperty("hcm_testing");
+	        	if("yes".equalsIgnoreCase(check)){
+	                System.out.println("====check===="+check);
+	        		String fileLoc = instance.getProperty("fileLocation")+File.separator+"hapTesting";
+	        		instance.setProperty("fileLocation", fileLoc);
+	        	}
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		InputStream is = null;
-        try {
-            happrop = new Properties();
-             is = Utils.class.getResourceAsStream("/com/helius/utils/hap.properties");
-            happrop.load(is);
-            String check =	happrop.getProperty("hcm_testing");
-        	if("yes".equalsIgnoreCase(check)){
-                System.out.println("====check===="+check);
-        		String fileLoc = instance.getProperty("fileLocation")+File.separator+"hapTesting";
-        		instance.setProperty("fileLocation", fileLoc);
-        	}
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-		InputStream aws = null;
-		try {
-			awsprop = new Properties();
-			aws = Utils.class.getResourceAsStream("/com/helius/utils/awsconfig.properties");
-			awsprop.load(aws);
-			bucketName = awsprop.getProperty("aws.bucketname");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		/*
+		 * InputStream is = null; try { happrop = new Properties(); is =
+		 * Utils.class.getResourceAsStream("/com/helius/utils/hap.properties");
+		 * happrop.load(is); String check = happrop.getProperty("hcm_testing");
+		 * if("yes".equalsIgnoreCase(check)){ System.out.println("====check===="+check);
+		 * String fileLoc =
+		 * instance.getProperty("fileLocation")+File.separator+"hapTesting";
+		 * instance.setProperty("fileLocation", fileLoc); } } catch
+		 * (FileNotFoundException e) { e.printStackTrace(); } catch (IOException e) {
+		 * e.printStackTrace(); }
+		 * 
+		 * InputStream aws = null; try { awsprop = new Properties(); aws =
+		 * Utils.class.getResourceAsStream("/com/helius/utils/awsconfig.properties");
+		 * awsprop.load(aws); bucketName = awsprop.getProperty("aws.bucketname"); }
+		 * catch (FileNotFoundException e) { e.printStackTrace(); } catch (IOException
+		 * e) { e.printStackTrace(); }
+		 */
 	}
 	
 	/*
@@ -112,11 +109,11 @@ public class Utils {
 	}
 	
 	public static String getHapProperty(String key) {
-		return happrop.getProperty(key);
+		return instance.getProperty(key);
 	}
     
 	public static String getAwsprop(String key) {
-		return awsprop.getProperty(key);
+		return instance.getProperty(key);
 	}
 	
 	private  org.hibernate.internal.SessionFactoryImpl sessionFactory;

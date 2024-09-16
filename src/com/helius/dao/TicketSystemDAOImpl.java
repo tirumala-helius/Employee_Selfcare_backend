@@ -117,7 +117,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 
 				//Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(Tickettype, session);
 
-				Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(query, session);
+				Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(query,Tickettype, session);
 
 				
 				//change
@@ -451,8 +451,10 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 		}
 		return ticket_Types;
 	}*/
-	public Employee_Ticketing_System_Ticket_Types getTicketType(String query, Session session) {
-		String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE  ticket_query = '" + query + "'";
+	public Employee_Ticketing_System_Ticket_Types getTicketType(String query, String Tickettype, Session session) {
+	//	String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE  ticket_query = '" + query + "'";
+		String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE ticket_query = '" + query + "' AND ticket_type = '" + Tickettype + "'";
+
 		Employee_Ticketing_System_Ticket_Types ticket_Types = null;
 		try {
 			java.util.List ticketType = session.createSQLQuery(ticketTypeQuery)

@@ -59,6 +59,8 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 		String ticketNumber = "";
 		int ticket_id = 0;
 		String employee_id = null;
+		String assign_name = null;
+
 
 		try {
 			session = sessionFactory.openSession();
@@ -98,6 +100,23 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 					copied_with_success = status.getCopied_with_success();
 				}
 			}
+			String country = emp.getEmployeeTicketingSystem().getWork_country();
+			String query = emp.getEmployeeTicketingSystem().getTicket_query();
+			String raised_by = emp.getEmployeeTicketingSystem().getEmployee_name();
+			String Tickettype = emp.getEmployeeTicketingSystem().getTicket_type();
+
+			
+			Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(Tickettype,query, session);
+
+			if(country.equalsIgnoreCase("india")){
+				assign_name= ticketType.getIndia_spoc_name();
+				emp.getEmployeeTicketingSystem().setTicket_assigned_to(assign_name);
+				
+			}if(country.equalsIgnoreCase("Singapore")){
+				assign_name = ticketType.getSingapore_spoc_name();
+				emp.getEmployeeTicketingSystem().setTicket_assigned_to(assign_name);
+			}
+			emp.getEmployeeTicketingSystem().setTicket_raised_by(raised_by);
 			transaction.commit();
 
 			try {
@@ -110,20 +129,11 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 				String comment = emp.getEmployeeTicketingSystem().getComments();
 				String employee_name = emp.getEmployeeTicketingSystem().getEmployee_name();
 				String RaisedBy = emp.getEmployeeTicketingSystem().getTicket_raised_by();
-				String Tickettype = emp.getEmployeeTicketingSystem().getTicket_type();
 				String work_country = emp.getEmployeeTicketingSystem().getWork_country();
 				String assign = emp.getEmployeeTicketingSystem().getTicket_assigned_to();
-				String query = emp.getEmployeeTicketingSystem().getTicket_query();
 
-				//Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(Tickettype, session);
-
-				Employee_Ticketing_System_Ticket_Types ticketType = getTicketType(query,Tickettype, session);
-
-				
-				//change
+	
 				String tikcet_query = emp.getEmployeeTicketingSystem().getTicket_query();
-				/*Timestamp date = ticketType.getCreate_date();
-				SimpleDateFormat sdf = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");*/
 				
 				Timestamp date = emp.getEmployeeTicketingSystem().getCreate_date();
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -258,12 +268,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	// method for Ticketid auto generated
 	private String generateTicketNumber(Integer ticketNumber) {
 		Employee emp = new Employee();
-		// String lastTicketNumber = null;
-		/*
-		 * String lastTicketNumber =
-		 * emp.getEmployeeTicketingSystem().getTicket_number(); Integer nextTicketNumber
-		 * = Integer.parseInt(lastTicketNumber); nextTicketNumber = 0;
-		 */
+		
 		Integer nextTicketNumber = ticketNumber + 1;
 		String formattedTicketNumber = String.format("ETS%03d", nextTicketNumber);
 		return formattedTicketNumber;
@@ -434,25 +439,8 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 		return empTicketByStatus;
 	}*/
 
-	/*public Employee_Ticketing_System_Ticket_Types getTicketType(String Tickettype, Session session) {
-		String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE ticket_type='" + Tickettype
-				+ "'";
-		Employee_Ticketing_System_Ticket_Types ticket_Types = null;
-		try {
-			java.util.List ticketType = session.createSQLQuery(ticketTypeQuery)
-					.addEntity(Employee_Ticketing_System_Ticket_Types.class).list();
 
-			if (ticketType != null && !ticketType.isEmpty()) {
-				ticket_Types = (Employee_Ticketing_System_Ticket_Types) ticketType.iterator().next();
-			}
-
-		} catch (Exception e) {
-			throw e;
-		}
-		return ticket_Types;
-	}*/
-	public Employee_Ticketing_System_Ticket_Types getTicketType(String query, String Tickettype, Session session) {
-	//	String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE  ticket_query = '" + query + "'";
+	public Employee_Ticketing_System_Ticket_Types getTicketType(String Tickettype , String query, Session session) {
 		String ticketTypeQuery = "SELECT * FROM Employee_Ticketing_System_Ticket_Types WHERE ticket_query = '" + query + "' AND ticket_type = '" + Tickettype + "'";
 
 		Employee_Ticketing_System_Ticket_Types ticket_Types = null;

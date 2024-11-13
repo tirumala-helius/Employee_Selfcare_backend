@@ -49,6 +49,25 @@ public class Employee extends HeliusEntity {
 	private List<Employee_Ticketing_System_Ticket_Types> employeeTicketTypes;
 	private Employee_Ticketing_System employeeTicketingSystem;
 	private List<Holiday_Master> clientHolidays;
+	private EmployeeTicketingFiles employeeTicketingFiles;
+	private List<EmployeeTicketingFiles>employeeticketingFilesList;
+	
+	public List<EmployeeTicketingFiles> getEmployeeticketingFilesList() {
+		return employeeticketingFilesList;
+	}
+
+	public void setEmployeeticketingFilesList(List<EmployeeTicketingFiles> employeeticketingFilesList) {
+		this.employeeticketingFilesList = employeeticketingFilesList;
+	}
+
+	public EmployeeTicketingFiles getEmployeeTicketingFiles() {
+		return employeeTicketingFiles;
+	}
+
+	public void setEmployeeTicketingFiles(EmployeeTicketingFiles employeeTicketingFiles) {
+		this.employeeTicketingFiles = employeeTicketingFiles;
+	}
+
 	//change
 	private Map<String, List<String>> ticketTypeMapList;
 	private Client_Timesheet_Automation_Status Client_timesheet_Automation_Status;

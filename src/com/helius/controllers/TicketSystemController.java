@@ -16,6 +16,9 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee;
+import com.helius.entities.EmployeeCommentsList;
+import com.helius.entities.EmployeeTicketingFilesCombine;
+import com.helius.entities.Employee_Ticketing_System;
 import com.helius.managers.EmployeeManager;
 import com.helius.managers.TicketManager;
 import com.helius.utils.Status;
@@ -52,9 +55,9 @@ public class TicketSystemController {
 	public String updatePermanentOffer(@RequestParam("model") String jsondata, MultipartHttpServletRequest request) {
 		ObjectMapper om = new ObjectMapper();
 		System.out.println("updatepermofferjson======" + jsondata);
-		Employee emp = null;
+		EmployeeTicketingFilesCombine emp = null;
 		try {
-			emp = om.readValue(jsondata, Employee.class);
+			emp = om.readValue(jsondata, EmployeeTicketingFilesCombine.class);
 		} catch (IOException e) {
 			e.printStackTrace();
 			status.setMessage("Unable to save Ticket details invalid json");
@@ -77,4 +80,37 @@ public class TicketSystemController {
 		ResponseEntity<byte[]> responseEntity = ticketManager.downloadFile(ticketid);
 		return responseEntity;
 	}
+	
+	@CrossOrigin
+	@RequestMapping(value = "ticketfilenames", method = RequestMethod.GET,produces = "application/json")
+	public String getfilenames(String ticketId){
+		String result = "";
+		try{
+			result = ticketManager.getallfilenames(ticketId);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	
+	//for comments
+	@CrossOrigin
+	@RequestMapping(value = "getEmployeeCommentsList", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody String getEmployeeCommentsList(@RequestParam String employeeid,String ticketNumber) {
+		String result ="";
+		ObjectMapper om = new ObjectMapper();
+		try {
+			if(employeeid!= null) {
+				EmployeeCommentsList empdetailsjson = ticketManager.getEmployeeCommentsList(employeeid,ticketNumber);
+				result = om.writeValueAsString(empdetailsjson);
+			}else {
+				result ="Employee ID Requried" ;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 }

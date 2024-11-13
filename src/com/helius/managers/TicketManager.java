@@ -6,6 +6,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.helius.dao.TicketSystemDAO;
 import com.helius.entities.Employee;
+import com.helius.entities.EmployeeCommentsList;
+import com.helius.entities.EmployeeTicketingFilesCombine;
+import com.helius.entities.EmployeeTicketingSystemCommentsList;
+import com.helius.entities.Employee_Ticketing_System;
 import com.helius.utils.Status;
 
 public class TicketManager {
@@ -30,7 +34,7 @@ public class TicketManager {
 	}
 
 	// update
-	public Status updateTicket(Employee emp, MultipartHttpServletRequest request) {
+	public Status updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request) {
 		try {
 			ticketSystemDAO.updateTicket(emp, request);
 		} catch (Throwable e) {
@@ -58,5 +62,26 @@ public class TicketManager {
 		}
 		return res;
 	}
+
+	public EmployeeCommentsList getEmployeeCommentsList(String empid,String ticketNumber) {
+		EmployeeCommentsList empdetailsByStatus = null;
+		try {
+			empdetailsByStatus = ticketSystemDAO.getEmployeeCommentsList(empid,ticketNumber);
+		} catch (Throwable e) {
+			return empdetailsByStatus;
+		}
+		return empdetailsByStatus;
+	}
+
+	public String getallfilenames(String ticketId) {
+		String result = "";
+		try{
+			result = ticketSystemDAO.getallticketfilenames(ticketId);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 
 }

@@ -52,6 +52,7 @@ public class Employee_Ticketing_System {
 	private Timestamp ticket_closure_date;
 
 	@Column
+	@Audited(withModifiedFlag = true)
 	private String comments;
 
 	@Column

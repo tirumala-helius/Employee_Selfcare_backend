@@ -1,6 +1,7 @@
 package com.helius.entities;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 public class EmployeeTicketingSystemBean {
 
@@ -26,6 +27,18 @@ public class EmployeeTicketingSystemBean {
 	private String ticket_query;
 	private String cc_helius_email_id;
 	
+	//change
+	private List<EmployeeTicketingFiles> employeeTicketingFiles;
+	
+	
+	public List<EmployeeTicketingFiles> getEmployeeTicketingFiles() {
+		return employeeTicketingFiles;
+	}
+
+	public void setEmployeeTicketingFiles(List<EmployeeTicketingFiles> employeeTicketingFiles) {
+		this.employeeTicketingFiles = employeeTicketingFiles;
+	}
+
 	public String getTicket_query() {
 		return ticket_query;
 	}

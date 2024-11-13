@@ -107,6 +107,8 @@
 			 	<value>com.helius.entities.Employee_Ticketing_System</value>
 			    <value>com.helius.entities.Employee_Ticketing_System_Ticket_Types</value>
 			    <value>com.helius.entities.Employee_Off_In_Lieu</value>
+			    <value>com.helius.entities.EmployeeTicketingFiles</value>
+			    
 			 	
 			</list>
 		</property>

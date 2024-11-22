@@ -698,6 +698,8 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	                                    fileDTO.setTicket_number(ticketNumber);
 	                                    fileDTO.setTicket_path(modifiedFileName);
 	                                    fileDTO.setEmployee_id(emp.getEmployee_Ticketing_System().getEmployee_id());
+	                                    fileDTO.setCreated_by(emp.getEmployee_Ticketing_System().getEmployee_name());
+	                                    fileDTO.setLast_modified_by(emp.getEmployee_Ticketing_System().getEmployee_name());
 	                                    session.save(fileDTO);
 	                               }
 

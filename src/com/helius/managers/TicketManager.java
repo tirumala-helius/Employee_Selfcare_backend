@@ -34,9 +34,9 @@ public class TicketManager {
 	}
 
 	// update
-	public Status updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request) {
+	public Status updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request, String userName) {
 		try {
-			ticketSystemDAO.updateTicket(emp, request);
+			ticketSystemDAO.updateTicket(emp, request, userName);
 		} catch (Throwable e) {
 			return new Status(false, "ticket details not saved " + e.getMessage());
 		}

@@ -11,7 +11,7 @@ import com.helius.entities.Employee_Ticketing_System;
 public interface TicketSystemDAO {
 	public void saveEmpTicket(Employee emp, MultipartHttpServletRequest request) throws Throwable;
 
-	public void updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request) throws Throwable;
+	public void updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request, String userName) throws Throwable;
 
 	public String getTicketHistoryByEmpId(String empId);
 

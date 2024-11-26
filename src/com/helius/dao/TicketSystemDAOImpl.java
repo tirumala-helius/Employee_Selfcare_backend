@@ -601,7 +601,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	}*/
 
 	@Override
-	public void updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request) throws Throwable {
+	public void updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request, String userName) throws Throwable {
 	    Session session = null;
 	    Transaction transaction = null;
 	    Map<String, String> templateFilenames = new HashMap<>();
@@ -618,7 +618,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	        	session.evict(emp.getEmployee_Ticketing_System());
 	            session.merge(emp.getEmployee_Ticketing_System());  // Merge emp object into the session
 	        }
-	        if (emp.getEmployeeTicketingFiles() != null) {
+	     /*   if (emp.getEmployeeTicketingFiles() != null) {
 	        	
 	        	List<EmployeeTicketingFiles> ticketingFiles = emp.getEmployeeTicketingFiles();
 	        	
@@ -645,7 +645,41 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	        		session.evict(ticket);
 	        		session.merge(ticket);
 	        	}
-	        }
+	        }*/
+	        if(emp.getEmployeeTicketingFiles()!=null && !emp.getEmployeeTicketingFiles().isEmpty()){
+	            List<EmployeeTicketingFiles> ticketingFiles = emp.getEmployeeTicketingFiles();
+		        	
+		        	for (EmployeeTicketingFiles ticket1: ticketingFiles){
+		        		 String modifiedFileName =  ticket1.getTicket_path();
+		        		
+		        		  EmployeeTicketingFiles existingFile = emp.getEmployeeTicketingFiles().stream()
+	                              .filter(f -> f.getTicket_path().equals(modifiedFileName))
+	                              .findFirst()
+	                              .orElse(null);
+
+	                          EmployeeTicketingFiles fileDTO = new EmployeeTicketingFiles();
+	                          if (existingFile != null) {
+	                              // Update the existing file record
+	                              fileDTO.setFile_id(existingFile.getFile_id());
+	                              fileDTO.setTicket_number(existingFile.getTicket_number());
+	                              fileDTO.setTicket_path(existingFile.getTicket_path());
+	                              fileDTO.setEmployee_id(existingFile.getEmployee_id());
+	                             // fileDTO.setLast_modified_by(emp.getEmployee_Ticketing_System().getEmployee_name());
+	                              fileDTO.setLast_modified_by(existingFile.getLast_modified_by());
+	                              
+	                              fileDTO.setCreated_date(existingFile.getCreated_date());
+	                              fileDTO.setCreated_by(existingFile.getCreated_by());
+	                             // session.update(fileDTO);
+	                              session.saveOrUpdate(fileDTO);
+	                              session.evict(fileDTO);
+	                            /*  session.evict(fileDTO);
+	                              session.merge(fileDTO);*/
+	                          }
+		        		
+					//session.evict(emp.getEmployeeTicketingFiles());
+					//session.merge(emp.getEmployeeTicketingFiles());
+				}
+				}
 
 	        if (ticketNumber != null && !ticketNumber.isEmpty()) {
 	            Map<String, List<MultipartFile>> filesMap = request.getMultiFileMap();
@@ -698,8 +732,9 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	                                    fileDTO.setTicket_number(ticketNumber);
 	                                    fileDTO.setTicket_path(modifiedFileName);
 	                                    fileDTO.setEmployee_id(emp.getEmployee_Ticketing_System().getEmployee_id());
-	                                    fileDTO.setCreated_by(emp.getEmployee_Ticketing_System().getEmployee_name());
-	                                    fileDTO.setLast_modified_by(emp.getEmployee_Ticketing_System().getEmployee_name());
+	                                    //fileDTO.setCreated_by(emp.getEmployee_Ticketing_System().getEmployee_name());
+	                                    fileDTO.setCreated_by(userName);
+	                                    fileDTO.setLast_modified_by(userName);
 	                                    session.save(fileDTO);
 	                               }
 

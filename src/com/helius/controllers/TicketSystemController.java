@@ -52,7 +52,7 @@ public class TicketSystemController {
 
 	@CrossOrigin
 	@RequestMapping(value = "updateEmpTicket", method = RequestMethod.POST, consumes = { "multipart/form-data" })
-	public String updatePermanentOffer(@RequestParam("model") String jsondata, MultipartHttpServletRequest request) {
+	public String updatePermanentOffer(@RequestParam("model") String jsondata, MultipartHttpServletRequest request, String userName) {
 		ObjectMapper om = new ObjectMapper();
 		System.out.println("updatepermofferjson======" + jsondata);
 		EmployeeTicketingFilesCombine emp = null;
@@ -63,7 +63,7 @@ public class TicketSystemController {
 			status.setMessage("Unable to save Ticket details invalid json");
 			return "{\"response\":\"" + status.getMessage() + "\"}";
 		}
-		status = ticketManager.updateTicket(emp, request);
+		status = ticketManager.updateTicket(emp, request, userName);
 		return "{\"response\":\"" + status.getMessage() + "\"}";
 	}
 

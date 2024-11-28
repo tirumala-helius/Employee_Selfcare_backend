@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee;
 import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
+import com.helius.entities.UserNavigationTracker;
+import com.helius.entities.User_Navigation_Details;
 import com.helius.entities.Users;
 import com.helius.managers.EmployeeManager;
 import com.helius.managers.UserManager;
@@ -34,7 +36,8 @@ import com.helius.utils.Utils;
 
 @RestController
 public class UserController {
-    @Autowired
+    private static final int List = 0;
+	@Autowired
     private UserService userService;
     private UserServiceImpl userServiceImp;
     @Autowired
@@ -362,5 +365,27 @@ public class UserController {
 		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
 	}  
 
+	@CrossOrigin
+    @RequestMapping(value = "saveNavigation", method = RequestMethod.POST,consumes ={ "multipart/form-data"})
+	public ResponseEntity<String> trackUserNavigation(@RequestParam("model") String userjson) {
+		ObjectMapper obm = new ObjectMapper();
+		Status status = null;
+		UserNavigationTracker userTracker=null;
+		
+		try {
+			userTracker = obm.readValue(userjson,UserNavigationTracker.class);
+			status = userManager.trackUserNavigation(userTracker);
+		} catch (Exception e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Throwable e) {
+			return new ResponseEntity<String>("{\"response\":\"" + e.getMessage() + "\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<String>("{\"response\":\"" + status.getMessage() + "\"}",HttpStatus.OK);
+	}
+	
+	
+	
+	
+	
 	
 }

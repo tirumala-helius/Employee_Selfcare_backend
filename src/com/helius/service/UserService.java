@@ -5,8 +5,10 @@ import java.util.List;
 import org.hibernate.Session;
 import org.springframework.http.ResponseEntity;
 
+import com.helius.controllers.UsernavigationBean;
 import com.helius.entities.Employee_Selfcare_Users;
 import com.helius.entities.User;
+import com.helius.entities.UserNavigationTracker;
 import com.helius.entities.Users;
 
 public interface UserService {
@@ -37,6 +39,9 @@ public interface UserService {
 	public void createBulkUserIdService() throws Throwable;
 	public void sendBulkNotifyForUserIdActivationLinkService() throws Throwable;
 	public void deactivateExitEmpSelfcareAccount() throws Throwable;
+	public void trackUserNavigation(UserNavigationTracker user) throws Throwable;
+
+	
 
 
 }

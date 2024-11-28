@@ -43,7 +43,7 @@ public class TicketSystemController {
 			emp = om.readValue(jsondata, Employee.class);
 		} catch (IOException e) {
 			e.printStackTrace();
-			status.setMessage("Unable to save Ticket details invalid json");
+			status.setMessage("Unable to save ticket details invalid json");
 			return "{\"response\":\"" + status.getMessage() + "\"}";
 		}
 		status = ticketManager.saveEmpTicket(emp, request);
@@ -60,7 +60,7 @@ public class TicketSystemController {
 			emp = om.readValue(jsondata, EmployeeTicketingFilesCombine.class);
 		} catch (IOException e) {
 			e.printStackTrace();
-			status.setMessage("Unable to save Ticket details invalid json");
+			status.setMessage("Unable to update ticket details invalid json");
 			return "{\"response\":\"" + status.getMessage() + "\"}";
 		}
 		status = ticketManager.updateTicket(emp, request, userName);

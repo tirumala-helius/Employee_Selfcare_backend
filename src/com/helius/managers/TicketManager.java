@@ -30,7 +30,7 @@ public class TicketManager {
 		} catch (Throwable e) {
 			return new Status(false, "ticket details not saved " + e.getMessage());
 		}
-		return new Status(true, "Ticket Details Saved Successfully.!");
+		return new Status(true, "Ticket details saved successfully!");
 	}
 
 	// update
@@ -38,9 +38,9 @@ public class TicketManager {
 		try {
 			ticketSystemDAO.updateTicket(emp, request, userName);
 		} catch (Throwable e) {
-			return new Status(false, "ticket details not saved " + e.getMessage());
+			return new Status(false, "ticket details not updated " + e.getMessage());
 		}
-		return new Status(true, "Ticket Details Saved Successfully.!");
+		return new Status(true, "Ticket details updated successfully!");
 	}
 
 	public String getTicketHistoryByEmpId(String empId) {

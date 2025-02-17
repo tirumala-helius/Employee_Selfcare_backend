@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.helius.utils.User;
 import com.helius.entities.Employee_Selfcare_Users;
+import com.helius.entities.UserNavigationTracker;
 import com.helius.entities.Users;
 import com.helius.service.UserService;
 
@@ -180,5 +181,14 @@ public class UserManager {
 			throw new Throwable(e.getMessage());
 		}
 		return new Status(true, "selfcare Users deactivated successfully");
+	}
+	
+	public Status trackUserNavigation(UserNavigationTracker user) throws Throwable {
+		try {
+			userService.trackUserNavigation(user);
+		} catch (Throwable e) {
+			throw new Throwable(e.getMessage());
+		}
+		return new Status(true, "user Activity traced successfully");
 	}
 }

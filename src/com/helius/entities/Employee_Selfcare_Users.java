@@ -3,12 +3,20 @@ package com.helius.entities;
 	import java.io.Serializable;
 import java.sql.Timestamp;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 
 	/**
@@ -49,6 +57,20 @@ import org.hibernate.envers.NotAudited;
 		private Timestamp create_date;
 		@Column
 		private String created_by;
+		
+		//change
+		@Transient 
+		@JsonInclude(JsonInclude.Include.NON_NULL) 
+		@Column
+		private String Version_Number;
+		
+		
+		public String getVersion_Number() {
+			return Version_Number;
+		}
+		public void setVersion_Number(String version_Number) {
+			Version_Number = version_Number;
+		}
 		public int getEmployee_Selfcare_Users_Id() {
 			return Employee_Selfcare_Users_Id;
 		}

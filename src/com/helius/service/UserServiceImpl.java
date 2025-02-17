@@ -579,7 +579,15 @@ public class UserServiceImpl implements com.helius.service.UserService {
 					Timestamp currentTimestamp = Timestamp.from(Instant.now());
 					user_entity.setUser_last_login(currentTimestamp);
 					user_entity.setUser_login_attempts(user_entity.getUser_login_attempts() + 1);
+					
+					//change
+					if(user_entity.getVersion_Number()==null){
+						String VersionNumber=Version();
+						user_entity.setVersion_Number(VersionNumber);
+					}
+					
 					session.update(user_entity);
+
 					transaction.commit();
 					validauser.setResult("Login success");
 					user_entity.setUser_last_login(lastlogin);
@@ -609,6 +617,39 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		}
 		return validauser;
 	}
+
+	//change
+	public String Version() {
+	    String versionQuery = "SELECT value FROM Dropdown_Picklist_Items WHERE drop_down_type = :dropDownType";
+	    String version = null; // Initialize version as null
+	    Session session = null;  // Declare session object
+	    
+	    // Declare session and transaction objects
+	    try {
+	        session = sessionFactory.openSession();  // Open a new session
+	        // Execute the query to fetch version
+	        version = (String) session.createSQLQuery(versionQuery)
+	                                  .setParameter("dropDownType", "version")
+	                                  .uniqueResult(); // Fetching a single value directly
+	        
+	        // Log the version fetched or a message if not found
+	        if (version == null) {
+	            logger.warn("No version found for dropDownType 'version'.");
+	        } else {
+	            logger.info("Fetched Version: " + version);
+	        }
+	    } catch (Exception e) {
+	        // Log the exception in case of any errors
+	        logger.error("Error fetching version", e);
+	    } finally {
+	        if (session != null) {
+	            session.close();  // Ensure the session is closed to release resources
+	        }
+	    }
+	    
+	    return version; // Return the fetched version value (or null if not found)
+	}
+
 
 	private void adduser_to_memory(Employee_Selfcare_Users user) {
 		String decodedpassword = new String(Base64.getDecoder().decode(user.getPassword()));

@@ -1,22 +1,24 @@
 package com.helius.service;
 
 import java.io.File;
-
 import java.util.List;
 import java.util.Properties;
 
-
-import javax.mail.*;
-import javax.mail.internet.*;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.Authenticator;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
+import javax.transaction.Transaction;
 
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
@@ -26,14 +28,33 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.helius.dao.AutomationTimesheetDAO;
 import com.helius.utils.Utils;
+import com.mysql.cj.Query;
 
 
 @Service("emailService")
 public class EmailServiceImpl implements EmailService {
+	
+	
+    private AutomationTimesheetDAO automationTimesheetDAO;
+	
+	
+	public AutomationTimesheetDAO getAutomationTimesheetDAO() {
+		return automationTimesheetDAO;
+	}
+
+	public void setAutomationTimesheetDAO(AutomationTimesheetDAO automationTimesheetDAO) {
+		this.automationTimesheetDAO = automationTimesheetDAO;
+	}
+	
     String awsCheck = Utils.awsCheckFlag();
 	@Autowired
 	private JavaMailSender mailSender;
+	
+	@Autowired
+	private SessionFactory sessionFactory;
+
    
 	@Bean
 	public JavaMailSender getJavaMailSender() {
@@ -296,6 +317,8 @@ public class EmailServiceImpl implements EmailService {
    	         messageBodyPart.setText(text);
    	         multipart.addBodyPart(messageBodyPart);
 				for (String file : pathToAttachment) {
+					//file = timesheet_details\Feb-25\Vinit Kumar Shankar Gundeti_Singapore Life India_AutomationTimesheet.xlsx
+					//db = timesheet_details/Jan-25/Vinit Kumar Shankar Gundeti_Singapore Life India_AutomationTimesheet.xlsx
 					try {
 						File file1 = new File(file);
 					     String filename = file1.getName();
@@ -315,11 +338,53 @@ public class EmailServiceImpl implements EmailService {
 			}
 		try {
 			 Transport.send(message);
+			 System.out.println("message: "+message);
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("pathToAttachment: "+pathToAttachment);
+			//change 
+			if(pathToAttachment!=null){
+			 //automationTimesheetDAO.deleteTimesheetFilesFromDB(pathToAttachment);
+				deleteTimesheetFilesFromDB(pathToAttachment);
+			}
 			throw new Throwable("Unable to send Email "+e.getMessage(), e);
 		}
 	//	syncSentItems(message);		    
 		
 	}
+	
+
+	public void deleteTimesheetFilesFromDB(List<String> pathToAttachment) {
+		    org.hibernate.Session session = null;
+		    org.hibernate.Transaction transaction = null;
+		    
+		    try {
+		        session = sessionFactory.openSession();
+		        transaction = session.beginTransaction();
+		        
+		        System.out.println("Abc:"+pathToAttachment);
+		        for (String filePath : pathToAttachment) {
+		        	String filePaths =  filePath.replace("\\", "/");
+		        	System.out.println("filePaths: "+filePaths);
+		            org.hibernate.Query query = session.createQuery("DELETE FROM Timesheet_Automation_Status a WHERE a.timesheet_upload_path =:filePaths");
+		            query.setParameter("filePaths", filePaths);
+		            int deletedRows = query.executeUpdate();
+		            System.out.println("Deleted " + deletedRows + " records for file path: " + filePath);
+		        }
+
+		        transaction.commit();
+		    } catch (Exception e) {
+		        if (transaction != null) {
+		            transaction.rollback();
+		        }
+		        System.err.println("Error deleting file reference from DB: " + e.getMessage());
+		        e.printStackTrace();
+		    } finally {
+		        if (session != null) {
+		            session.close();
+		        }
+		    }
+	}	
+
+	
 }

@@ -345,7 +345,7 @@ public class EmailServiceImpl implements EmailService {
 			//change 
 			if(pathToAttachment!=null){
 			 //automationTimesheetDAO.deleteTimesheetFilesFromDB(pathToAttachment);
-				deleteTimesheetFilesFromDB(pathToAttachment);
+			//	deleteTimesheetFilesFromDB(pathToAttachment);
 			}
 			throw new Throwable("Unable to send Email "+e.getMessage(), e);
 		}

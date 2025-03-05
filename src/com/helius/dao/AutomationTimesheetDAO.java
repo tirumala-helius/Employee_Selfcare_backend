@@ -14,7 +14,7 @@ public interface AutomationTimesheetDAO {
 	
 	public List<String> sendTimesheetAutomationmail(String json,MultipartHttpServletRequest request) throws Throwable;
 	
-	public ResponseEntity<byte[]> getTimesheet(String  timesheetMonth) throws Throwable;
+	public ResponseEntity<byte[]> getTimesheet(String  timesheetMonth,String empId,String EmpName,String Client ) throws Throwable;
 
 	public ResponseEntity<byte[]> downloadsTimesheet(String empId, String clientId, String timesheetMonth) throws Throwable;
 	

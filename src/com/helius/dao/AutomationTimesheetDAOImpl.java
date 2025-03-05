@@ -103,6 +103,18 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 		String url = Utils.getProperty("fileLocation") + File.separator + "DAH2timesheet_details" + File.separator
 				+ "DAH2" + "_" + "AutomationTimesheet.xlsx";
+		
+/*		
+		 String url = "C:" + File.separator + "Wildfly" + File.separator +
+                 "wildfly_10.0.1" + File.separator +
+                 "wildfly-10.1.0.Final (1)" + File.separator +
+                 "wildfly-10.1.0.Final" + File.separator +
+                 "conf" + File.separator + "DAH2" + "_" + "AutomationTimesheet.xlsx";*/
+                 
+		// Url Path
+	//	C:Wildflywildfly_10.0.1wildfly-10.1.0.Final (1)wildfly-10.1.0.Finalconf\hapTesting\DAH2timesheet_details\DAH2_AutomationTimesheet.xlsx
+		//Conf path
+		// C:\\wildfly-10.1.0.Final\\wildfly-10.1.0.Final\\conf
 		File file = null;
 		InputStream fi = null;
 		byte[] invoice_bytes = null;
@@ -3812,12 +3824,21 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					automation_Status.setTimesheet_upload_path(clientfilelocation);
 					automation_Status.setSubmited_date(timestamp);
 					
+				/*	if(clientfilelocation.contains("\\")){
+					String clientFileLocation = clientfilelocation.replace("\\", "/");
+					automation_Status.setTimesheet_upload_path(clientFileLocation);
+					}else{
+						automation_Status.setTimesheet_upload_path(clientfilelocation);
+					}
+					System.out.println("clientfilelocation: "+clientfilelocation);
+					automation_Status.setSubmited_date(timestamp);*/
+					
 					if(automation_Status != null ) {
 						session2.save(automation_Status);
-						transaction.commit();	
+						//transaction.commit();	
 					}
 				}				
-			} catch (Exception e) {
+			/*} catch (Exception e) {
 				e.printStackTrace();
 				if (transaction != null) {
 		            transaction.rollback();
@@ -3825,7 +3846,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 				throw new Throwable("Unable to save Automation Timesheet Data into DB  " + e.getMessage(), e);
 			}
-			
+			*/
 			
 			//To send Mail to corresponding person 
 			String subject = "Helius Timesheet Approval Request - " + monthYearString +" - "+empName;
@@ -3852,7 +3873,20 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					+ "Helius - Time sheet processing team" ;
 
 			service.sendMessageWithAttachmentForTimesheet(to, cc, subject, text, urlList, client);
+			
+			  if (transaction != null && !transaction.wasCommitted() && !transaction.wasRolledBack()) {
+			        transaction.commit();
+			    }	
 
+			} catch (Exception e) {
+				e.printStackTrace();
+				if (transaction != null && !transaction.wasCommitted()) {
+		            transaction.rollback();
+		        }
+
+				throw new Throwable("Unable to save Automation Timesheet Data into DB  " + e.getMessage(), e);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			transaction.rollback();
@@ -3942,7 +3976,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	}
 
 	@Override
-	public ResponseEntity<byte[]> getTimesheet(String timesheetMonth) throws Throwable {
+	public ResponseEntity<byte[]> getTimesheet(String timesheetMonth,String empId,String EmpName,String Client ) throws Throwable {
 
 		ResponseEntity<byte[]> responseEntity = null;
 		SimpleDateFormat sdfday = new SimpleDateFormat("yyyy-MM-dd");
@@ -3970,13 +4004,16 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 			Row headerRow11 = sheet.getRow(1);
 			Cell headerCell3 = headerRow11.getCell(3);
-			headerCell3.setCellValue("");
+			//headerCell3.setCellValue("");
+			headerCell3.setCellValue(empId);
 			Row headerRow21 = sheet.getRow(2);
 			Cell headerCell5 = headerRow21.getCell(3);
-			headerCell5.setCellValue("");
+			//headerCell5.setCellValue("");
+			headerCell5.setCellValue(EmpName);
 			Row headerRow31 = sheet.getRow(3);
 			Cell headerCell7 = headerRow31.getCell(3);
-			headerCell7.setCellValue("");
+			//headerCell7.setCellValue("");
+			headerCell7.setCellValue(Client);
 			Row headerRow41 = sheet.getRow(4);
 			Cell headerCell9 = headerRow41.getCell(3);
 			headerCell9.setCellValue("");

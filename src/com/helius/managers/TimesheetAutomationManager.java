@@ -53,10 +53,10 @@ public class TimesheetAutomationManager {
 		}
 	}
 
-	public ResponseEntity<byte[]> getTimesheet(String timesheetMonth ) throws JsonProcessingException {
+	public ResponseEntity<byte[]> getTimesheet(String timesheetMonth,String empId,String EmpName,String Client ) throws JsonProcessingException {
 		ResponseEntity<byte[]> response;
 		try {
-			response =automationTimesheetDAO.getTimesheet(timesheetMonth);
+			response =automationTimesheetDAO.getTimesheet(timesheetMonth,empId,EmpName,Client);
 		} catch (Throwable e) {
 			
 			 Map<String, String> errorDetails = new HashMap<>();

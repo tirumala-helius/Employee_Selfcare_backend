@@ -71,9 +71,9 @@ public class AutomationTimesheetController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "client/getTimesheet", method = RequestMethod.POST, consumes = { "multipart/form-data" })
-	public ResponseEntity<byte[]> getTimesheet(@RequestParam String timesheetMonth) throws JsonProcessingException {
+	public ResponseEntity<byte[]> getTimesheet(@RequestParam String timesheetMonth,String empId,String EmpName,String Client) throws JsonProcessingException {
 	
-		ResponseEntity<byte[]> responseEntity  = automationManager.getTimesheet(timesheetMonth);
+		ResponseEntity<byte[]> responseEntity  = automationManager.getTimesheet(timesheetMonth,empId,EmpName,Client);
 	
 		 return responseEntity;
 

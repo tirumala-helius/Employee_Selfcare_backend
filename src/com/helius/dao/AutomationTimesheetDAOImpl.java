@@ -3850,8 +3850,12 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			
 			//To send Mail to corresponding person 
 			String subject = "Helius Timesheet Approval Request - " + monthYearString +" - "+empName;
+			String text = null;
+			
+			
+			if(workcountry.equalsIgnoreCase("India")){
 
-			String text = "THIS IS A SYSTEM GENERATED EMAIL AND PLEASE USE REPLY ALL WHILE RESPONDING TO THE EMAIL" + "\n\n"
+			 text = "THIS IS A SYSTEM GENERATED EMAIL AND PLEASE USE REPLY ALL WHILE RESPONDING TO THE EMAIL" + "\n\n"
 
 					+ "Dear " + managerName + ",\n\n" 
 					+ "This timesheet is for " + empName +" working through Helius Technologies in your team with "+client +"\n\n"
@@ -3871,6 +3875,27 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 					+"In case of queries or clarifications, please contact "+contactname+" on "+contactEmailID +" or "+ contactNumber
 					+ "\n\n" + "Kind regards," + "\n"
 					+ "Helius - Time sheet processing team" ;
+			 
+			}else if(workcountry.equalsIgnoreCase("Singapore")){
+				 text = "THIS IS A SYSTEM GENERATED EMAIL AND PLEASE USE REPLY ALL WHILE RESPONDING TO THE EMAIL" + "\n\n"
+
+					+ "Dear " + managerName + ",\n\n" 
+					+ "This timesheet is for " + empName +" working through Helius Technologies in your team with "+client +"\n\n"
+					
+					+"This timesheet  has been generated through our internal automated system based"
+					+ " on the attendance and leave inputs given by the employee in our self service "
+					+ "portal, along with required evidence attachments (where required)."+"\n\n"
+					
+					+"If you are ready to APPROVE the timesheet, please state APPROVED and  press REPLY ALL to this email."+"\n\n"
+					
+					+"In case you are queries and hence cannot Approve, please state REJECTED and press REPLY ALL to this email."
+					+ " We would be grateful if you can state the reasons for the rejection as well, so that the employee"
+					+ " can immediately rectify/ clarify as needed" +"\n\n"
+					
+					+"In case of queries or clarifications, please contact "+contactname+" on "+contactEmailID +" or "+ contactNumber
+					+ "\n\n" + "Kind regards," + "\n"
+					+ "Helius - Time sheet processing team" ;
+			}
 
 			service.sendMessageWithAttachmentForTimesheet(to, cc, subject, text, urlList, client);
 			

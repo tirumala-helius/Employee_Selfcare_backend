@@ -190,6 +190,20 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		return workbookinput;
 	}
 
+	
+	/**
+	 * This method generates an automated timesheet Excel file for an employee based on input data.
+	 * It processes the employee's details including name, ID, client, project, month, and working location.
+	 * The method validates the selected month against the employee's joining and relieving dates.
+	 * Holidays and weekends are identified and appropriately marked in the Excel sheet.
+	 * 
+	 * Before saving the file, it checks the AWS flag using Utils.awsCheckFlag():
+	 * - If the flag is "YES", the file is created and stored locally.
+	 * - If the flag is "NO", the file is created and stored in the server location.
+	 * 
+	 * The generated Excel contains pre-filled dates and working hours for each day of the selected month.
+	 */
+
 	@Override
 	public ResponseEntity<byte[]> createAutomationTimesheet(String clientjson, MultipartHttpServletRequest request)
 			throws Throwable, JsonProcessingException {
@@ -3439,6 +3453,17 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		}
 
 	}
+	
+	/**
+	 * This method is responsible for sending an automated email after successfully generating a timesheet for an employee. 
+	 * The process includes various steps such as checking for duplicate entries, setting up email recipients, generating the 
+	 * timesheet document, and uploading it to the server. First, the method parses the input JSON to retrieve necessary 
+	 * details about the employee and the timesheet. It then checks the database for any existing timesheet entries to avoid 
+	 * duplication or overwriting. Based on specific conditions, the email recipients are determined, and additional recipients 
+	 * (like a reporting manager) are added as necessary. The method proceeds to generate the timesheet document, usually 
+	 * in the form of an Excel file, which is then uploaded to the server for storage. Finally, the method 
+	 * returns a list of success or error messages reflecting the status of each task within the process.
+	 */
 
 	@Override
 	public List<String> sendTimesheetAutomationmail(String json, MultipartHttpServletRequest request) throws Throwable {
@@ -4000,6 +4025,25 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		}
 	}
 
+	
+	/**
+	 * This method generates a timesheet for an employee in Excel format based on the provided month, employee details, and client information.
+	 * It retrieves the necessary data such as public holidays from the database and adjusts the timesheet to account for these holidays. The timesheet includes the employee’s ID, name, client, and the month-year for which the timesheet is being generated.
+	 * The method then dynamically fills in the timesheet with the employee’s working days, shift details, holidays, and other relevant information.
+	 * It also checks if a given day is a holiday and applies special formatting to those cells.
+	 * Once the timesheet is populated, it is converted into a byte array and returned as a downloadable Excel file. 
+	 * In case of any errors during the process, such as database access issues or problems with file generation, an error message is returned instead.
+	 * The method ensures that the database session is properly closed after execution to free up resources.
+	 * 
+	 * @param timesheetMonth The month for which the timesheet is generated.
+	 * @param empId The employee's ID.
+	 * @param EmpName The employee's name.
+	 * @param Client The client name for the timesheet.
+	 * @return A ResponseEntity containing the generated timesheet as a downloadable file or an error message if something goes wrong.
+	 * @throws Throwable If an error occurs during the process.
+	 */
+
+	
 	@Override
 	public ResponseEntity<byte[]> getTimesheet(String timesheetMonth,String empId,String EmpName,String Client ) throws Throwable {
 
@@ -4208,6 +4252,12 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		}
 		return responseEntity;
 	}
+
+	/**
+	 * This method downloads the timesheet from S3 based on the provided empId, clientId, and timesheetMonth.
+	 * It retrieves the corresponding timesheet file and returns it as a byte array in a ResponseEntity format, 
+	 * which can be used to send the file as a downloadable response.
+	 */
 
 	@Override
 	public ResponseEntity<byte[]> downloadsTimesheet(String empId, String clientId, String timesheetMonth) throws Throwable {

@@ -474,6 +474,9 @@ if(!(group_subgroups.containsValue(subgrp))){
 
 	}
 	
+	/**
+	 * This method is used to get picklist_name and helius_email_id from pickllistNameAndEmployeeNameAssoc and returns the response in a structured format. 
+	 * */
 	public static HashMap<String,String> getEmailIdFromPickllistNameAndEmployeeNameAssoc(String[] picklist_name, Session session)
 			throws Exception {
 		List<Object[]> emailids = null;
@@ -490,12 +493,39 @@ if(!(group_subgroups.containsValue(subgrp))){
 		return map;
 	}
 	
+	
+	/**
+	 * This method retrieves a list of helius_email_id values from the `pickllistNameAndEmployeeNameAssoc` table based on the provided picklist_name.
+	 * @throws Exception If there are any issues during the query execution or data retrieval.
+	 */
 	public static List getEmailIdFromPickllistNameAndEmployeeNameAssoc(String picklist_name,Session session) throws Exception {
 		String Query = "SELECT helius_email_id from pickllistNameAndEmployeeNameAssoc where picklist_name = :picklist_name ";
 		java.util.List emailids = session.createSQLQuery(Query).setParameter("picklist_name", picklist_name).list();
 		return emailids;
 		}
 	
+	
+	/**
+	 * This method handles the copying of files either to a local directory or to an AWS S3 bucket.
+	 * 
+	 * It performs the following tasks:
+	 * 
+	 * 1. It checks whether files should be copied to a local folder or uploaded to AWS S3 based on the `awsCheckFlag`.
+	 * 2. If copying locally:
+	 *    - It creates the target directory if it doesn't exist.
+	 *    - It saves the file with the modified filename in the specified folder.
+	 * 3. If uploading to AWS S3:
+	 *    - It uploads the file to the S3 bucket using the `saveAwsS3bucket` method.
+	 * 4. If any file copy operation fails, it reverts the changes by deleting any successfully copied files and throws an error.
+	 * 5. It returns a status object that contains whether the operation was successful and a list of successfully copied files.
+	 * 
+	 * @param request The request containing the files to be copied.
+	 * @param modifiedFilenames A map containing the modified names for the files.
+	 * @param filefolder The folder path where the files will be saved.
+	 * @return A status object containing the result of the file copy operation and a list of copied files.
+	 * @throws Exception If any errors occur during the file copy process.
+	 */
+
 	
 	public static FilecopyStatus copyFiles(MultipartHttpServletRequest request, Map<String,String> modifiedFilenames, String filefolder) throws Exception {
 		String check = Utils.awsCheckFlag();
@@ -558,6 +588,27 @@ if(!(group_subgroups.containsValue(subgrp))){
 		return success;
 	}
 	
+	/**
+	 * This method handles file copying from a request to either a local folder or an AWS S3 bucket.
+	 * 
+	 * It performs the following tasks:
+	 * 
+	 * 1. Iterates through all files in the request.
+	 * 2. For each file:
+	 *    - If AWS S3 is not used (`awsCheck` is "no"), it saves the file to a local directory.
+	 *    - If AWS S3 is used (`awsCheck` is "yes"), it saves the file to an S3 bucket.
+	 * 3. It creates the necessary directories if they don't exist.
+	 * 4. If any file copy operation fails, it deletes the successfully copied files and throws an error.
+	 * 5. It returns a status object indicating whether the file copying was successful, along with the list of files that were successfully copied.
+	 * 
+	 * @param request The request containing the files to be copied.
+	 * @param modifiedFilenames A map containing modified names for the files.
+	 * @param filefolder A map containing the folder paths where the files should be saved.
+	 * @return A status object containing the result and list of successfully copied files.
+	 * @throws Exception If any errors occur during the file copy process.
+	 */
+
+	
 	public static FilecopyStatus copyFiles(MultipartHttpServletRequest request, Map<String,String> modifiedFilenames, Map<String,String> filefolder) throws Exception {
 		String awsCheck = Utils.awsCheckFlag();
 		List<String> copied_with_success = new ArrayList<String>();
@@ -616,6 +667,26 @@ if(!(group_subgroups.containsValue(subgrp))){
 		return success;
 	}
 	
+	
+	
+	/**
+	 * This method copies files from an HTTP request to a specified folder on the server.
+	 * It does the following:
+	 * 
+	 * 1. Reads the file names from the request and gets the new file names and folder paths.
+	 * 2. Checks if the target folder exists. If not, it creates the folder.
+	 * 3. Saves each file with the new name in the correct folder.
+	 * 4. If any file fails to save, it stops the process, deletes the files that were saved, and throws an error.
+	 * 
+	 * The method returns a status indicating whether the files were successfully copied and lists the successfully copied files.
+	 * 
+	 * @param request The request containing the files to be copied.
+	 * @param modifiedFilenames The new names for the files.
+	 * @param filefolder The folders where the files will be saved.
+	 * @return A status object with the result and list of successfully copied files.
+	 * @throws Exception If something goes wrong during the file copying process.
+	 */
+
 public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, Map<String,String> modifiedFilenames, Map<String,String> filefolder) throws Exception {		
 		List<String> copied_with_success = new ArrayList<String>();
 		FilecopyStatus success = new FilecopyStatus();
@@ -663,6 +734,21 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 		}
 	}
 	
+	
+	
+	/**
+	 * This method handles downloading a file based on the given URL. It first checks if the AWS service is being used (based on a flag).
+	 * - If AWS is not used, it tries to retrieve the file from the local file system using the given URL (as a relative file path).
+	 * - If AWS is used, it attempts to download the file from an AWS S3 bucket.
+	 * 
+	 * If the file is found, the method reads the file's contents into a byte array and returns it with an HTTP status of OK (200).
+	 * If the file is not found, it returns a 404 Not Found response.
+	 * If any unexpected errors occur, it returns a 500 Internal Server Error response.
+	 * 
+	 * @param url The path or URL of the file to be downloaded (either from the local file system or S3).
+	 * @return A ResponseEntity containing the file as a byte array and the corresponding HTTP status code.
+	 */
+
 	public static ResponseEntity<byte[]> downloadFileByUrl(String url) {
 		String awsCheck = awsCheckFlag();
 		byte[] files = null;
@@ -700,6 +786,18 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 		ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(files, HttpStatus.OK);
 		return responseEntity;
 	}
+	
+	/**
+	 * This method downloads a file from an AWS S3 bucket based on the provided file path. 
+	 * It first checks if the file exists in the S3 bucket by verifying the file path. If the file is found, 
+	 * the method retrieves the file as bytes and returns them. If the file is not found, 
+	 * a custom exception with a "File Not Found" message is thrown.
+	 * 
+	 * @param filePath The path of the file in the S3 bucket that needs to be downloaded.
+	 * @return A byte array representing the file content if the file exists.
+	 * @throws Exception If the file is not found or an error occurs during the process.
+	 */
+
 	public static byte[] downloadFileByAWSS3Bucket(String filePath) throws Exception {
 		byte[] bytes = null;
 		String fileUrl = removeExistingPath(filePath);
@@ -734,6 +832,17 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 		return !listObjects.contents().isEmpty();
 	}
 	
+	
+	/**
+	 * This method uploads a PDF file (in byte format) to an AWS S3 bucket. 
+	 * It takes the byte array of the PDF and the desired file path in the S3 bucket as input. 
+	 * The method creates a request to upload the file to the specified location in the bucket using the AWS SDK.
+	 * After the file is uploaded, a response is returned and logged.
+	 * 
+	 * @param pdfBytes The byte array of the PDF file to upload.
+	 * @param out The path where the file will be saved in the S3 bucket.
+	 */
+
 	public static void convertXlsxAndPdfFileToByte(byte[] pdfBytes, String out) {
 		
 		PutObjectResponse response = s3Client.putObject(PutObjectRequest.builder().bucket(bucketName).key(out).build(),
@@ -749,6 +858,9 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 		 */
 		 
 	}
+	/**
+	 * This method is used to check the file is exist or not in AWS S3 bucket based on provided invoicepdfpathfolder.
+	 * */
 	public static Boolean checkFileExist(String invoicepdfpathfolder) {
 		boolean fileExist = doesKeyExist(bucketName, invoicepdfpathfolder, s3Client);
 		return fileExist;
@@ -787,6 +899,17 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 		return awsCheck;
 
 	}
+	
+	
+	/**
+	 * This method deletes all files and subdirectories inside a given directory.
+	 * 
+	 * It goes through each file and subdirectory in the directory and deletes them. If a subdirectory is found, 
+	 * it calls the method again to delete the files inside it before deleting the subdirectory itself.
+	 * 
+	 * @param dirPath The directory whose files and subdirectories will be deleted.
+	 */
+
 	 public static void deleteFiles(File dirPath) {
 	      File filesList[] = dirPath.listFiles();
 	      for(File file : filesList) {
@@ -798,6 +921,23 @@ public static FilecopyStatus copySowFiles(MultipartHttpServletRequest request, M
 	      }
 	 }
 	 
+	 
+	 /**
+	  * This method is responsible for saving a file to an AWS S3 bucket. It accepts a file, a modified filename, and a folder name as parameters, then uploads the file to the specified S3 bucket under the given folder path. 
+	  * If an exception occurs during the file conversion or upload process, it catches the exception and throws an appropriate error message. 
+	  * The method first converts the MultipartFile to a File object, then constructs the S3 file path using the provided folder and modified filename. 
+	  * A PutObjectRequest is created and executed to upload the file to the S3 bucket. 
+	  * After the file is uploaded, the method checks whether the file was successfully saved by verifying the file's existence in the S3 bucket using the `doesKeyExist` function. 
+	  * If the file is successfully saved, a success message containing the file path in the S3 bucket is returned. 
+	  * If the file upload fails or any other error occurs, an exception is thrown with a corresponding error message.
+	  * 
+	  * @param file The file to be uploaded to the S3 bucket.
+	  * @param modifiedfilename The modified name of the file to be saved.
+	  * @param folder The folder path in the S3 bucket where the file will be stored.
+	  * @return A string containing the S3 file path if the upload is successful.
+	  * @throws Exception If any error occurs during the file conversion, upload, or verification process.
+	  */
+
 	 public static String saveAwsS3bucket(MultipartFile file, String modifiedfilename, String folder)throws Exception {
 			boolean flag=false;
 			String sucessMsg="";

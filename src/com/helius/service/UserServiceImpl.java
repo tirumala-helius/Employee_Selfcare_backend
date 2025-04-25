@@ -160,6 +160,10 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		}
 	}
 */
+    
+    /**
+     * This code is used to retrieve the particular Employee_Selfcare_Users details of an employee from database based on userid parameter.
+     * */
 	@Override
 	public Employee_Selfcare_Users getUser(String userid) throws Throwable {
 		Employee_Selfcare_Users User = null;
@@ -330,9 +334,11 @@ public class UserServiceImpl implements com.helius.service.UserService {
 */
 	
 	/**
-	 * Service used to activate account for the first time login and
-	 * also to change password incase of forgot
-	 **/
+	 * This code is used to Handles account activation for first-time login and password reset in case of a forgotten password.  
+	 * Validates the user token and updates the password if the token matches.  
+	 * Ensures that an already activated account cannot reset its password multiple times using the same token.  
+	 */
+
 	@Override
 	public String resetpswd(String base64Credentials,String token,String fg) throws Throwable{
 		Session session = null;
@@ -430,6 +436,15 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * 
 	 * @see com.helius.service.UserService#createUser(com.helius.entities.User)
 	 */
+	
+	
+	/**
+	 * This code is used to creates a new user entry in the Employee_Selfcare_Users table.
+	 * Generates a unique token for account activation and saves the user in the database.
+	 * Sends an account activation email to the user's personal email ID.
+	 * If an error occurs, logs the issue and throws an exception.
+	 */
+
 	@Override
 	public void createUser(Employee_Selfcare_Users user) throws Throwable {
 		Session session  = null;
@@ -471,6 +486,11 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	 * 
 	 * @see com.helius.service.UserService#updateUser(com.helius.entities.User)
 	 */
+	
+	
+	/**
+	 * This code is used to update particular user details in Employee_Selfcare_Users entity in database by using user as parameter.
+	 * */
 	@Override
 	public void updateUser(Employee_Selfcare_Users user) throws Throwable {
 		Session session = null;
@@ -560,6 +580,15 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	/* (non-Javadoc)
 	 * @see com.helius.service.UserService#validateUser()
 	 */
+	
+	/**
+	 * This code retrieves employee data from the database based on the provided user ID and password  
+	 * from the Employee_Selfcare_Users entity.  
+	 * It checks whether the user ID exists in the database.  
+	 * If the user ID is found, it validates the credentials; otherwise, it prevents login  
+	 * and returns a relevant exception message.  
+	 */
+
 	@Override
 	public Logindetails validateUser(String userid, String password) throws Throwable {
 		Logindetails validauser = new Logindetails();
@@ -756,6 +785,17 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		return map;
 	}
 	
+	
+	/**
+	 * This method retrieves and returns a payslip file for a given userId and month.
+	 * It first checks if the user has an associated employee ID, then queries the database 
+	 * to get the path of the payslip file for the specified month.
+	 * If the file is found, it is returned as a byte array. 
+	 * 
+	 * 
+	 * If the payslip file is not found or an error occurs, appropriate HTTP status codes are returned.
+	 */
+	
 	@Override
 	public ResponseEntity<byte[]> getPayslipFIle(String userId,String date) throws Throwable {
 		Session session = null;
@@ -825,6 +865,14 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		return 	new ResponseEntity<byte[]>(files, HttpStatus.OK);		
 	}
 	
+	
+	/**
+	 * This method creates bulk user accounts in the Employee_Selfcare_Users table.
+	 * It retrieves a list of active employees working in Singapore from the database.
+	 * For each employee, a default password is generated, encoded, and a unique token is assigned.
+	 * The new user records are then saved in the database.
+	 */
+
 	public void createBulkUserIdService() throws Throwable {
 		Session session = null;
 		Transaction transaction = null;
@@ -887,6 +935,15 @@ public class UserServiceImpl implements com.helius.service.UserService {
 		}
 	}
 	
+	
+	/**
+	 * This method sends bulk email notifications to active employees in Singapore 
+	 * with an activation link to change their password for the Self-Service Portal. 
+	 * It queries the database for employee details and sends an email to each employee 
+	 * with their unique token to activate their account. 
+	 * Successful and failed email notifications are tracked and printed in the logs.
+	 */
+
 	public void sendBulkNotifyForUserIdActivationLinkService() throws Throwable {
 		Session session = null;
 		try {
@@ -949,6 +1006,13 @@ public class UserServiceImpl implements com.helius.service.UserService {
 			session.close();
 		}
 	}
+
+	
+	/**
+	 * This method deactivates the selfcare accounts of employees who have exited the company the previous day. 
+	 * It sends email notifications with the list of successfully deactivated accounts and any failures.
+	 * The method is scheduled to run daily at 1:01 AM.
+	 */
 
 	@Override
    @Scheduled(cron = "0 1 1 ? * *")
@@ -1021,6 +1085,13 @@ public class UserServiceImpl implements com.helius.service.UserService {
 	    }
 		
 	}
+
+	
+	/**
+	 * This method tracks and saves the navigation details of a user. 
+	 * It iterates through the user's tracing details and stores each one in the database.
+	 * If an error occurs, an exception is thrown with a relevant message.
+	 */
 
 	@Override
 	public void trackUserNavigation(UserNavigationTracker user) throws Throwable {

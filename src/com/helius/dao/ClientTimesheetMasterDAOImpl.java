@@ -38,6 +38,11 @@ public class ClientTimesheetMasterDAOImpl implements IClientTimesheetMasterDAO {
 		this.sessionFactory = sessionFactory;
 	}
 
+	/**
+	 * This method Retrieves all Client_Timesheet_Master records from the database 
+	 *  and returns the response in a structured JSON format.
+	 */
+
 	@Override
 	public List<ClientTimesheetMaster> getAllTimeshhetmaster() throws Throwable {
 		// TODO Auto-generated method stub

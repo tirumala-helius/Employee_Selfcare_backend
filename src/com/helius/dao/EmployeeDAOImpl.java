@@ -136,7 +136,11 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	private List<String> copied_with_success = new ArrayList<String>();
     private static final Logger logger = LogManager.getLogger(EmployeeDAOImpl.class.getName());
     
-	/** returns employee details **/
+	
+    /** 
+	 * This method retrieves all details of a particular employee based on the employee ID. 
+	 * It fetches comprehensive data related to the employee from various associated entities from Database and returns the information in a structured JSON response. 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Employee get(String employeeid) {
@@ -601,6 +605,16 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		return emp;
 	}
 
+	
+	/**
+	 * This method is used to Retrieves all Work_Permit_Master details for employees in a structured format.
+	 * 
+	 * This method fetches and organizes work permit-related information for employees, 
+	 * ensuring the data is structured and formatted for easy access and processing.
+	 * 
+	 * @return A structured response containing work permit details of employees.
+	 */
+	
 	public String WorkLocationPicklist() {
 		Session session = null;
 		String workPermitJson = null;
@@ -622,7 +636,17 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	}
 
 	
-	/** Returns offer details using offerid **/
+	
+	/**
+	 * This method is used to retrieve all the offer details of an employee 
+	 * based on a particular offer_id passed as a parameter. 
+	 * It returns the offer details in a structured JSON format for easy consumption.
+	 * 
+	 * @param offerId - The unique identifier of the offer for which the details are being retrieved.
+	 * 
+	 * The method fetches the relevant offer details from the database 
+	 * and structures the response as JSON for further processing or display.
+	 */
 	public Employee getOfferDetails(String offerid) {
 		Employee emp = new Employee();
 		Session session = null;
@@ -671,7 +695,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		return emp;
 	}
 	
-	/** Return offer details by name **/
+	/**
+	 * This method is used to retrieve Employee Offer details based on the given offerName and type.
+	 * Once the data is fetched, it returns the offer details in a structured JSON format.
+	 * 
+	 * @param offerName - The name of the employee or the offer ID used for searching Employee Offer details.
+	 * @param type - A string that specifies the type of search: "NAME" to search by employee name or any other value to search by offer ID.
+	 * @return A list of Employee_Offer_Details that match the given search criteria, structured as a JSON response.
+	 */
+	
 	@Override
 	public List<Employee_Offer_Details> getOfferDetailsByName(String offerName,String type) {
 		Session session = null;
@@ -701,6 +733,34 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 		return employee_Offer_Details;
 	}
+	
+	
+
+	/**
+	 * This method calculates and prepares leave utilization details for an employee.
+	 * It does the following:
+	 * 
+	 * 1. **Retrieve Leave Eligibility:**
+	 *    - Gets the leave eligibility (how many days of leave the employee is entitled to) from the `Leave_Eligibility_Details`.
+	 * 
+	 * 2. **Retrieve Leave Usage:**
+	 *    - Fetches how much leave the employee has already used from `Leave_Usage_Details`.
+	 *    - This helps calculate the remaining leave balance.
+	 * 
+	 * 3. **Record Leave Details:**
+	 *    - When the employee takes leave, the leave details are saved in `Leave_Record_Details`.
+	 * 
+	 * 4. **Calculate Remaining Leave:**
+	 *    - The remaining leave is calculated by subtracting the used leave from the eligible leave.
+	 *    - If the employee has any "Off In Lieu" leave, it’s also considered.
+	 * 
+	 * 5. **Return Data:**
+	 *    - Finally, the calculated leave data is returned in a JSON format to be shown on the front end.
+	 * 
+	 * This method helps track the employee’s leave eligibility, usage, and balances.
+	 */
+
+	
 	@Override
 	public Employee_Leave_Data getEmployeeLeaveData(String employee_id) throws Throwable {
 		Employee_Leave_Data employeeLeaveData = new Employee_Leave_Data();
@@ -1290,6 +1350,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 	}
 	
+	
+	/** 
+	 * This method retrieves employee files from S3 based on the provided "employee_id" and "filetype".
+	 * It supports retrieving the following file types:
+	 * - photo
+	 * - cancelled cheque
+	 * 
+	 * The method returns the file as a byte array wrapped in a ResponseEntity.
+	 */
 	@Override
 	public ResponseEntity<byte[]> getEmployeeFiles(String employee_id, String filetype) {		
 		Employee employee = get(employee_id);
@@ -1323,6 +1392,17 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		return responseEntity;
 	}
 
+	
+	
+	/**
+	 * This method is used to retrieve the offer files (such as offer letter, job description, EP, or BGV report) 
+	 * associated with an employee by their `offerid` and `filetype`. The file is either fetched from the local 
+	 * file system or an AWS S3 bucket, depending on the configuration.
+	 * 
+	 * @param offerid - The unique identifier for the offer, used to retrieve associated files.
+	 * @param filetype - The type of file to retrieve (e.g., offer, jobdescription, ep, bgv).
+	 * @return A `ResponseEntity<byte[]>` containing the requested file data or an error message if the file is not found.
+	 */
 	@Override
 	public ResponseEntity<byte[]> getOfferFiles(String offerid, String filetype) {
 		Employee employee = getOfferDetails(offerid);
@@ -1724,6 +1804,13 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 	}*/
 	
+	/**
+	 * This code is used to Processes email sending with attachments. Extracts
+	 * and saves multipart files from the request. Parses JSON data to retrieve
+	 * email details such as recipients, subject, and body. Sends the email
+	 * along with attachments using the email service.
+	 */
+
 	@Override
 	public void sendEmail(String jsonData, MultipartHttpServletRequest request) throws Throwable {
 		try {
@@ -1763,6 +1850,13 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 	}
 	
+	/**
+	 * This method is used to save or update help video information in the database and upload the corresponding video files to S3.
+	 * - If the video is new, it saves the details in the database.
+	 * - If it's an update, it updates the existing video information.
+	 * It also uploads the video files from the request to S3 under the "hapHelpVideo" folder.
+	 * 
+	 */
 	@Override
 	public void saveOrUpdateHelpVideo(String helpdata, MultipartHttpServletRequest request) throws Throwable {
 		Session session = null;
@@ -1800,6 +1894,12 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		}
 	}
 	
+	
+	/**
+	 * Deletes a help video from the database and the file system.
+	 * It fetches the video based on the provided ID, deletes the database record, 
+	 * and removes the associated video file if it exists.
+	 */
 	public void deleteHelpVideo(String help_videos_id)throws Throwable{
 		Session session = null;
 		Transaction transaction = null;
@@ -1837,7 +1937,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	}
 	}
 
-	
+
+	/**
+	 * Retrieves all help videos from the database.
+	 * It executes a SQL query to fetch the help videos and returns a list of Help_Videos objects.
+	 * 
+	 * @return A list of Help_Videos objects containing all help videos.
+	 * @throws Throwable If the operation fails to fetch the data.
+	 */
+
 	@Override
 	public List<Help_Videos> getAllHelpVideos() throws Throwable {
 		Session session = null;
@@ -1855,6 +1963,17 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		return help_Videos;
 	}
 	
+	/**
+	 * Fetches and returns the help video file based on the provided help_videos_id.
+	 * The method performs the following:
+	 * 1. Retrieves all help videos from the database.
+	 * 2. Searches for the video URL using the given video ID.
+	 * 3. Converts the video file to a byte array.
+	 * 4. Returns the video file as a ResponseEntity.
+	 * 
+	 * @param help_videos_id The ID of the help video to be fetched.
+	 * @return A ResponseEntity containing the video file in byte array format.
+	 */
 	@Override
 	public ResponseEntity<byte[]> getHelpVideoFIle(int help_videos_id) {
 		List<Help_Videos> help_Videos = null;
@@ -1987,6 +2106,17 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		return lieuList;
 	}
 
+	
+	/**
+	 * This code is used to download Form 16 from S3 based on the provided empId and filePath parameters.
+	 * It retrieves the file from S3, converts the content to a byte array, and returns it in the response.
+	 * 
+	 * The S3 file is identified using the empId (employee ID) and filePath (location of the file in S3).
+	 * The content is returned in a byte array format, which can be used for further processing or sent to the client as part of a download.
+	 * 
+	 * This functionality is typically used for generating Form 16 files for employees in a downloadable format.
+	 */
+	
 	@Override
 	public ResponseEntity<byte[]> getDownloadForm16(String empId, String filePath) throws Throwable {
 		Session session = null;
@@ -2017,6 +2147,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 		return new ResponseEntity<byte[]>(files, HttpStatus.OK);
 	}
 
+	
+	/**
+	 * This code is used to download IR8 from S3 based on the provided empId and financialYear parameters.
+	 * It retrieves the file from S3, converts the content to a byte array, and returns it in the response.
+	 * 
+	 * This functionality is typically used for  downloadIR8 files for employees in a downloadable format.
+	 */
+	
+	
 	@Override
 	public ResponseEntity<byte[]> downloadIR8(String empId, String financialYear) throws Throwable {
 		Session session = null;

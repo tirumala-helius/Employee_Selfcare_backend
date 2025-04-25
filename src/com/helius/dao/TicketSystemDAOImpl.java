@@ -60,6 +60,14 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	private EmailService emailService;
 	private List<String> copied_with_success = new ArrayList<String>();
     private static final Logger logger = LogManager.getLogger(EmployeeDAOImpl.class.getName());
+    
+    
+    /**
+     * This feature is related to the Employee Ticketing System. In this, we are saving ticket data in the database along with related files.
+     * We are storing the files in S3 and saving their paths in the database. Additionally, we are retrieving the required data from the database 
+     * for email sending, saving it in JSON format, and sending an email to the employee and the respective ticket owner.
+     */
+
 	@Override
 	public void saveEmpTicket(Employee emp, MultipartHttpServletRequest request) throws Throwable {
 		Session session = null;
@@ -433,6 +441,12 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	}
 
 	// method for Ticketid auto generated
+	/**
+	 * This code is used to generate a unique ticket number for the Employee
+	 * Ticketing System. It ensures that each ticket created for an employee has
+	 * a distinct identifier that can be used for tracking, managing, and
+	 * referencing the ticket throughout its lifecycle. *
+	 */
 	private String generateTicketNumber(Integer ticketNumber) {
 		Employee emp = new Employee();
 		
@@ -599,6 +613,13 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	        }
 	    }
 	}*/
+	
+	
+	/**
+	 * In this, we are updating ticket data in the database along with related files.
+	 * If the old ticket owner is not equal to the new ticket owner, we send an email to the new ticket owner.
+	 * Additionally, we are updating the data in the database and saving the ticket data in the respective JSON format.
+	 */
 
 	@Override
 	public void updateTicket(EmployeeTicketingFilesCombine emp, MultipartHttpServletRequest request, String userName) throws Throwable {
@@ -949,6 +970,13 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 		}
 		return empTicketByStatus;
 	}*/
+	
+	
+	/**
+	 * In this, we are retrieving all ticket data and the respective ticket files of a particular employee 
+	 * based on employee_id and provide it to the frontend in the respective JSON format.
+	 */
+
 	@Override
 	public String getTicketHistoryByEmpId(String empId) {
 	    Employee emp = new Employee();
@@ -1281,6 +1309,13 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 
 	    return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
 	}*/
+	
+	
+	/**
+	 * This functionality is used to download ticket-related file based on the ticket ID. 
+	 * The file is retrieved from S3 as byte content and returned to the frontend in the same format.
+	 */
+	
 	@Override
 	public ResponseEntity<byte[]> downloadFile(String ticketid) {
 		Session session = null;
@@ -1449,6 +1484,12 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	}
 */
 
+	/**
+	 * Retrieves the comment history of an employee from the Employee_Ticketing_System_AUD entity.
+	 * The method uses the provided empID and ticketNumber parameters to filter and fetch the relevant comment history.
+	 * The results are returned in a structured JSON format, which includes the list of comments related to the specified employee and ticket.
+	 */
+	
 	@Override
 	public EmployeeCommentsList getEmployeeCommentsList(String empID, String ticketNumber) {
 		Session session = null;
@@ -1456,6 +1497,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 		EmployeeCommentsList commentsList = new EmployeeCommentsList();
 
 		List<EmployeeTicketingSystemCommentsList> personalcomments = null;
+		List<EmployeeTicketingSystemCommentsList> MainTablecomments = null;
 
 		try {
 			session = sessionFactory.openSession();
@@ -1480,8 +1522,21 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 			if (list != null && !list.isEmpty()) {
 				commentsList.setEmployeeTicketingFiles(list);
 			}
+			//change
+			if(personalcomments.size()==0){
+				String MainComments = "SELECT  a.comments, a.last_modified_by, a.last_modified_date FROM Employee_Ticketing_System a WHERE a.employee_id = '" + empID + "' AND a.ticket_number = '" + ticketNumber + "'";
+				MainTablecomments =  session.createSQLQuery(MainComments)
+						.setResultTransformer(Transformers.aliasToBean(EmployeeTicketingSystemCommentsList.class)).list();
+			}
 
-			commentsList.setEmployeeTicketingSystemComments(personalcomments);
+			if (personalcomments != null && !personalcomments.isEmpty()) {
+				commentsList.setEmployeeTicketingSystemComments(personalcomments);
+			}
+			else {
+				commentsList.setEmployeeTicketingSystemComments(MainTablecomments);
+			}
+
+			//commentsList.setEmployeeTicketingSystemComments(personalcomments);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1491,6 +1546,11 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 		return commentsList;
 	}
 
+	
+	/**
+	 * This code retrieves all ticket filenames for a specific ticket ID from the `EmployeeTicketingFiles` Entity.
+	 * It fetches the ticket path, created date, and employee name, formats them, and returns the results in a structured JSON format.
+	 */
 	@Override
 	public String getallticketfilenames(String ticketId) {
 	    Session session = null;

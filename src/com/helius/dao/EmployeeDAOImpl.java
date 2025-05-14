@@ -507,10 +507,10 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			}
 
 			
-//Employe_Tickt_type json
+            //Employe_Tickt_type json for Singapore Employees
 
 	        // Define your SQL query
-	        String ticketTypeQuery1 = "SELECT ticket_type, ticket_query FROM Employee_Ticketing_System_Ticket_Types";
+	        String ticketTypeQuery1 = "SELECT ticket_type, ticket_query FROM Employee_Ticketing_System_Ticket_Types WHERE work_country LIKE '%Singapore%'";
 	        List<Object[]> ticketTypeList1 = session.createSQLQuery(ticketTypeQuery1).list();
 
 	        // Create a map to store ticket_type as keys and lists of ticket_query as values
@@ -544,7 +544,52 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 	            e.printStackTrace();
 	        }//emp.setEmployeeTicketTypes(ticketTypeMapList);
 
-	        emp.setTicketTypeMapList(ticketTypeMap);
+	      //  emp.setTicketTypeMapList(ticketTypeMap);
+	        emp.setTicketTypeMapSingaporeList(ticketTypeMap);
+	        
+	        
+	      //Employe_Tickt_type json for Singapore Employees
+	        
+	        // Define your SQL query
+	        String ticketTypeQuery2 = "SELECT ticket_type, ticket_query FROM Employee_Ticketing_System_Ticket_Types WHERE work_country LIKE '%India%'";
+	        List<Object[]> ticketTypeList2 = session.createSQLQuery(ticketTypeQuery2).list();
+
+	        // Create a map to store ticket_type as keys and lists of ticket_query as values
+	        Map<String, List<String>> ticketTypeMapIndia = new HashMap<>();
+
+	        // Configure Jackson ObjectMapper
+	        ObjectMapper objectMapper1 = new ObjectMapper();
+
+	        // Iterate through the query result and populate the map
+	        for (Object[] row : ticketTypeList2) {
+	            String ticketType = (String) row[0];
+	            String ticketQuery = (String) row[1];
+
+	            // If the ticket type is already in the map, add the ticket query to the existing list
+	            if (ticketTypeMapIndia.containsKey(ticketType)) {
+	            	ticketTypeMapIndia.get(ticketType).add(ticketQuery);
+	            } else {
+	                // If the ticket type is not in the map, create a new list and add the ticket query
+	                List<String> ticketQueries = new ArrayList<>();
+	                ticketQueries.add(ticketQuery);
+	                ticketTypeMapIndia.put(ticketType, ticketQueries);
+	            }
+	        }
+	       
+	        // Convert the map to JSON using Jackson
+	        String json1 = null;
+	        try {
+	            json1 = objectMapper.writeValueAsString(ticketTypeMapIndia);
+	            System.out.println(json1);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }//emp.setEmployeeTicketTypes(ticketTypeMapList);
+
+	        emp.setTicketTypeMapIndiaList(ticketTypeMapIndia);
+	       // emp.setTicketTypeMapList(ticketTypeMapIndia);
+	        
+	        
+	        
 	        
 			// To get TimeSheet Automation Status based on client
 

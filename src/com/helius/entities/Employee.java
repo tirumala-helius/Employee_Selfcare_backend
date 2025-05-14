@@ -69,15 +69,35 @@ public class Employee extends HeliusEntity {
 	}
 
 	//change
-	private Map<String, List<String>> ticketTypeMapList;
+	private Map<String, List<String>> ticketTypeMapSingaporeList;
+	
+	private Map<String, List<String>> ticketTypeMapIndiaList;
+	public Map<String, List<String>> getTicketTypeMapIndiaList() {
+		return ticketTypeMapIndiaList;
+	}
+
+	public void setTicketTypeMapIndiaList(Map<String, List<String>> ticketTypeMapIndiaList) {
+		this.ticketTypeMapIndiaList = ticketTypeMapIndiaList;
+	}
+
 	private Client_Timesheet_Automation_Status Client_timesheet_Automation_Status;
 
-	public Map<String, List<String>> getTicketTypeMapList() {
+	
+	
+	/*public Map<String, List<String>> getTicketTypeMapList() {
 		return ticketTypeMapList;
 	}
 
 	public void setTicketTypeMapList(Map<String, List<String>> ticketTypeMapList) {
 		this.ticketTypeMapList = ticketTypeMapList;
+	}*/
+
+	public Map<String, List<String>> getTicketTypeMapSingaporeList() {
+		return ticketTypeMapSingaporeList;
+	}
+
+	public void setTicketTypeMapSingaporeList(Map<String, List<String>> ticketTypeMapSingaporeList) {
+		this.ticketTypeMapSingaporeList = ticketTypeMapSingaporeList;
 	}
 
 	public List<Sow_Ctc_Breakup> getDeletedsowCtcBreakup() {

@@ -1210,16 +1210,35 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				
 					
 					if(conStartDate!= null) {
-						if(validity !=null  && validity.equalsIgnoreCase("sowEndDate")) {
+						/*if(validity !=null  && validity.equalsIgnoreCase("sowEndDate")) {
 							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:sowStartDate  AND oil_date<=:sowEndDate ORDER BY oil_date ASC";
 							 Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "sowStartDate",sowStartDate)
 										.setParameter( "sowEndDate",sowEndDate).list();
 							
 						}else {
-							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) <=:currenttimestamp ORDER BY oil_date ASC";
+							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp ORDER BY oil_date ASC";
 							  Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
 									.setParameter( "currenttimestamp",currenttimestamp).list();
-						}
+						}*/
+						List<Employee_Off_In_Lieu>  Off_In_Lieus1 = new ArrayList<>();
+						StringBuilder sqlBuilder1 = new StringBuilder("SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp and validitytype is null ");
+						
+						sqlBuilder1.append(" ORDER BY oil_date ASC");
+						
+						//String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) <=:currenttimestamp ORDER BY oil_date ASC";
+						Off_In_Lieus1 =  session.createSQLQuery(sqlBuilder1.toString()).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
+								.setParameter( "currenttimestamp",currenttimestamp).list();
+						
+						List<Employee_Off_In_Lieu>  Off_In_Lieus2 = new ArrayList<>();
+						StringBuilder sqlBuilder2 = new StringBuilder("SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp AND client_id='"+client_id+"'");
+						
+						sqlBuilder2.append(" ORDER BY oil_date ASC");
+						
+						//String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) <=:currenttimestamp ORDER BY oil_date ASC";
+						Off_In_Lieus2 =  session.createSQLQuery(sqlBuilder2.toString()).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
+								.setParameter( "currenttimestamp",currenttimestamp).list();
+						Off_In_Lieus1.addAll(Off_In_Lieus2);
+						Off_In_Lieus = Off_In_Lieus1;
 						if(!Off_In_Lieus.isEmpty()) {
 							oildate = Off_In_Lieus.get(0).getOil_date();
 						}
@@ -1228,7 +1247,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						
 						
 						String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
-								+ "  WHERE a.leaveMonth >= '"+contractMonth+"'  AND YEAR(a.leaveMonth) >= '"+oildate+"' AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
+								+ "  WHERE a.leaveMonth >= '"+contractMonth+"'  AND a.leaveMonth >= '"+oildate+"' AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
 										+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";
 						List<Object[]> recordList =session.createSQLQuery(leaveRecordQuery).list();
 						if (recordList != null) {

@@ -9,7 +9,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public interface AutomationTimesheetDAO {
 
 	
-	
 	public ResponseEntity<byte[]> createAutomationTimesheet(String  clientjson, MultipartHttpServletRequest request,String work_country) throws Throwable;
 	
 	public List<String> sendTimesheetAutomationmail(String json,MultipartHttpServletRequest request, String work_country) throws Throwable;

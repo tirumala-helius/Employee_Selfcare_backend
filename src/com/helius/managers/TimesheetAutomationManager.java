@@ -28,7 +28,6 @@ public class TimesheetAutomationManager {
 
 
 
-
 	public ResponseEntity<byte[]> createAutomationTimesheet(String  clientjson, MultipartHttpServletRequest request, String work_country) throws JsonProcessingException {
 		ResponseEntity<byte[]> response;
 		try {

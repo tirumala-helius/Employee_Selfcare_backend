@@ -47,7 +47,6 @@ public class AutomationTimesheetController {
 		ResponseEntity<byte[]> responseEntity  = automationManager.createAutomationTimesheet(jsondata, request, work_country);
 	
 		 return responseEntity;
-
 		
 	}
 	

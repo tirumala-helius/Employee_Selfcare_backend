@@ -29,10 +29,10 @@ public class TimesheetAutomationManager {
 
 
 
-	public ResponseEntity<byte[]> createAutomationTimesheet(String  clientjson, MultipartHttpServletRequest request) throws JsonProcessingException {
+	public ResponseEntity<byte[]> createAutomationTimesheet(String  clientjson, MultipartHttpServletRequest request, String work_country) throws JsonProcessingException {
 		ResponseEntity<byte[]> response;
 		try {
-			response =automationTimesheetDAO.createAutomationTimesheet(clientjson,request);
+			response =automationTimesheetDAO.createAutomationTimesheet(clientjson,request,work_country);
 		} catch (Throwable e) {
 			
 			 Map<String, String> errorDetails = new HashMap<>();
@@ -45,9 +45,9 @@ public class TimesheetAutomationManager {
 		return  response;
 	}
 
-	public List<String> sendTimesheetAutomationmail(String clientjson, MultipartHttpServletRequest request)throws Throwable {
+	public List<String> sendTimesheetAutomationmail(String clientjson, MultipartHttpServletRequest request, String work_country)throws Throwable {
 		try {
-			return automationTimesheetDAO.sendTimesheetAutomationmail(clientjson, request);
+			return automationTimesheetDAO.sendTimesheetAutomationmail(clientjson, request, work_country);
 		} catch (Throwable e) {
 			throw new Throwable("Automation Timesheet Process Failed :" + e.getMessage(), e);
 		}

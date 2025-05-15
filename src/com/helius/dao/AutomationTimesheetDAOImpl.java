@@ -205,7 +205,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	 */
 
 	@Override
-	public ResponseEntity<byte[]> createAutomationTimesheet(String clientjson, MultipartHttpServletRequest request)
+	public ResponseEntity<byte[]> createAutomationTimesheet(String clientjson, MultipartHttpServletRequest request, String work_country)
 			throws Throwable, JsonProcessingException {
 		// String check = Utils.awsCheckFlag();
 		Session session = null;
@@ -514,8 +514,9 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			List<String> publicholiday = new ArrayList<>();
 			List<String> PHday = new ArrayList<>();
 			String client_id = automation.getClientId();
+			List<Object> results = null;
 			try {
-				String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
+			/*	String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
 						+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
 
 				Query emplist = session.createSQLQuery(checklist_query)
@@ -524,6 +525,34 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						.setParameter("thrudate", endDayOfMonth);
 
 				List<Object> results = emplist.list();
+				*/
+				if (work_country!=null && work_country.equalsIgnoreCase("india") && client_id.equalsIgnoreCase("381")) {
+					String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =381  AND DATE(holiday_date) \r\n"
+							+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+					Query emplist = session.createSQLQuery(checklist_query)
+							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
+							.setParameter("fromdate", startDayOfMonth)
+							.setParameter("thrudate", endDayOfMonth);
+					results = emplist.list();
+					
+				} else if (work_country!=null && work_country.equalsIgnoreCase("Singapore") && client_id.equalsIgnoreCase("381")) {
+					String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =225  AND DATE(holiday_date) \r\n"
+							+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+					Query emplist = session.createSQLQuery(checklist_query)
+							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
+							.setParameter("fromdate", startDayOfMonth).setParameter("thrudate", endDayOfMonth);
+					results = emplist.list();
+					
+				} else {
+					String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
+							+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+
+					Query emplist = session.createSQLQuery(checklist_query)
+							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
+							.setParameter("client_id", client_id).setParameter("fromdate", startDayOfMonth)
+							.setParameter("thrudate", endDayOfMonth);
+					results = emplist.list();
+				}
 				
 				if(!results.isEmpty()) {
 					for (Object checklist : results) {
@@ -3466,7 +3495,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 	 */
 
 	@Override
-	public List<String> sendTimesheetAutomationmail(String json, MultipartHttpServletRequest request) throws Throwable {
+	public List<String> sendTimesheetAutomationmail(String json, MultipartHttpServletRequest request, String work_country) throws Throwable {
 
 		List<String> list = new ArrayList<>();
 		ObjectMapper obm = new ObjectMapper();
@@ -3603,7 +3632,11 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		
 		//To Cretate Timesheet with Given JSON data
 		try {
-			responseEntity =  createAutomationTimesheet(json, request);
+			if(work_country!=null && !work_country.isEmpty()){
+			responseEntity =  createAutomationTimesheet(json, request,work_country);
+			}else{
+				responseEntity =  createAutomationTimesheet(json, request,null);	
+			}
 			 if (responseEntity.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
 			        throw new Exception("Timesheet creation failed with given Data");
 			    }

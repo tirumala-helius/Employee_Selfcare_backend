@@ -42,9 +42,9 @@ public class AutomationTimesheetController {
 	@CrossOrigin
 	@RequestMapping(value = "client/createAutomationTimesheet", method = RequestMethod.POST, consumes = { "multipart/form-data" })
 	public ResponseEntity<byte[]> createAutomationTimesheet(@RequestParam("model") String jsondata,
-			MultipartHttpServletRequest request) throws JsonProcessingException {
+			MultipartHttpServletRequest request, String work_country) throws JsonProcessingException {
 		System.out.println("clientjsondata:" + jsondata.toString());
-		ResponseEntity<byte[]> responseEntity  = automationManager.createAutomationTimesheet(jsondata, request);
+		ResponseEntity<byte[]> responseEntity  = automationManager.createAutomationTimesheet(jsondata, request, work_country);
 	
 		 return responseEntity;
 
@@ -53,12 +53,12 @@ public class AutomationTimesheetController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "client/sendTimesheetAutomationmail", method = RequestMethod.POST, consumes = { "multipart/form-data" })
-	public ResponseEntity<?> sendTimesheetAutomationmail(@RequestParam("model") String jsondata,MultipartHttpServletRequest request,MultipartHttpServletRequest request2) throws Throwable {
+	public ResponseEntity<?> sendTimesheetAutomationmail(@RequestParam("model") String jsondata,MultipartHttpServletRequest request,MultipartHttpServletRequest request2,String work_country) throws Throwable {
 		List<String> list = null;
 		System.out.println("clientjsondata:" + jsondata.toString());
 		String errorresponse = 	"";
 		try {
-	        list = automationManager.sendTimesheetAutomationmail(jsondata, request);
+	        list = automationManager.sendTimesheetAutomationmail(jsondata, request, work_country);
 	        return ResponseEntity.ok(list);
 	    } catch (Throwable e) {
 	    	list = new ArrayList<String>();

@@ -10,9 +10,9 @@ public interface AutomationTimesheetDAO {
 
 	
 	
-	public ResponseEntity<byte[]> createAutomationTimesheet(String  clientjson, MultipartHttpServletRequest request) throws Throwable;
+	public ResponseEntity<byte[]> createAutomationTimesheet(String  clientjson, MultipartHttpServletRequest request,String work_country) throws Throwable;
 	
-	public List<String> sendTimesheetAutomationmail(String json,MultipartHttpServletRequest request) throws Throwable;
+	public List<String> sendTimesheetAutomationmail(String json,MultipartHttpServletRequest request, String work_country) throws Throwable;
 	
 	public ResponseEntity<byte[]> getTimesheet(String  timesheetMonth,String empId,String EmpName,String Client ) throws Throwable;
 

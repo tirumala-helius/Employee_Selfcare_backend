@@ -349,28 +349,44 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 				  if (work_country.equalsIgnoreCase("india")){
 						
 					assign= ticketType.getIndia_spoc_name();
-					text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
+				/*	text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
 						       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
 							   + "details or clarifications, they will contact you for the same."+"\n\n"
 						       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
 							   + "and an email will be sent to you immediately." +"\n\n"
 						       + "Thank you for your patience."+"\n"
 							   + "Regards,"+"\n"
-						       + "Helius Operations team";
+						       + "Helius Operations team";*/
+					
+					//change
+					text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +" and he/she will work on resolving your issue." + "\n\n"
+					             + "Our usual response time is one business day. If we require additional time to consult with other relevant parties, we will update you." + "\n\n"
+							     + "To view the status of your request in the self-service portal, please go to 'Employee Ticketing System' and select 'View Ticket History'." + "\n\n"
+					             + "Once the ticket is resolved, the ticket status will be changed in your self-service portal, and an email will be sent to you immediately." + "\n\n"
+							     + "Regards," + "\n" 
+					             + "Helius Operations team";
+					
 
 					emailService.sendEmail(to, null, null, subject, text);
 				}
 					if (work_country.equalsIgnoreCase("singapore")){
 						
 						assign= ticketType.getSingapore_spoc_name();
-						text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
+						/*text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +"\n"
 							       + "and he/she will work on resolving your issue. In case they need any additional" +"\n"
 								   + "details or clarifications, they will contact you for the same."+"\n\n"
 							       + "Once the ticket is resolved the ticket status will be changed in your self-service portal" +"\n"
 								   + "and an email will be sent to you immediately." +"\n\n"
 							       + "Thank you for your patience."+"\n"
 								   + "Regards,"+"\n"
-							       + "Helius Operations team";
+							       + "Helius Operations team";*/
+						
+						text = "Hi," + "\n\n"+"Thank you for raising this ticket which has been forwarded to "+ assign +" and he/she will work on resolving your issue." + "\n\n"
+					             + "Our usual response time is one business day. If we require additional time to consult with other relevant parties, we will update you." + "\n\n"
+							     + "To view the status of your request in the self-service portal, please go to 'Employee Ticketing System' and select 'View Ticket History'." + "\n\n"
+					             + "Once the ticket is resolved, the ticket status will be changed in your self-service portal, and an email will be sent to you immediately." + "\n\n"
+							     + "Regards," + "\n" 
+					             + "Helius Operations team";
 
 						emailService.sendEmail(to, null, null, subject, text);
 					}

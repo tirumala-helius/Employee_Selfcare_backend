@@ -94,6 +94,23 @@ public class ClientDetail implements Serializable {
 	
 	@Column
 	private String oil_validity; 
+	
+	@Column
+	private int no_of_days;
+	/**
+	 * @return the no_of_days
+	 */
+	public int getNo_of_days() {
+		return no_of_days;
+	}
+
+	/**
+	 * @param no_of_days the no_of_days to set
+	 */
+	public void setNo_of_days(int no_of_days) {
+		this.no_of_days = no_of_days;
+	}
+
 	/**
 	 * @return the budgetowner
 	 */

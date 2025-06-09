@@ -2,6 +2,8 @@ package com.helius.utils;
 
 import java.sql.Timestamp;
 
+import javax.persistence.Column;
+
 
 public class Employee_Off_In_Lieu_Data {
 	
@@ -26,6 +28,33 @@ public class Employee_Off_In_Lieu_Data {
 	private float leavesUsed;
 	
 	
+	private String validitytype;
+	/**
+	 * @return the validitytype
+	 */
+	public String getValiditytype() {
+		return validitytype;
+	}
+	/**
+	 * @param validitytype the validitytype to set
+	 */
+	public void setValiditytype(String validitytype) {
+		this.validitytype = validitytype;
+	}
+	/**
+	 * @return the validitydate
+	 */
+	public Timestamp getValiditydate() {
+		return validitydate;
+	}
+	/**
+	 * @param validitydate the validitydate to set
+	 */
+	public void setValiditydate(Timestamp validitydate) {
+		this.validitydate = validitydate;
+	}
+	
+	private Timestamp validitydate;
 
 	public int getEmployee_off_in_lieu_id() {
 		return employee_off_in_lieu_id;

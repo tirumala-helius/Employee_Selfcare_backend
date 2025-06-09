@@ -29,6 +29,34 @@ public class Employee_Off_In_Lieu {
 	private String oil_day;
 	@Column
 	private String no_of_days;
+	@Column
+	private String validitytype;
+	/**
+	 * @return the validitytype
+	 */
+	public String getValiditytype() {
+		return validitytype;
+	}
+	/**
+	 * @param validitytype the validitytype to set
+	 */
+	public void setValiditytype(String validitytype) {
+		this.validitytype = validitytype;
+	}
+	/**
+	 * @return the validitydate
+	 */
+	public Timestamp getValiditydate() {
+		return validitydate;
+	}
+	/**
+	 * @param validitydate the validitydate to set
+	 */
+	public void setValiditydate(Timestamp validitydate) {
+		this.validitydate = validitydate;
+	}
+	@Column
+	private Timestamp validitydate;
 	
 	
 	

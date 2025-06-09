@@ -1165,11 +1165,39 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
 					Timestamp sowEndDate = null;
 					Timestamp sowStartDate = null;
+					Integer no_of_oil_days = 0;
+					String validity = null;
+					String isheliusclient = "";
+					String QueryClientdetails ="SELECT a.* FROM client_details a LEFT JOIN Employee_Assignment_Details b  ON a.client_name = b.client WHERE employee_id='"+employee_id+"'";
+					List<com.helius.entities.ClientDetail> clientDetailsList =  session.createSQLQuery(QueryClientdetails).addEntity(com.helius.entities.ClientDetail.class).list();
+					if(!clientDetailsList.isEmpty() && clientDetailsList.get(0).getOil_validity()!= null){
+						 validity = clientDetailsList.get(0).getOil_validity();
+						if(!validity.equalsIgnoreCase("sowEndDate")) {
+							no_of_oil_days = Integer.parseInt(validity);
+						}	
+					}
+
+					String isheliusclient_query = "SELECT a.isheliusclient FROM client_details a LEFT JOIN Employee_Assignment_Details b  ON a.client_name = b.client WHERE employee_id='"+employee_id+"'";
+					List<String> isheliusclient_res =session.createSQLQuery(isheliusclient_query).list();
+					if(isheliusclient_res != null) {
+						isheliusclient =  isheliusclient_res.get(0);
+					}
+							
+							String contractdateQuery = "";
+					if("false".equalsIgnoreCase(isheliusclient)){
+						contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,d.sow_expiry_date,d.sow_start_date FROM Employee_Personal_Details a "
+								+ "	 LEFT JOIN Employee_Assignment_Details b ON a.employee_id = b.employee_id  LEFT JOIN Sow_Employee_Association c ON a.employee_id = c.employee_id "
+								+ "	 LEFT JOIN Sow_Details d ON c.sow_details_id = d.sow_details_id  WHERE a.employee_id ='"+employee_id+"' and d.sow_status='active' ORDER BY c.sow_details_id DESC LIMIT 1";
+
+					}
+					if("true".equalsIgnoreCase(isheliusclient)){
+						contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,d.sow_expiry_date,d.sow_start_date FROM Employee_Personal_Details a "
+								+ "	 LEFT JOIN Employee_Assignment_Details b ON a.employee_id = b.employee_id  LEFT JOIN Sow_Employee_Association c ON a.employee_id = c.employee_id "
+								+ "	 LEFT JOIN Sow_Details d ON c.sow_details_id = d.sow_details_id  WHERE a.employee_id ='"+employee_id+"'"
+										+ " ORDER BY c.sow_details_id DESC LIMIT 1";
+
+					}						
 					
-			
-					String contractdateQuery = "SELECT a.employee_id, b.client_start_date, a.actual_date_of_joining,d.sow_expiry_date,d.sow_start_date FROM Employee_Personal_Details a \r\n"
-							+ "	 LEFT JOIN Employee_Assignment_Details b ON a.employee_id = b.employee_id  LEFT JOIN Sow_Employee_Association c ON a.employee_id = c.employee_id\r\n"
-							+ "	 LEFT JOIN Sow_Details d ON c.sow_details_id = d.sow_details_id  WHERE a.employee_id ='"+employee_id+"' ORDER BY c.sow_details_id DESC LIMIT 1";
 					List<Object[]> contractdateList =session.createSQLQuery(contractdateQuery).list();
 					if (contractdateList != null) {
 						for (Object[] obj : contractdateList) {
@@ -1187,50 +1215,32 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						}
 					}
 				
-					Integer no_of_oil_days = 0;
-					String validity = null;
-					String QueryClientdetails ="SELECT * FROM `client_details` WHERE client_id =:client_id";
-					List<com.helius.entities.ClientDetail> clientDetailsList =  session.createSQLQuery(QueryClientdetails).addEntity(com.helius.entities.ClientDetail.class)
-							.setParameter("client_id", client_id).list();
-					if(!clientDetailsList.isEmpty() && clientDetailsList.get(0).getOil_validity()!= null){
-						 validity = clientDetailsList.get(0).getOil_validity();
-						if(!validity.equalsIgnoreCase("sowEndDate")) {
-							no_of_oil_days = Integer.parseInt(validity);
-						}	
-					}
-					if( validity !=null  && validity.equalsIgnoreCase("sowEndDate")) {
-						conStartDate =sowStartDate;
-					}
+					
 					Date date2 = new Date();
 					Timestamp currenttimestamp = new Timestamp(date2.getTime());
 					Timestamp oildate = new Timestamp(date2.getTime());
 					String typeofleave= "Off In Lieu";
 					float totalSumofLeaves =0;
-					
-				
-					
+					List<Employee_Off_In_Lieu>  Off_In_Lieus1 = new ArrayList<>();
 					if(conStartDate!= null) {
-						/*if(validity !=null  && validity.equalsIgnoreCase("sowEndDate")) {
-							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:sowStartDate  AND oil_date<=:sowEndDate ORDER BY oil_date ASC";
-							 Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "sowStartDate",sowStartDate)
+						if(validity !=null && validity.equalsIgnoreCase("sowEndDate")) {
+							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:sowStartDate  AND oil_date<=:sowEndDate and validitytype is null ORDER BY oil_date ASC ";
+							 Off_In_Lieus1 =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "sowStartDate",sowStartDate)
 										.setParameter( "sowEndDate",sowEndDate).list();
 							
 						}else {
-							String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp ORDER BY oil_date ASC";
-							  Off_In_Lieus =  session.createSQLQuery(query_OIL).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
+							
+							StringBuilder sqlBuilder1 = new StringBuilder("SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp and validitytype is null");
+							
+							sqlBuilder1.append(" ORDER BY oil_date ASC");
+							
+							//String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) <=:currenttimestamp ORDER BY oil_date ASC";
+							Off_In_Lieus1 =  session.createSQLQuery(sqlBuilder1.toString()).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
 									.setParameter( "currenttimestamp",currenttimestamp).list();
-						}*/
-						List<Employee_Off_In_Lieu>  Off_In_Lieus1 = new ArrayList<>();
-						StringBuilder sqlBuilder1 = new StringBuilder("SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp and validitytype is null ");
-						
-						sqlBuilder1.append(" ORDER BY oil_date ASC");
-						
-						//String query_OIL ="SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND YEAR(oil_date) <=:currenttimestamp ORDER BY oil_date ASC";
-						Off_In_Lieus1 =  session.createSQLQuery(sqlBuilder1.toString()).addEntity(Employee_Off_In_Lieu.class).setParameter( "conStartDate",conStartDate)
-								.setParameter( "currenttimestamp",currenttimestamp).list();
+						}
 						
 						List<Employee_Off_In_Lieu>  Off_In_Lieus2 = new ArrayList<>();
-						StringBuilder sqlBuilder2 = new StringBuilder("SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp AND client_id='"+client_id+"'");
+						StringBuilder sqlBuilder2 = new StringBuilder("SELECT * FROM `Employee_Off_In_Lieu` WHERE oil_date >=:conStartDate AND oil_date <=:currenttimestamp and validitytype is not null AND client_id='"+client_id+"'");
 						
 						sqlBuilder2.append(" ORDER BY oil_date ASC");
 						
@@ -1247,7 +1257,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						
 						
 						String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
-								+ "  WHERE a.leaveMonth >= '"+contractMonth+"'  AND a.leaveMonth >= '"+oildate+"' AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
+								+ "  WHERE a.leaveMonth >= '"+contractMonth+"'  AND (year(a.leaveMonth) >= year('"+oildate+"') and month(a.leaveMonth) >= month('"+oildate+"')) AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
 										+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";
 						List<Object[]> recordList =session.createSQLQuery(leaveRecordQuery).list();
 						if (recordList != null) {
@@ -1266,6 +1276,14 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 							//float totalleaves = totalSumofLeaves;
 							Employee_Off_In_Lieu_Data lieu = null;
 							for( Employee_Off_In_Lieu OIL_db : Off_In_Lieus) {
+								
+								 if(OIL_db.getValiditytype() != null && "custom".equalsIgnoreCase(OIL_db.getValiditytype())){
+						            	validity = "custom";
+						         }
+						         if(OIL_db.getValiditytype() != null && "SOW end date".equalsIgnoreCase(OIL_db.getValiditytype())) {
+						            	validity = "SOW end date";
+						          }
+								
 								lieu= new Employee_Off_In_Lieu_Data();
 								lieu.setEmployee_off_in_lieu_id(OIL_db.getEmployee_off_in_lieu_id());
 								lieu.setClient_id(OIL_db.getClient_id());
@@ -1288,6 +1306,12 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						            calendar.add(Calendar.DAY_OF_MONTH, no_of_oil_days);
 						            validityEndDate = new Timestamp(calendar.getTime().getTime());
 					            }else if(validity !=null && validity.equalsIgnoreCase("sowEndDate")) {
+					            	validityEndDate = sowEndDate;
+					            }
+					            if(OIL_db.getValiditytype() != null && "custom".equalsIgnoreCase(OIL_db.getValiditytype())){
+					            	validityEndDate = OIL_db.getValiditydate();
+					            }
+					            if(OIL_db.getValiditytype() != null && "SOW end date".equalsIgnoreCase(OIL_db.getValiditytype())){
 					            	validityEndDate = sowEndDate;
 					            }
 					            if(totalSumofLeaves   >= 0.5 ) {

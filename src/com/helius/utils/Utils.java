@@ -115,7 +115,9 @@ public class Utils {
 	public static String getAwsprop(String key) {
 		return instance.getProperty(key);
 	}
-	
+	public static Set<Entry<Object,Object>> getHAPEntrySet() {
+		return instance.entrySet();
+	}
 	private  org.hibernate.internal.SessionFactoryImpl sessionFactory;
 
 	/**

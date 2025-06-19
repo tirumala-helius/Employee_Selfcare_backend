@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -1256,11 +1257,15 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 						 Timestamp contractMonth = new Timestamp(contractMonthData.getTime());
 						
 						
-						String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
+						/*String leaveRecordQuery = "SELECT a.employee_id,a.type_of_leave, SUM(a.leaves_used) AS total  FROM Leave_Record_Details a \r\n"
 								+ "  WHERE a.leaveMonth >= '"+contractMonth+"'  AND (year(a.leaveMonth) >= year('"+oildate+"') and month(a.leaveMonth) >= month('"+oildate+"')) AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
-										+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";
-						List<Object[]> recordList =session.createSQLQuery(leaveRecordQuery).list();
-						if (recordList != null) {
+										+ "AND a.employee_id= '"+employee_id+"' AND a.client_id='"+client_id+"'";*/
+						
+						 String leaveRecordQuery = "SELECT a.*  FROM Leave_Record_Details a \r\n"
+									+ "  WHERE a.leaveMonth >= '"+contractMonth+"'  AND  a.leaveMonth <= '"+currenttimestamp+"' AND (a.type_of_leave ='Off In Lieu' OR a.type_of_leave = 'Off-In-Lieu') "
+											+ "AND a.employee_id= "+employee_id;
+						List<Leave_Record_Details> recordList =session.createSQLQuery(leaveRecordQuery).addEntity(Leave_Record_Details.class).list();
+						/*if (recordList != null) {
 							for (Object[] obj : recordList) {
 								if(obj[0] !=null && obj[1] !=null
 										&& obj[2]!= null){
@@ -1268,13 +1273,42 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 								}
 								
 							}
+						}*/
+						Set<Map.Entry<Object,Object>> happrops = Utils.getHAPEntrySet();
+						Iterator<Map.Entry<Object,Object>> iter_entry = happrops.iterator();
+						Map<LocalDate,String> tslist = new HashMap<LocalDate,String> ();
+					while(iter_entry.hasNext()) {	
+						Map.Entry<Object,Object> entry = iter_entry.next();
+						String hapkey = (String) entry.getKey();
+						String hapvalue = (String) entry.getValue();
+						if(hapkey.startsWith("empids_off-in-lieu_na")){
+							String off_in_liew_na = hapkey.substring("empids_off-in-lieu_na".length()+1,hapkey.length());
+							SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+							Date dt = sdf2.parse(off_in_liew_na);
+							LocalDate ts = LocalDate.parse(off_in_liew_na);
+							
+							tslist.putIfAbsent(ts,hapvalue);
 						}
-						
+					} 
 						
 						
 						if(!Off_In_Lieus.isEmpty()) {
 							//float totalleaves = totalSumofLeaves;
+							Iterator<Employee_Off_In_Lieu> off_in_lieu_iter = Off_In_Lieus.iterator();
+							while(off_in_lieu_iter.hasNext()) {
+								Employee_Off_In_Lieu empoff = off_in_lieu_iter.next();
+								for(LocalDate ts1 : tslist.keySet()){
+									String empids_na = tslist.get(ts1);
+									List<String> empids_array = Arrays.asList(empids_na.split(","));
+									
+									if(ts1.equals(empoff.getOil_date().toLocalDateTime().toLocalDate())
+											&& empids_array.contains(employee_id) ) {
+										off_in_lieu_iter.remove();
+									}
+								}
+							}
 							Employee_Off_In_Lieu_Data lieu = null;
+						
 							for( Employee_Off_In_Lieu OIL_db : Off_In_Lieus) {
 								
 								 if(OIL_db.getValiditytype() != null && "custom".equalsIgnoreCase(OIL_db.getValiditytype())){
@@ -1314,7 +1348,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					            if(OIL_db.getValiditytype() != null && "SOW end date".equalsIgnoreCase(OIL_db.getValiditytype())){
 					            	validityEndDate = sowEndDate;
 					            }
-					            if(totalSumofLeaves   >= 0.5 ) {
+					            /*if(totalSumofLeaves   >= 0.5 ) {
 					            	if(totalSumofLeaves >=1) {
 					            		lieu.setLeavesUsed(1);
 					            		totalSumofLeaves =	totalSumofLeaves -1;
@@ -1323,14 +1357,29 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					            		totalSumofLeaves = (float) (totalSumofLeaves -0.5);
 					            	}
 					            	
-					            }
-					            
+					            }*/
+					           
 
 					            lieu.setOil_Validity_Start_Date(validityStartDate);
 					            lieu.setOil_Validity_End_Date(validityEndDate);
+					            Iterator<Leave_Record_Details> lr_iter = recordList.iterator();
+					            while(lr_iter.hasNext()){
+					            	Leave_Record_Details lr = lr_iter.next();
+					            	LocalDate startdate = lr.getStartdate().toLocalDateTime().toLocalDate();
+					            	LocalDate enddate = lr.getEnddate().toLocalDateTime().toLocalDate();
+									if(startdate.isBefore(validityStartDate.toLocalDateTime().toLocalDate())){
+										continue;
+									}
+									if(validityEndDate != null  && enddate.isAfter(validityEndDate.toLocalDateTime().toLocalDate())){
+										continue;
+									}
+									float leaves_used = lieu.getLeavesUsed();
+									if(leaves_used >= 1.0) continue;
+									lieu.setLeavesUsed(leaves_used + lr.getLeaves_used());
+									lr_iter.remove();
+								}
 					            
-					            employee_Off_In_Lieu_Datas.add(lieu);
-								
+					            employee_Off_In_Lieu_Datas.add(lieu);								
 							}
 						}
 						if (employee_Off_In_Lieu_Datas != null && !employee_Off_In_Lieu_Datas.isEmpty()) {
@@ -1339,10 +1388,6 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 					}
 					
 				}
-			 
-			 
-			 
-			 
 			
 		}catch(Exception e){
 			e.printStackTrace();

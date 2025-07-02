@@ -89,6 +89,18 @@ public class Employee_Personal_Details extends HeliusEntity{
 	private String secondary_skills;
 	@Column
 	private String resource_type;
+	
+	@Column
+	private String mobile_number;
+	
+
+	public String getMobile_number() {
+		return mobile_number;
+	}
+
+	public void setMobile_number(String mobile_number) {
+		this.mobile_number = mobile_number;
+	}
 
 	public String getPrimary_skills() {
 		return primary_skills;

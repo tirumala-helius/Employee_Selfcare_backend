@@ -52,6 +52,17 @@ public class Employee extends HeliusEntity {
 	private EmployeeTicketingFiles employeeTicketingFiles;
 	private List<EmployeeTicketingFiles>employeeticketingFilesList;
 	
+	//change
+	private ExceptionalHolidayCalendar exceptionalHolidayCalendar;
+	
+	public ExceptionalHolidayCalendar getExceptionalHolidayCalendar() {
+		return exceptionalHolidayCalendar;
+	}
+
+	public void setExceptionalHolidayCalendar(ExceptionalHolidayCalendar exceptionalHolidayCalendar) {
+		this.exceptionalHolidayCalendar = exceptionalHolidayCalendar;
+	}
+
 	public List<EmployeeTicketingFiles> getEmployeeticketingFilesList() {
 		return employeeticketingFilesList;
 	}

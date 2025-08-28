@@ -112,6 +112,8 @@
 			    <value>com.helius.entities.Dropdown_Picklist_Items</value>
 
 			    <value>com.helius.entities.User_Navigation_Details</value>
+			    <value>com.helius.entities.ExceptionalHolidayCalendar</value>
+			  
 			    
 
 			 	

@@ -74,6 +74,7 @@ import com.helius.entities.Employee_Terms_And_Conditions;
 import com.helius.entities.Employee_Ticketing_System_Ticket_Types;
 import com.helius.entities.Employee_Timesheet_Status;
 import com.helius.entities.Employee_Work_Permit_Details;
+import com.helius.entities.ExceptionalHolidayCalendar;
 import com.helius.entities.Help_Videos;
 import com.helius.entities.Indian_Employee_Family_Member;
 import com.helius.entities.Indian_Employees_Insurance_Details;
@@ -199,6 +200,19 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 				emp.setEmployeeAssignmentDetails(employee_Assigmnent_Details);
 			}
 
+			
+			// ExceptionalHolidayCalendar
+			String ExcpetionQuery = "select a.* from ExceptionalHolidayCalendar a where a.employee_id = :employee_id ";
+			java.util.List HolidayCaledar = session.createSQLQuery(ExcpetionQuery).addEntity(ExceptionalHolidayCalendar.class).setParameter("employee_id", employeeid).list();
+			ExceptionalHolidayCalendar exceptionalHolidayCalendar = null;
+			if(HolidayCaledar!=null && !HolidayCaledar.isEmpty()){
+				exceptionalHolidayCalendar = (ExceptionalHolidayCalendar)HolidayCaledar.iterator().next();
+			}
+			if(exceptionalHolidayCalendar!=null){
+				emp.setExceptionalHolidayCalendar(exceptionalHolidayCalendar);
+			}
+			
+			
 			// Employee bank details
 			String bankdetails_query = "select bankdetails.* from Employee_Bank_Details bankdetails where employee_id = :employee_id ";
 			java.util.List bankList = session.createSQLQuery(bankdetails_query).addEntity(Employee_Bank_Details.class)

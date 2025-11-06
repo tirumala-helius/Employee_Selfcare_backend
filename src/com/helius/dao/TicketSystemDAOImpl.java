@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1331,8 +1332,94 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 	 * This functionality is used to download ticket-related file based on the ticket ID. 
 	 * The file is retrieved from S3 as byte content and returned to the frontend in the same format.
 	 */
-	
 	@Override
+	public ResponseEntity<byte[]> downloadFile(String ticketid) {
+	    Session session = null;
+	    byte[] files = null;
+	    String check = Utils.awsCheckFlag();
+
+	    try {
+	        session = sessionFactory.openSession();
+
+	        // Fetch the file record
+	        String query = "SELECT * FROM EmployeeTicketingFiles WHERE ticket_path = :ticketid";
+	        List<EmployeeTicketingFiles> empticketlist = session.createSQLQuery(query)
+	                .addEntity(EmployeeTicketingFiles.class)
+	                .setParameter("ticketid", ticketid)
+	                .list();
+
+	        if (empticketlist != null && !empticketlist.isEmpty()) {
+	            EmployeeTicketingFiles emp = empticketlist.get(0);
+	            String filePath = emp.getTicket_path();
+
+	            if (filePath != null && !filePath.isEmpty() && "yes".equalsIgnoreCase(check)) {
+	                // Build S3 URL
+	                String url = "ticketing_system/" + filePath;
+
+	                // Download raw file bytes from S3
+	                try {
+	                    files = Utils.downloadFileByAWSS3Bucket(url);
+	                } catch (Exception e) {
+	                    logger.error("Failed to download file from S3: " + url, e);
+	                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	                }
+
+	                if (files == null || files.length == 0) {
+	                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	                }
+
+	                // Determine Content-Type
+	                MediaType mediaType = getMediaTypeForFileName(filePath);
+
+	                // Prepare HTTP headers
+	                HttpHeaders headers = new HttpHeaders();
+	                headers.setContentType(mediaType);
+
+	                // Set Content-Disposition safely for all Spring versions
+	                String encodedFileName = UriUtils.encode(filePath, "UTF-8");
+	                headers.set(HttpHeaders.CONTENT_DISPOSITION,
+	                        "attachment; filename=\"" + filePath + "\"; filename*=UTF-8''" + encodedFileName);
+
+	                return new ResponseEntity<>(files, headers, HttpStatus.OK);
+
+	            } else {
+	                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	            }
+	        }
+
+	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+	    } catch (Throwable e) {
+	        logger.error("Failed to download file - " + ticketid, e);
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    } finally {
+	        if (session != null) {
+	            session.close();
+	        }
+	    }
+	}
+
+	// Utility method to get MediaType based on file extension
+
+	private MediaType getMediaTypeForFileName(String fileName) {
+	    if (fileName == null) return MediaType.APPLICATION_OCTET_STREAM;
+
+	    String lower = fileName.toLowerCase();
+	    if (lower.endsWith(".pdf")) return MediaType.APPLICATION_PDF;
+	    if (lower.endsWith(".xls")) return MediaType.parseMediaType("application/vnd.ms-excel");
+	    if (lower.endsWith(".xlsx"))
+	        return MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	    if (lower.endsWith(".doc")) return MediaType.parseMediaType("application/msword");
+	    if (lower.endsWith(".docx"))
+	        return MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+	    if (lower.endsWith(".msg")) return MediaType.parseMediaType("application/vnd.ms-outlook");
+
+	    // fallback for unknown file types
+	    return MediaType.APPLICATION_OCTET_STREAM;
+	}
+
+	
+	/*@Override
 	public ResponseEntity<byte[]> downloadFile(String ticketid) {
 		Session session = null;
 		byte[] files = null;
@@ -1374,7 +1461,7 @@ public class TicketSystemDAOImpl implements TicketSystemDAO {
 			}
 		}
 		return new ResponseEntity<byte[]>(files, HttpStatus.OK);
-	}
+	}*/
 	//secondne 
 	/*@Override
 	public ResponseEntity<byte[]> downloadFile(String ticketid) {

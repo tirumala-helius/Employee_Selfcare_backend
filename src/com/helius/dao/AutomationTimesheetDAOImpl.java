@@ -61,6 +61,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helius.entities.Employee_Personal_Details;
+import com.helius.entities.ExceptionalHolidayCalendar;
 import com.helius.entities.Leave_Record_Details;
 import com.helius.entities.Leave_Usage_Details;
 import com.helius.entities.Timesheet_Automation_Status;
@@ -215,6 +216,8 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		SimpleDateFormat sdfMonth = new SimpleDateFormat("yyyy-MM");
 		ResponseEntity<byte[]> responseEntity = null;
 		ObjectMapper obm = new ObjectMapper();
+		/*List<ExceptionalHolidayCalendar> exceptionResult = null;
+		String holiday_CalendarType = "";*/
 		try {
 
 			TimesheetAutomation automation = obm.readValue(clientjson, TimesheetAutomation.class);
@@ -480,6 +483,14 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 						.setParameter("empid", empid);
 
 				List<Object> results = emplist.list();
+				
+			/*	//change for Exceptional Calendar case	
+				String Exceptional_Query = "SELECT * FROM `ExceptionalHolidayCalendar` WHERE employee_id =:empid";
+				exceptionResult = session.createSQLQuery(Exceptional_Query).addEntity(ExceptionalHolidayCalendar.class)
+						.setParameter("empid", empid).list();
+				 holiday_CalendarType = exceptionResult.get(0).getHoliday_calendar_type();*/
+				
+				
 
 				for (Object checklist : results) {
 					Employee_Personal_Details items = (Employee_Personal_Details) checklist;
@@ -527,34 +538,68 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 
 				List<Object> results = emplist.list();
 				*/
-				if (work_country!=null && work_country.equalsIgnoreCase("india") && client_id.equalsIgnoreCase("381")) {
-					String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =381  AND DATE(holiday_date) \r\n"
-							+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
-					Query emplist = session.createSQLQuery(checklist_query)
-							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
-							.setParameter("fromdate", startDayOfMonth)
-							.setParameter("thrudate", endDayOfMonth);
-					results = emplist.list();
-					
-				} else if (work_country!=null && work_country.equalsIgnoreCase("Singapore") && client_id.equalsIgnoreCase("381")) {
-					String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =225  AND DATE(holiday_date) \r\n"
-							+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+				
+				boolean isMatched = false;
+
+				/* Case 1: India + client 381 */
+				if (work_country != null && work_country.equalsIgnoreCase("India")&& "381".equalsIgnoreCase(client_id)) {
+
+					isMatched = true;
+
+					String checklist_query = "SELECT client_id, holiday_name, holiday_date " + "FROM Holiday_Master WHERE client_id = 381 "
+							+ "AND DATE(holiday_date) BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+
 					Query emplist = session.createSQLQuery(checklist_query)
 							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
 							.setParameter("fromdate", startDayOfMonth).setParameter("thrudate", endDayOfMonth);
+
 					results = emplist.list();
+				}
+
+				/* Case 2: Singapore + client 381 */
+				if (!isMatched && work_country != null && work_country.equalsIgnoreCase("Singapore") && "381".equalsIgnoreCase(client_id)) {
 					
-				} else {
-					String checklist_query = " SELECT client_id,holiday_name,holiday_date FROM Holiday_Master WHERE client_id =:client_id  AND DATE(holiday_date) \r\n"
-							+ "  BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+					isMatched = true;
+					String checklist_query = "SELECT client_id, holiday_name, holiday_date " + "FROM Holiday_Master WHERE client_id = 225 "
+							+ "AND DATE(holiday_date) BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+
+					Query emplist = session.createSQLQuery(checklist_query)
+							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
+							.setParameter("fromdate", startDayOfMonth).setParameter("thrudate", endDayOfMonth);
+
+					results = emplist.list();
+				}
+
+				/* Case 3: Exception condition */
+				if (!isMatched && work_country != null && work_country.equalsIgnoreCase("Singapore") && "382".equalsIgnoreCase(client_id)) {
+
+					isMatched = true;
+
+					String checklist_query = "SELECT client_id, holiday_name, holiday_date " + "FROM Holiday_Master WHERE client_id = 225 "
+							+ "AND DATE(holiday_date) BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
+
+					Query emplist = session.createSQLQuery(checklist_query)
+							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
+							.setParameter("fromdate", startDayOfMonth).setParameter("thrudate", endDayOfMonth);
+
+					results = emplist.list();
+				}
+
+				/* ELSE case – when none of the above matched */
+				if (!isMatched) {
+
+					String checklist_query = "SELECT client_id, holiday_name, holiday_date " + "FROM Holiday_Master WHERE client_id = :client_id "
+							+ "AND DATE(holiday_date) BETWEEN STR_TO_DATE(:fromdate,'%Y-%m-%d') AND :thrudate";
 
 					Query emplist = session.createSQLQuery(checklist_query)
 							.setResultTransformer(Transformers.aliasToBean(TimesheetAutomationHolidays.class))
 							.setParameter("client_id", client_id).setParameter("fromdate", startDayOfMonth)
 							.setParameter("thrudate", endDayOfMonth);
+
 					results = emplist.list();
 				}
-				
+					
+			
 				if(!results.isEmpty()) {
 					for (Object checklist : results) {
 						TimesheetAutomationHolidays items = (TimesheetAutomationHolidays) checklist;

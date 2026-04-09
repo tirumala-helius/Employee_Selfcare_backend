@@ -2,58 +2,41 @@
  * 
  */
 package com.helius.dao;
-import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.mail.MessagingException;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.formula.functions.Now;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.transform.Transformers;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.helius.entities.Client_Leave_Policy;
 import com.helius.entities.Contact_Address_Details;
 import com.helius.entities.DeleteIndianEmployeeFamilyMember;
 import com.helius.entities.DeleteSingaporeEmployeeFamilyMember;
@@ -65,37 +48,32 @@ import com.helius.entities.Employee_Assignment_Details;
 import com.helius.entities.Employee_Bank_Details;
 import com.helius.entities.Employee_Identification_Details;
 import com.helius.entities.Employee_Leave_Data;
-import com.helius.entities.Employee_Leaves_Eligibility;
 import com.helius.entities.Employee_Off_In_Lieu;
 import com.helius.entities.Employee_Offer_Details;
 import com.helius.entities.Employee_Personal_Details;
 import com.helius.entities.Employee_Salary_Details;
 import com.helius.entities.Employee_Terms_And_Conditions;
 import com.helius.entities.Employee_Ticketing_System_Ticket_Types;
-import com.helius.entities.Employee_Timesheet_Status;
 import com.helius.entities.Employee_Work_Permit_Details;
 import com.helius.entities.ExceptionalHolidayCalendar;
 import com.helius.entities.Help_Videos;
 import com.helius.entities.Indian_Employee_Family_Member;
 import com.helius.entities.Indian_Employees_Insurance_Details;
+import com.helius.entities.Indian_Sow_Ctc_Breakup;
 import com.helius.entities.LeaveUtilization;
 import com.helius.entities.Leave_Eligibility_Details;
 import com.helius.entities.Leave_Record_Details;
 import com.helius.entities.Leave_Usage_Details;
-import com.helius.entities.Leaves_Eligibility_defined_By_Client_Policy;
 import com.helius.entities.Singapore_Employee_Family_Member;
 import com.helius.entities.Singapore_Employee_Insurance_Details;
 import com.helius.entities.Sow_Ctc_Breakup;
 import com.helius.entities.Sow_Details;
 import com.helius.entities.Sow_Employee_Association;
-import com.helius.entities.Timesheet_Email;
 import com.helius.entities.Work_Permit_Master;
 import com.helius.service.EmailService;
-import com.helius.service.UserServiceImpl;
 import com.helius.utils.Employee_Off_In_Lieu_Data;
 import com.helius.utils.FilecopyStatus;
 import com.helius.utils.Holiday_Master;
-import com.helius.utils.TimesheetAutomationHolidays;
 import com.helius.utils.Utils;
 /**
  * @author Tirumala 22-Feb-2018
@@ -256,7 +234,24 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			  if(sow_Ctc_BreakupList!= null) {
 			  emp.setSowCtcBreakup(sow_Ctc_BreakupList); 
 			  }
-			 
+			  
+			  //change for Indian Employee Sow_Ctc_Breakup Details
+			  
+			  String Ctc_Query = "select breakup.* from Indian_Sow_Ctc_Breakup breakup where employee_id = :employee_id AND status = :status";
+			  java.util.List Ctc_List = session.createSQLQuery(Ctc_Query).addEntity(Indian_Sow_Ctc_Breakup.class).setParameter("employee_id", employeeid).setParameter("status", "active").list();
+			  Indian_Sow_Ctc_Breakup indianSowCtc_Breakup = null;
+			  
+			  List<Indian_Sow_Ctc_Breakup> indian_sow_Ctc_BreakupList = new ArrayList<Indian_Sow_Ctc_Breakup>();
+			  if(Ctc_List!=null && !Ctc_List.isEmpty()){
+				  for(Object sow : Ctc_List){
+					  indianSowCtc_Breakup = (Indian_Sow_Ctc_Breakup)sow;
+					  indian_sow_Ctc_BreakupList.add(indianSowCtc_Breakup);  
+				  }
+			  }
+			  if(indian_sow_Ctc_BreakupList!=null && !indian_sow_Ctc_BreakupList.isEmpty()){
+				  emp.setIndian_Sow_Ctc_Breakup(indian_sow_Ctc_BreakupList);
+			  }
+			  
 			  
 			  String sowbreakuphis_query = "select breakup.* from Sow_Ctc_Breakup breakup where employee_id = :employee_id AND status = :status"; 
 			  java.util.List breakuphisList = session.createSQLQuery(sowbreakuphis_query).addEntity(Sow_Ctc_Breakup.class).setParameter("employee_id", employeeid).setParameter("status", "inactive").list();

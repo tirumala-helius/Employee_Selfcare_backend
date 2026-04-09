@@ -54,6 +54,16 @@ public class Employee extends HeliusEntity {
 	
 	//change
 	private ExceptionalHolidayCalendar exceptionalHolidayCalendar;
+	public List<Indian_Sow_Ctc_Breakup> getIndian_Sow_Ctc_Breakup() {
+		return indian_Sow_Ctc_Breakup;
+	}
+
+	public void setIndian_Sow_Ctc_Breakup(List<Indian_Sow_Ctc_Breakup> indian_Sow_Ctc_Breakup) {
+		this.indian_Sow_Ctc_Breakup = indian_Sow_Ctc_Breakup;
+	}
+
+	private List<Indian_Sow_Ctc_Breakup> indian_Sow_Ctc_Breakup;
+	
 	
 	public ExceptionalHolidayCalendar getExceptionalHolidayCalendar() {
 		return exceptionalHolidayCalendar;

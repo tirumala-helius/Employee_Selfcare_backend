@@ -237,7 +237,13 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 			  
 			  //change for Indian Employee Sow_Ctc_Breakup Details
 			  
-			  String Ctc_Query = "select breakup.* from Indian_Sow_Ctc_Breakup breakup where employee_id = :employee_id AND status = :status";
+			  //String Ctc_Query = "select breakup.* from Indian_Sow_Ctc_Breakup breakup where employee_id = :employee_id AND status = :status";
+			  
+			  String Ctc_Query = "SELECT breakup.* " + "FROM Indian_Sow_Ctc_Breakup breakup " + "INNER JOIN ( "
+						+ "    SELECT sow_field, MAX(Indian_sow_ctc_breakup_id) AS max_id "
+						+ "    FROM Indian_Sow_Ctc_Breakup " + "    WHERE employee_id = :employee_id "
+						+ "      AND status = :status " + "    GROUP BY sow_field " + ") latest "
+						+ "ON breakup.Indian_sow_ctc_breakup_id = latest.max_id";
 			  java.util.List Ctc_List = session.createSQLQuery(Ctc_Query).addEntity(Indian_Sow_Ctc_Breakup.class).setParameter("employee_id", employeeid).setParameter("status", "active").list();
 			  Indian_Sow_Ctc_Breakup indianSowCtc_Breakup = null;
 			  

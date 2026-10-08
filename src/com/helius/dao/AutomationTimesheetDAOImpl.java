@@ -4134,7 +4134,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		cal.setTime(sdfday.parse(timesheetMonth));
 		int givenDate = cal.get(Calendar.DAY_OF_MONTH);
 
-		if (!(givenDate >= 25 && givenDate <= 31)) {
+		if (!(givenDate >= 20 && givenDate <= 31)) {
 			cal.add(Calendar.MONTH, -1);
 		}
 		Date selectedMonth = cal.getTime();

@@ -3958,6 +3958,13 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			
 			
 			if(workcountry.equalsIgnoreCase("India")){
+				
+				if ("LG CNS INDIA".equalsIgnoreCase(client)
+				        || "LG CNS".equalsIgnoreCase(client)) {
+				    contactname = "Ramu";
+				    contactEmailID = "ramu@helius-tech.com";
+				    contactNumber = "+91-7093904212";
+				}
 
 			 text = "THIS IS A SYSTEM GENERATED EMAIL AND PLEASE USE REPLY ALL WHILE RESPONDING TO THE EMAIL" + "\n\n"
 

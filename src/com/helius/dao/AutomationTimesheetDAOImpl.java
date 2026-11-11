@@ -3625,7 +3625,7 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		 */
 		
 		
-		if(workcountry != null) {
+	/*	if(workcountry != null) {
 			
 			if(workcountry.equalsIgnoreCase("India")) {
 				String additionalEmail = "hrIndia@helius-tech.com"; 
@@ -3646,6 +3646,44 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 		        contactNumber ="+91-7093904212";
 			}
 			
+		}
+		*/
+		
+		if (workcountry != null) {
+
+		    if (workcountry.equalsIgnoreCase("India")) {
+					if ("LG CNS INDIA".equalsIgnoreCase(client) || "LG CNS".equalsIgnoreCase(client)) {
+		            contactname = "Ramu";
+		            contactEmailID = "ramu@helius-tech.com";
+		            contactNumber = "+91-7093904212";
+		        } else {
+		            contactname = "Padma";
+		            contactEmailID = "padma@helius-tech.com";
+		            contactNumber = "+91-7331144355";
+		        }
+
+		        String additionalEmail;
+					if ("LG CNS INDIA".equalsIgnoreCase(client) || "LG CNS".equalsIgnoreCase(client)) {
+		            additionalEmail = "timesheet@helius-tech.com";
+		        } else {
+		            additionalEmail = "hrIndia@helius-tech.com";
+		        }
+
+		        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
+		        ccWithAdditionalEmail[cc.length] = additionalEmail;
+		        cc = ccWithAdditionalEmail;
+
+		    } else if (workcountry.equalsIgnoreCase("Singapore")) {
+
+		        String additionalEmail = "timesheet@helius-tech.com";
+		        String[] ccWithAdditionalEmail = Arrays.copyOf(cc, cc.length + 1);
+		        ccWithAdditionalEmail[cc.length] = additionalEmail;
+		        cc = ccWithAdditionalEmail;
+
+		        contactname = "Ramu";
+		        contactEmailID = "ramu@helius-tech.com";
+		        contactNumber = "+91-7093904212";
+		    }
 		}
 		
 		/*
@@ -3959,12 +3997,6 @@ public class AutomationTimesheetDAOImpl implements AutomationTimesheetDAO {
 			
 			if(workcountry.equalsIgnoreCase("India")){
 				
-				if ("LG CNS INDIA".equalsIgnoreCase(client)
-				        || "LG CNS".equalsIgnoreCase(client)) {
-				    contactname = "Ramu";
-				    contactEmailID = "ramu@helius-tech.com";
-				    contactNumber = "+91-7093904212";
-				}
 
 			 text = "THIS IS A SYSTEM GENERATED EMAIL AND PLEASE USE REPLY ALL WHILE RESPONDING TO THE EMAIL" + "\n\n"
 
